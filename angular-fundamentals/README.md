@@ -20,6 +20,8 @@ TypeScript Core শেষ করে এখানে আসুন। এই স�
 - [10) RxJS basics (switchMap, debounce)](topics/10-rxjs-basics.md)
 - [11) Change Detection + OnPush](topics/11-change-detection.md)
 - [12) Guards & Resolvers](topics/12-guards-resolvers.md)
+- [13) Components Deep (Input/Output, ViewChild, projection)](topics/13-components-deep.md)
+- [14) Routing (Startup app mandatory, hospital flows)](topics/14-routing-startup.md)
 
 ## Demo
 - `demos/hms-appointments` এ Angular standalone কম্পোনেন্টের কোড আছে; Angular CLI প্রজেক্টে কপি করে চালান।
