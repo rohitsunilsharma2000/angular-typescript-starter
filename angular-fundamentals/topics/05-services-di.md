@@ -51,3 +51,5 @@ export const API_URL = new InjectionToken<string>('API_URL');
 ```ts
 constructor(@Inject(API_URL) api:string, private http:HttpClient) {}
 ```
+
+**UI test hint**: Component template এ `{{ patientService.base }}` বাউন্ড করুন; `ng serve` চালিয়ে Network ট্যাবে service call (dummyjson) দেখুন, এবং DevTools Components প্যানেলে provider tree পরখ করুন।

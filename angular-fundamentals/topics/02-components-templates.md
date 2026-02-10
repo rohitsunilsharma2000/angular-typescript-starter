@@ -53,3 +53,5 @@ styles: [`.btn{ @apply bg-blue-600 text-white rounded px-3 py-2; }`]
   </li>
 </ul></hms-card>
 ```
+
+**UI test hint**: `AppComponent` টেমপ্লেটে উপরোক্ত স্নিপেট রেখে `ng serve`; Elements প্যানেলে `hms-card` shadow-free render ও Tailwind ক্লাস প্রয়োগ দেখা যাবে।

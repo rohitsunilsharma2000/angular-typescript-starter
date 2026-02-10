@@ -47,3 +47,5 @@ bootstrapApplication(ShellComponent, { providers: [provideRouter(routes)] });
 ```
 5) **Hybrid tip**  
 - Standalone root + feature module lazy works; Tailwind classes usable in both.
+
+**UI test hint**: Standalone `ShellComponent` bootstrap করে `ng serve`; Lazy routeে (Network tab) JS chunk লোড হচ্ছে কিনা দেখুন, এবং Tailwind ক্লাস সহ লেজি কম্পোনেন্ট রেন্ডার হচ্ছে কিনা চোখে দেখুন।

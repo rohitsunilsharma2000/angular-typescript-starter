@@ -52,3 +52,5 @@ this.beds$ = this.beds$.pipe(map(list => [...list, newBed]));
 ```ts
 @Component({ changeDetection: ChangeDetectionStrategy.OnPush, ... })
 ```
+
+**UI test hint**: Patients observable আপডেট করতে service থেকে নতুন array emit করুন; OnPush হওয়ায় async pipe UI আপডেট হবে। TrackBy থাকলে ngFor DOM key স্থির আছে কিনা Elements-এ দেখুন।

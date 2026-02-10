@@ -49,3 +49,5 @@ fromEvent(button,'click').pipe(debounceTime(300)).subscribe(() => save());
 ```scss
 .input { @apply w-full border rounded px-3 py-2; }
 ```
+
+**UI test hint**: search inputে টাইপ করুন, Network ট্যাবে debounced call (dummyjson) হচ্ছে কিনা দেখুন; observable result আপডেট হলে তালিকা rerender হচ্ছে কিনা লক্ষ্য করুন। loading flag true করলে “Loading...” টেক্সট দেখুন।

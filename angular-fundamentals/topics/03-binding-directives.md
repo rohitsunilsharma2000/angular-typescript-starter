@@ -62,3 +62,5 @@ trackById = (_: number, item: any) => item.id;
 <input class="input" [(ngModel)]="search" placeholder="Search patient" />
 <button class="btn" [disabled]="!search" (click)="doSearch()">Search</button>
 ```
+
+**UI test hint**: `FormsModule` ইমপোর্ট করে কম্পোনেন্টে উপরের টেমপ্লেট দিন; DevTools → Toggle `search` মডেল (Component tab) আর বাটনের disabled state একসাথে দেখুন।

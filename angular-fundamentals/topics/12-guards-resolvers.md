@@ -68,3 +68,5 @@ export class PatientResolver implements Resolve<Observable<any>> {
 .input { @apply w-full border rounded px-3 py-2; }
 .btn { @apply w-full bg-blue-600 text-white rounded px-4 py-2; }
 ```
+
+**UI test hint**: টোকেন ছাড়া `/patients/1` এ গেলে guard redirect করছে কিনা দেখুন; resolver ডেটা `route.data` থেকে এসে টেমপ্লেটে দেখানো হচ্ছে কিনা Network + console এ verify করুন।

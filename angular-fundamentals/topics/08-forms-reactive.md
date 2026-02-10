@@ -62,3 +62,5 @@ addSymptom() { this.form.controls.symptoms.push(new FormControl('')); }
 .input { @apply w-full border rounded px-3 py-2; }
 .btn { @apply w-full bg-blue-600 text-white rounded px-4 py-2; }
 ```
+
+**UI test hint**: ReactiveFormsModule ইমপোর্ট করে ফর্মটি বসান; invalid state-এ Submit বাটন disable হচ্ছে কিনা আর error মেসেজ দেখাচ্ছে কিনা ব্রাউজারে দেখুন। Tailwind spinner দেখা যায় কিনা `loading=true` করে কনসোল থেকে ট্রিগার করুন।

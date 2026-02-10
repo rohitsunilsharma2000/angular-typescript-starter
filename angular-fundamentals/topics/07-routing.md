@@ -53,3 +53,5 @@ ngOnInit() {
 ```ts
 { path: '**', redirectTo: '' }
 ```
+
+**UI test hint**: Router devtools বা ব্রাউজার URL বারে `/patients/3?tab=lab` খুলুন; ব্যাজ/ট্যাব ক্লাস স্যুইচ হচ্ছে ও lazy chunk নেটওয়ার্কে লোড হচ্ছে কিনা দেখুন।

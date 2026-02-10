@@ -65,3 +65,5 @@ export const authInterceptorFn: HttpInterceptorFn = (req,next)=> {
   return next(token ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : req);
 };
 ```
+
+**UI test hint**: DevTools Network এ Authorization হেডার যাচ্ছে কিনা দেখুন; টোকেন মুছে `ng serve` রিফ্রেশে guarded API তে error toast উঠছে কিনা দেখে নিন।

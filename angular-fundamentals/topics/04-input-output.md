@@ -61,3 +61,5 @@ get classes() { return this.tone==='green' ? 'bg-emerald-100 text-emerald-700' :
 ```html
 <button class="text-blue-600" (click)="edit.emit(patient)">Edit</button>
 ```
+
+**UI test hint**: Parent টেমপ্লেটে `console.log($event)` দিয়ে Output বাউন্ড করুন; ব্রাউজারে Discharge/Edit ক্লিক করলে কনসোলে id/অবজেক্ট দেখা যাবে। Tailwind ক্লাস দেখে স্টাইল যাচাই করুন।
