@@ -1,0 +1,60 @@
+<div class="page">
+  <header class="flex items-center justify-between mb-4">
+    <div>
+      <p class="text-sm text-slate-500">Hospital Management</p>
+      <h1 class="text-2xl font-semibold text-slate-900">Appointments</h1>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="text-sm text-slate-500" [class.text-amber-600]="loading">{{ loading ? 'Loading...' : 'Ready' }}</span>
+      <button class="btn w-auto px-3 py-2" type="button" (click)="logout()">Logout</button>
+    </div>
+  </header>
+
+  <div class="grid gap-4 md:grid-cols-3">
+    <section class="card md:col-span-2">
+      <h2 class="text-lg font-semibold text-slate-900 mb-3">Book new appointment</h2>
+      <form [formGroup]="form" class="space-y-3" (ngSubmit)="submit()">
+        <div class="grid gap-3 md:grid-cols-2">
+          <div>
+            <label class="label">Patient</label>
+            <select formControlName="patient" class="input">
+              <option value="" disabled selected hidden>Choose patient</option>
+              <option *ngFor="let p of patients" [value]="p.firstName + ' ' + p.lastName">
+                {{ p.firstName }} {{ p.lastName }} ({{ p.email }})
+              </option>
+            </select>
+          </div>
+          <div>
+            <label class="label">Doctor</label>
+            <input formControlName="doctor" class="input" />
+          </div>
+        </div>
+        <div class="grid gap-3 md:grid-cols-2">
+          <div>
+            <label class="label">Slot</label>
+            <input type="datetime-local" formControlName="slot" class="input" />
+          </div>
+          <div>
+            <label class="label">Notes</label>
+            <input formControlName="notes" class="input" placeholder="Optional" />
+          </div>
+        </div>
+        <button class="btn" type="submit" [disabled]="loading || form.invalid">Create</button>
+      </form>
+      <p class="mt-2 text-sm" [class.text-emerald-700]="message.startsWith('Mock')" [class.text-red-600]="message.startsWith('Failed')">{{ message }}</p>
+    </section>
+
+    <section class="card">
+      <h2 class="text-lg font-semibold text-slate-900 mb-2">Patients (DummyJSON)</h2>
+      <ul class="space-y-2 max-h-80 overflow-auto">
+        <li *ngFor="let p of patients" class="flex items-center gap-2 text-sm">
+          <span class="avatar">{{ p.firstName[0] }}</span>
+          <div>
+            <div class="font-medium text-slate-800">{{ p.firstName }} {{ p.lastName }}</div>
+            <div class="text-slate-500 text-xs">{{ p.email }}</div>
+          </div>
+        </li>
+      </ul>
+    </section>
+  </div>
+</div>
