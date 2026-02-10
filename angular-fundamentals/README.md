@@ -23,6 +23,7 @@ TypeScript Core শেষ করে এখানে আসুন। এই স�
 - [13) Components Deep (Input/Output, ViewChild, projection)](topics/13-components-deep.md)
 - [14) Routing (Startup app mandatory, hospital flows)](topics/14-routing-startup.md)
 - [15) Forms (Angular fresher interview killer topic)](topics/15-forms.md)
+- [16) HTTP + API Integration (Must)](topics/16-http-api.md)
 
 ## Demo
 - `demos/hms-appointments` এ Angular standalone কম্পোনেন্টের কোড আছে; Angular CLI প্রজেক্টে কপি করে চালান।
