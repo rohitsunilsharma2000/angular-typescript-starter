@@ -30,3 +30,44 @@ function assertNever(x: never): never {
 
 **Try it**
 - `type PaymentMethod = 'cash' | 'card' | 'upi'` নিয়ে switch লিখে `assertNever` কল করুন।
+
+## ব্রাউজারে কনসোল টেস্ট (any / unknown / never)
+
+1) **any bypasses safety**
+```ts
+let a: any = 5;
+a.toFixed(); // ok
+a.noSuchMethod(); // runtime error possible
+console.log('any value:', a);
+```
+
+2) **unknown needs narrowing**
+```ts
+function parseNumber(input: unknown) {
+  if (typeof input === 'number') return input * 2;
+  throw new Error('not a number');
+}
+console.log(parseNumber(4));
+```
+
+3) **Exhaustive switch with never**
+```ts
+type Payment = 'cash' | 'card';
+function pay(p: Payment) {
+  switch (p) {
+    case 'cash': return 'Collect notes';
+    case 'card': return 'Swipe card';
+    default: return assertNever(p);
+  }
+}
+function assertNever(x: never): never { throw new Error('Unhandled ' + x); }
+console.log(pay('cash'));
+```
+
+4) **unknown + type predicate**
+```ts
+function isPatient(x: unknown): x is { id: string } {
+  return typeof x === 'object' && x !== null && 'id' in x;
+}
+console.log(isPatient({ id: 'P1', name: 'Asha' }), isPatient('nope'));
+```

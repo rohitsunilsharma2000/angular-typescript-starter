@@ -28,3 +28,48 @@ function admit(entity: Patient | InPatient) {
 
 **Try it**
 - `type Appointment = WalkIn | Scheduled` ইউনিয়ন বানান; Scheduled এ `slot: string` যোগ করুন।
+
+## ব্রাউজারে কনসোল টেস্ট (Union & Intersection)
+
+1) **Union narrowing with `in`**
+```ts
+type WalkIn = { kind: 'walkin'; name: string };
+type Scheduled = { kind: 'scheduled'; name: string; slot: string };
+type Appointment = WalkIn | Scheduled;
+
+function label(appt: Appointment) {
+  if ('slot' in appt) return `Scheduled at ${appt.slot}`;
+  return 'Walk-in';
+}
+console.log(label({ kind: 'scheduled', name: 'Rima', slot: '10:30' }));
+```
+
+2) **Intersection combine properties**
+```ts
+type Billing = { amount: number };
+type Identified = { id: string };
+type BillablePatient = Billing & Identified;
+const bp: BillablePatient = { id: 'P10', amount: 5000 };
+console.log('Billable patient:', bp);
+```
+
+3) **Function accepting union**
+```ts
+type StaffRole = 'doctor' | 'nurse' | 'admin';
+function assign(role: StaffRole) {
+  switch (role) {
+    case 'doctor': return 'ICU';
+    case 'nurse': return 'Ward';
+    case 'admin': return 'Front desk';
+  }
+}
+console.log(assign('nurse'));
+```
+
+4) **Intersection for mixins**
+```ts
+type Timestamped = { createdAt: Date };
+type Bed = { id: string; type: 'ICU' | 'GENERAL' };
+const bed: Bed & Timestamped = { id: 'B9', type: 'ICU', createdAt: new Date() };
+console.log('Bed with timestamp:', bed);
+```

@@ -35,3 +35,38 @@ async function showFirstReport(patientId: string) {
 
 **Try it**
 - `checkBedAvailability` নামে async ফাংশন বানিয়ে 1 সেকেন্ড পরে boolean resolve করুন।
+
+## ব্রাউজারে কনসোল টেস্ট (async/await)
+
+1) **Basic async**
+```ts
+async function greet(name) { return `Hi ${name}`; }
+greet('Asha').then(console.log);
+```
+
+2) **Await + try/catch**
+```ts
+async function risky(ok = true) {
+  if (!ok) throw new Error('fail');
+  return 'success';
+}
+(async () => {
+  try { console.log(await risky(false)); }
+  catch (e) { console.log('Caught:', e.message); }
+})();
+```
+
+3) **Parallel calls**
+```ts
+function fake(delay, value) { return new Promise(r => setTimeout(() => r(value), delay)); }
+(async () => {
+  const [p, d] = await Promise.all([fake(200, 'patient'), fake(300, 'doctor')]);
+  console.log(p, d);
+})();
+```
+
+4) **Finally usage**
+```ts
+fake(100, 'done')
+  .finally(() => console.log('cleanup after API'));
+```

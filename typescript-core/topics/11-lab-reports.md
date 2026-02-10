@@ -40,3 +40,41 @@ function assertNever(x: never): never {
 
 **Try it**
 - নতুন state `archived` যোগ করে switch আপডেট না করলে কী error আসে দেখুন।
+
+## ব্রাউজারে কনসোল টেস্ট (Lab state machine)
+
+1) **Discriminated union switch**
+```ts
+type LabReport =
+  | { status: 'requested'; test: string }
+  | { status: 'completed'; test: string; result: 'positive' | 'negative' };
+
+function label(r: LabReport) {
+  switch (r.status) {
+    case 'requested': return 'Waiting';
+    case 'completed': return `Result: ${r.result}`;
+    default: return assertNever(r);
+  }
+}
+function assertNever(x: never): never { throw new Error('Unhandled ' + JSON.stringify(x)); }
+console.log(label({ status: 'completed', test: 'CBC', result: 'negative' }));
+```
+
+2) **Array filter by tag**
+```ts
+const reports: LabReport[] = [
+  { status: 'requested', test: 'XR' },
+  { status: 'completed', test: 'CBC', result: 'positive' },
+];
+console.log(reports.filter(r => r.status === 'requested'));
+```
+
+3) **Map to messages**
+```ts
+console.log(reports.map(label));
+```
+
+4) **Add new status to see compile-time guard**
+```ts
+// type LabReport += { status: 'archived'; test: string }; // uncomment করলে switch এ error দেখাবে (TS)
+```
