@@ -30,3 +30,26 @@ CDN is perfect for prototypes; for production move to a build so unused classes 
 </body>
 </html>
 ```
+
+**Examples (beginner → advanced)**
+1) Defer big images
+```html
+<img src="hero.jpg" loading="lazy" class="w-full rounded-xl shadow">
+```
+2) Minimal class lists
+```html
+<div class="p-4 bg-white rounded-xl shadow-sm">Keep utility sets short and predictable.</div>
+```
+3) Avoid dynamic class concat (good)
+```html
+<div class="text-blue-600 bg-blue-50 px-3 py-2 rounded">Static classes are purgeable.</div>
+```
+4) Hint to migrate to build
+```html
+<!-- Next step: npx tailwindcss -i ./src/input.css -o ./dist/output.css --watch -->
+```
+5) CDN + inline config size caution
+```html
+<script>tailwind.config={theme:{extend:{colors:{brand:'#2563eb'}}}}</script>
+<!-- Keep config small; big theme maps slow first paint. -->
+```

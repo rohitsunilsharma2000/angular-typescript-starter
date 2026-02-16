@@ -37,3 +37,42 @@
 
 - Focus ring: `focus:ring-2 focus:ring-blue-200`.
 - Checkbox styling: `text-blue-600` controls the check color.
+
+**Examples (beginner → advanced)**
+1) Input with hint
+```html
+<label class="block text-sm font-medium mb-1">Name</label>
+<input class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-200" placeholder="Patient name">
+<p class="text-xs text-slate-500 mt-1">Full legal name</p>
+```
+2) Inline form row
+```html
+<div class="flex gap-3">
+  <input class="flex-1 border rounded-lg px-3 py-2" placeholder="Email">
+  <button class="px-3 py-2 bg-blue-600 text-white rounded-lg">Invite</button>
+</div>
+```
+3) Required + invalid state
+```html
+<input class="w-full border rounded-lg px-3 py-2 invalid:border-red-500 invalid:text-red-600" type="email" required placeholder="email@site.com">
+```
+4) Select + icon (simple)
+```html
+<div class="relative">
+  <select class="w-full appearance-none border rounded-lg px-3 py-2 pr-10">
+    <option>ICU</option><option>Ward</option>
+  </select>
+  <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-500">▾</span>
+```
+5) Inline validation message
+```html
+<p class="mt-1 text-sm text-red-600">Please enter 10 digits.</p>
+```
+6) Checkbox group
+```html
+<fieldset class="space-y-2">
+  <legend class="text-sm font-medium">Services</legend>
+  <label class="flex items-center gap-2 text-sm"><input type="checkbox" class="rounded border-slate-300 text-blue-600">ICU</label>
+  <label class="flex items-center gap-2 text-sm"><input type="checkbox" class="rounded border-slate-300 text-blue-600">Pharmacy</label>
+</fieldset>
+```

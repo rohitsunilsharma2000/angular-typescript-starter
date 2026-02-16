@@ -30,3 +30,29 @@
 </body>
 </html>
 ```
+
+**Examples (beginner → advanced)**
+1) Padding + margin
+```html
+<div class="p-4 m-4 bg-slate-100 rounded-lg">Box with spacing</div>
+```
+2) Gap on flex
+```html
+<div class="flex gap-3">
+  <div class="w-10 h-10 bg-blue-200 rounded"></div>
+  <div class="w-10 h-10 bg-blue-300 rounded"></div>
+</div>
+```
+3) Fixed vs fluid width
+```html
+<div class="w-40 bg-emerald-100 p-3">Fixed 160px</div>
+<div class="w-full max-w-md bg-emerald-50 p-3">Fluid max 448px</div>
+```
+4) Container with clamp
+```html
+<div class="mx-auto px-4 w-full max-w-5xl">Centered page</div>
+```
+5) Responsive spacing
+```html
+<div class="p-4 sm:p-6 lg:p-10 bg-white rounded-xl shadow-sm">Padding grows with viewport.</div>
+```

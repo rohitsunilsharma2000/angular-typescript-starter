@@ -54,3 +54,52 @@
 </body>
 </html>
 ```
+
+**Examples (beginner → advanced)**
+1) Primary & ghost buttons
+```html
+<button class="px-4 py-2 rounded-md bg-blue-600 text-white">Save</button>
+<button class="px-4 py-2 rounded-md border border-slate-200">Cancel</button>
+```
+2) Badge with icon
+```html
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 text-sm">
+  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M8 13l-3-3 1.4-1.4L8 10.2l5.6-5.6L15 6z"/></svg>
+  Stable
+</span>
+```
+3) Media card
+```html
+<article class="flex gap-3 p-4 rounded-xl border border-slate-200 bg-white shadow-sm">
+  <div class="w-12 h-12 rounded-lg bg-slate-200"></div>
+  <div class="space-y-1">
+    <h3 class="font-semibold">Bed A</h3>
+    <p class="text-sm text-slate-600">Patient P-11, SpO2 93%</p>
+  </div>
+</article>
+```
+4) Tabs (utility)
+```html
+<div class="inline-flex rounded-lg border border-slate-200 bg-white p-1 text-sm">
+  <button class="px-3 py-1.5 rounded-md bg-slate-900 text-white">Beds</button>
+  <button class="px-3 py-1.5 rounded-md text-slate-600">Patients</button>
+</div>
+```
+5) Toast / alert
+```html
+<div class="flex items-start gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800">
+  <span class="text-lg">!</span>
+  <div>
+    <p class="font-semibold">Low stock</p>
+    <p class="text-sm">Pharmacy inventory needs restock.</p>
+  </div>
+</div>
+```
+6) Modal trigger + overlay (dialog)
+```html
+<button class="px-3 py-2 bg-slate-900 text-white rounded-md" onclick="assign.showModal()">Open</button>
+<dialog id="assign" class="backdrop:bg-slate-900/50 p-6 rounded-xl border border-slate-200">
+  <p class="text-lg font-semibold mb-4">Confirm action?</p>
+  <button class="px-3 py-2 bg-blue-600 text-white rounded-md" onclick="assign.close()">Yes</button>
+</dialog>
+```

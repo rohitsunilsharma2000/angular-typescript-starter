@@ -33,3 +33,32 @@
 ```
 
 - Breakpoints: `sm` 640px, `md` 768px, `lg` 1024px.
+
+**Examples (beginner → advanced)**
+1) Mobile-first stack
+```html
+<div class="flex flex-col sm:flex-row gap-3">
+  <button class="px-3 py-2 bg-blue-600 text-white rounded-md">Primary</button>
+  <button class="px-3 py-2 border border-slate-200 rounded-md">Secondary</button>
+</div>
+```
+2) Responsive grid
+```html
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+  <div class="p-3 bg-white shadow rounded">Card</div>
+  <div class="p-3 bg-white shadow rounded">Card</div>
+</div>
+```
+3) Show/hide
+```html
+<div class="md:hidden p-2 bg-amber-100 rounded">Mobile notice</div>
+<div class="hidden md:block p-2 bg-emerald-100 rounded">Desktop notice</div>
+```
+4) Responsive container padding
+```html
+<div class="px-4 sm:px-8 lg:px-16 py-6 bg-slate-100 rounded-xl">Adaptive padding</div>
+```
+5) Clamp width hero
+```html
+<section class="w-full max-w-5xl mx-auto px-4 sm:px-8 py-10 bg-white shadow rounded-xl">Hero content</section>
+```

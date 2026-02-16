@@ -34,3 +34,29 @@
 
 - `dark:` prefix mirrors the light class.
 - With CDN you can still set `tailwind.config` inline for colors.
+
+**Examples (beginner → advanced)**
+1) Dark text inversion
+```html
+<p class="text-slate-700 dark:text-slate-200">Adaptive text</p>
+```
+2) Dual card
+```html
+<article class="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+  <h3 class="font-semibold">Card</h3>
+  <p class="text-sm text-slate-600 dark:text-slate-300">Works in both themes.</p>
+</article>
+```
+3) Button swap
+```html
+<button class="px-3 py-2 rounded-md bg-blue-600 text-white dark:bg-blue-500 dark:text-slate-900">Toggle</button>
+```
+4) Themed badge
+```html
+<span class="px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200 text-sm">Stable</span>
+```
+5) JS toggle snippet
+```html
+<button id="dm" class="px-3 py-2 border rounded-md">Switch</button>
+<script>dm.onclick=()=>document.documentElement.classList.toggle('dark');</script>
+```
