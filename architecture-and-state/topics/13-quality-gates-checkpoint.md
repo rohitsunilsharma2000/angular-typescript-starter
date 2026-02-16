@@ -55,3 +55,8 @@ A11y: role="button", keyboard focus-visible
 - Memoized selectors ব্যবহার।
 - Shared UI docs আপডেটেড।
 - a11y basics (aria/keyboard) চেকড।
+
+## How to test this topic
+1) VS Code: lint errors (circular deps) নেই; ESLint/import-boundary rules থাকলে Problems panel দেখুন।
+2) CLI/CI: `node tools/check-circular.ts` (madge) চালিয়ে cycles খুঁজুন; `npm run lint` চালান।
+3) Runtime/Storybook: shared UI docs (button/input etc.) দেখা যায়; selectors heavy compute করছে না (Angular DevTools change detection count পর্যবেক্ষণ)।  

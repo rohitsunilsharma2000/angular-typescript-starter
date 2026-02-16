@@ -90,3 +90,8 @@ export class DialogComponent {
 - Tokens ফাইল আছে ও কম্পোনেন্টে ব্যবহার।
 - Button/Dialog accessible (role, focus-visible)।
 - Token-driven spacing/color বজায়।
+
+## How to test this topic
+1) VS Code: CSS vars/tokens imports resolve; no hardcoded color lint warnings (if using stylelint/ESLint rules).
+2) Storybook/manual: Button/Dialog render করে keyboard tab/Shift+Tab দিয়ে focus-visible ও aria role কাজ করছে কিনা দেখুন।
+3) Browser: data-theme switch করলে রঙ/spacing সঠিকভাবে বদলাচ্ছে কিনা; axe devtools দিয়ে dialog role/aria-modal violation নেই নিশ্চিত করুন।  

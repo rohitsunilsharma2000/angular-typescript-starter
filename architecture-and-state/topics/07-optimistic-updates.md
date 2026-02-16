@@ -114,3 +114,8 @@ export class AppointmentForm {
 - temp ID ব্যবহৃত; success এ replace, fail এ remove।
 - error message surfacing আছে।
 - unit test বা manual check দিয়ে rollback দেখা হয়েছে।
+
+## How to test this topic
+1) VS Code: interceptor/facade imports resolve; no red squiggles; signals typed। 
+2) Unit/component test: mock API success ও failure দুইটাই করে দেখুন temp row replace বনাম rollback হয় কিনা। Testing Library + HttpTestingController ব্যবহার করুন।
+3) Browser: `ng serve` → Create বাটন দু-তিনবার চাপুন; Network tab এ একবার error ইনজেক্ট করলে rollback ও error toast দেখুন, success এ temp আইটেম real data দিয়ে replace হচ্ছে।  

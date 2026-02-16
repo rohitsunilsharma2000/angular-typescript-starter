@@ -91,3 +91,8 @@ export class BillingView {
 ## Done when…
 - Common state model ফাইল আছে; সব feature একই enum ব্যবহার করছে।
 - UI তে loading/refreshing/error/empty আলাদা ভাবে হ্যান্ডল।
+
+## How to test this topic
+1) VS Code: state interface imports resolve; enum values autocomplete হচ্ছে কিনা দেখুন।
+2) Component test: HttpTestingController দিয়ে success ও error stub করে loading/refresh/error UI assert করুন।
+3) Browser: slow network throttle এ `/billing` পেজ চালিয়ে refresh state দেখুন; error হলে inline alert আসে কিনা।  

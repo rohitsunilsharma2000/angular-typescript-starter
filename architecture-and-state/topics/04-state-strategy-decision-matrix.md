@@ -55,3 +55,8 @@ export class StateChooser {
 ## Done when…
 - নিজস্ব প্রজেক্টে প্রতিটি ফিচারের state choice লিখিত।
 - derive vs store পরিষ্কার; cache/refresh পরিকল্পনা আছে।
+
+## How to test this topic
+1) VS Code: decision helper ফাংশন থেকে type hints ঠিক আছে কিনা দেখুন; no implicit any warnings।
+2) Unit test (optional): decision matrix ফাংশনের ইনপুট/আউটপুট for a few cases `vitest/jest` দিয়ে যাচাই করুন।
+3) App sanity: এক ফিচারে local signal, অন্যটায় service store, আর তৃতীয়টায় NgRx ব্যবহার করে দেখুন—build passes এবং imports clean।  

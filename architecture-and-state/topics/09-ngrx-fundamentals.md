@@ -139,3 +139,8 @@ export class AppointmentsContainer {
 - Actions/Reducer/Effects/Selectors সম্পূর্ণ ও compile হয়।
 - Route-level providers দিয়ে slice scoped।
 - Loading/error UI হ্যান্ডল।
+
+## How to test this topic
+1) VS Code: action/reducer/selectors auto-import এবং feature key মিসম্যাচ নেই নিশ্চিত করুন।
+2) Unit test: reducer pure tests (load → success/error), selector memo test; effects with provideMockActions + HttpTestingController stub.
+3) Runtime: `ng serve` → appointments container খুলে Load বাটন চাপুন; state devtools/console এ load-success events দেখতে পাবেন, UI loading/error ঠিক আছে কিনা দেখুন।  

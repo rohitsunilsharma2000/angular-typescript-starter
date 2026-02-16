@@ -117,3 +117,9 @@ export class AppointmentList {
 - Standalone routes lazy-load হয়।
 - Legacy NgModule interop কাজ করে।
 - Providers feature scope-এ সীমাবদ্ধ।
+
+## How to test this topic
+1) VS Code: Ctrl/Cmd+Click করে lazy route import path resolve হচ্ছে কিনা দেখুন; providers array তে HttpClient/feature API উপস্থিত কিনা চেক করুন।
+2) Run guard build: `ng test` বা `ng build`—module not found/circular error না এলে ঠিক আছে।
+3) Browser: `ng serve` → `/appointments` lazy route লোড হচ্ছে কিনা Network tab এ নতুন chunk দেখুন; API call success হলে list render হচ্ছে।
+4) Optional: Add legacy NgModule component; ensure template renders without injector errors.  

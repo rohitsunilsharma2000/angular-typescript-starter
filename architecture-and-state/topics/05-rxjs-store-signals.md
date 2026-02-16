@@ -129,3 +129,8 @@ export class AppointmentList {
 - Store shape documented; cache policy লেখা।
 - shareReplay(1) ব্যবহার হয়েছে।
 - Template এ loading/error/empty branches আছে।
+
+## How to test this topic
+1) VS Code: hover করে store state টাইপ ঠিক আছে কিনা দেখুন; missing return/any নেই।
+2) Unit/component test: ATL দিয়ে container render করে loading → success → error UI assert করুন; `HttpTestingController` দিয়ে API stub করুন।
+3) Runtime: `ng serve` চালিয়ে Refresh বোতাম চাপুন; Network panel এ 5s cache window respected কিনা ও UI loading state কাজ করছে কিনা দেখুন।  

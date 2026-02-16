@@ -138,3 +138,8 @@ export class PatientsView {
 - vm$ template এ চলছে; effect switchMap + catchError + finalize আছে।
 - Optimistic create rollback করে।
 - Derived selector filter কাজ করে।
+
+## How to test this topic
+1) VS Code: ComponentStore imports ও selectors টাইপ ঠিক আছে কিনা দেখুন; no implicit any.
+2) Unit test: store.filtered$ observable expect output for a filter; effect success ও error কেস spy করুন (using TestingModule + HttpTestingController).
+3) Runtime: `ng serve` → patients container এ filter dropdown ও quick add চাপুন; temp entry replace/rollback কাজ করছে কিনা লক্ষ্য করুন।  

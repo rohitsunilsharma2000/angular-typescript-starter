@@ -152,3 +152,8 @@ export class BillingContainer {
 ## Done when…
 - Entity adapter wired; pagination/filter selectors কাজ করে।
 - Route-level provideState/provideEffects করা।
+
+## How to test this topic
+1) VS Code: adapter selectors imports resolve; feature key spelling ঠিক আছে।
+2) Unit test: reducer pagination state change; selector pages math; effect success/error with HttpTestingController.
+3) Runtime: `ng serve` → billing route খুলে Prev/Next/Filter ব্যবহার করুন; Network panel এ calls expected params পাঠাচ্ছে কিনা ও UI pages count আপডেট হচ্ছে কিনা দেখুন।  

@@ -96,3 +96,9 @@ export class PatientApi {
 - Container শুধু data/orchestration; Presentational শুধু template/style.
 - vm object/signal আছে; template এ state branches স্পষ্ট।
 - Route-level providers ঠিকভাবে scoped।
+
+## How to test this topic
+1) VS Code: Ctrl/Cmd+Click করে container থেকে facade/service imports resolve হচ্ছে কিনা দেখুন; Problems panel এ unused input/output নেই নিশ্চিত করুন।
+2) Unit/component test: Angular Testing Library দিয়ে container render করে loading→success assert করুন; presentational component এ @Input required ঠিক আছে কিনা।
+3) Boundary: নিশ্চিত করুন container কোনো heavy UI barrel থেকে ইমপোর্ট করছে না (direct path); optional guard স্ক্রিপ্ট চালান।
+4) Browser sanity: `ng serve` → patients route খুলে container-presentational split কাজ করছে কিনা (state updates reflect).  

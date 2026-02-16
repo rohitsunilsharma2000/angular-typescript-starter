@@ -79,3 +79,20 @@ console.log('No boundary issues');
 - ফোল্ডার লেয়ার: feature → shared → core স্পষ্ট।
 - tsconfig paths সেট; relative import সাফ।
 - boundary স্ক্রিপ্ট চালালে ০ violation।
+
+## How to test this topic
+1) Sample folder structure তৈরি করুন: `src/app/features`, `src/app/shared`, `src/app/core`, `src/tools/check-boundary.ts`।
+2) Boundary guard স্ক্রিপ্ট চালান:
+   ```bash
+   npx ts-node src/tools/check-boundary.ts
+   ```
+   - ভায়োলেশন থাকলে তালিকা দেখাবে; ঠিক করার পর পুনরায় চালিয়ে “No boundary issues” নিশ্চিত করুন।
+3) Path alias যাচাই করুন: `tsconfig.json` এ paths যোগ করে `npx tsc --noEmit` চালান; alias import ঠিকমতো resolve হচ্ছে কিনা দেখুন।
+4) Barrel vs direct import: heavy UI barrel থেকে ইমপোর্ট করলে ওজন বাড়ে কিনা `npm run build -- --stats-json && npx source-map-explorer dist/**/main*.js` দিয়ে দেখে তুলনা করুন।
+5) Clean-up: ইচ্ছাকৃত ভুল import সরিয়ে guard পুনরায় চালিয়ে নিশ্চিত হন ০ violation।
+6) VS Code এ quick check:
+   - Ctrl/Cmd+Click করে alias import জাম্প করুন; কোনো unresolved পথ থাকলে fix করুন।
+   - Problems প্যানেলে boundary guard output দেখতে `Tasks: Run Task` থেকে `check-boundaries` স্ক্রিপ্ট (scripts এ যোগ করলে) চালাতে পারেন।
+7) Browser রান (optional sanity):
+   - `npm start` বা `ng serve` চালিয়ে অ্যাপ খুলুন; console এ boundary errors থাকবে না (guard CI/CLI তে চললেও রানটাইমে কিছু আসে না)।
+   - Feature routes (e.g., `/patients`) লোড হলে নিশ্চিত করুন import path ঠিক আছে এবং circular error দেখা যাচ্ছে না।

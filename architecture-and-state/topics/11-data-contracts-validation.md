@@ -87,3 +87,8 @@ try { /* parse */ } catch (e) {
 ## Done when…
 - DTO/interface + mapper + zod schema আছে।
 - Errors human-readable; fallback মান সেট।
+
+## How to test this topic
+1) VS Code: mapper import path ঠিক; zod types inference কাজ করছে কিনা hover করে দেখুন (zod না থাকলে install hint অনুসরণ করুন বা ts error দেখুন)। 
+2) Unit test: valid DTO parse → UI model; invalid DTO → ZodError throw এবং message map; date normalization equals expected ISO.
+3) Runtime: `ng serve` → patients fetch; console এ mapper চলেছে ও UI তে normalized values (e.g., date formatted) দেখুন; error হলে toast/log দেখা যায় কিনা।  
