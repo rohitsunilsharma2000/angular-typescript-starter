@@ -36,6 +36,18 @@ src/
 
 Note: Minimal stub versions of the files shown above now live in `src/` so you can run the guard and path-alias checks without adding extra Angular packages.
 
+### Ready-to-run demo
+- লোকাল স্যান্ডবক্স: `architecture-and-state/demos/feature-boundaries-demo`
+- চালান:
+  ```bash
+  cd architecture-and-state/demos/feature-boundaries-demo
+  npm install
+  npm run demo          # boundary guard + typecheck
+  # বা পৃথকভাবে:
+  npm run check:boundaries
+  npm run typecheck
+  ```
+
 ## Why this matters (real world)
 - দ্রুত অনবোর্ডিং: নতুন ডেভেলপার বুঝতে পারে patients/billing/appointments কোথায়।
 - ডেপ্লয় ঝুঁকি কম: feature আলাদা থাকলে blast radius কমে।
@@ -58,7 +70,7 @@ Note: Minimal stub versions of the files shown above now live in `src/` so you c
 3) `tsconfig.json` (বা থাকলে `tsconfig.base.json`) এ path alias যোগ করুন।
 4) নিচের "Copy-paste Example" এর ফাইলগুলো একই path-এ তৈরি করুন।
 
-## Copy-paste Example
+## Demos (copy-paste)
 ```ts
 // tsconfig.json (excerpt)
 {
@@ -137,6 +149,44 @@ console.log('No boundary issues');
 - Beginner: `src/app/features/patients`, `src/app/shared/ui`, `src/app/shared/data-access`, `src/app/core` ফোল্ডার বানিয়ে path alias যোগ করুন; তারপর `npx tsc --noEmit` দিয়ে alias resolve হচ্ছে কিনা দেখুন।
 - Intermediate: `src/tools/check-boundary.ts` চালিয়ে boundary স্ক্রিপ্ট ঠিক চলছে কিনা যাচাই করুন।
 - Advanced: ইচ্ছাকৃত cross-feature import তৈরি করে দেখুন স্ক্রিপ্ট রিপোর্ট আসে কিনা।
+
+## হাতেকলমে চালিয়ে দেখুন (আয়মানের জন্য beginner গাইড)
+1) ফোল্ডার ও স্যাম্পল ফাইল তৈরি করুন (এই রেপোতে আগেই আছে, না থাকলে চালান):
+   ```bash
+   mkdir -p src/app/core src/app/shared/ui src/app/shared/data-access src/app/features/patients/{components,pages,data-access} src/app/features/billing src/tools src/types
+   ```
+2) tsconfig alias চেক করুন (paths আছে কিনা):
+   ```bash
+   cat tsconfig.json
+   ```
+3) স্যাম্পল ফাইল মিলিয়ে নিন (না থাকলে আগের সেকশন থেকে কপি):
+   - core: `src/app/core/auth.guard.ts`, `http-interceptors.ts`
+   - shared: `src/app/shared/ui/button.component.ts`, `card.component.ts`, `src/app/shared/data-access/http-client.service.ts`, `state-store.ts`
+   - features/patients: `patients.api.ts`, `patients.facade.ts`, `components/patient-list.component.ts`, `pages/patients.page.ts`, `patients.routes.ts`
+   - features/billing: `billing.routes.ts`
+   - root: `src/app/app.config.ts`, `src/tools/check-boundary.ts`, `src/types/angular-core-shim.d.ts`
+4) boundary guard চালান:
+   ```bash
+   npx ts-node src/tools/check-boundary.ts
+   ```
+   - আশা করা আউটপুট: `No boundary issues`.
+5) ইচ্ছাকৃত ভুল করে boundary ভাঙা দেখুন:
+   ```bash
+   echo "import '../shared/ui/button.component';" >> src/app/core/auth.guard.ts
+   npx ts-node src/tools/check-boundary.ts  # এখন লাল রিপোর্ট দেখাবे
+   ```
+6) ভুল সরিয়ে আবার চালান:
+   ```bash
+   # macOS/BSD
+   sed -i '' '/shared\/ui/d' src/app/core/auth.guard.ts
+   # Linux হলে: sed -i '/shared\/ui/d' src/app/core/auth.guard.ts
+   npx ts-node src/tools/check-boundary.ts
+   ```
+7) alias resolve হচ্ছে কিনা নিশ্চিত করতে টাইপচেক চালান:
+   ```bash
+   npx tsc --noEmit
+   ```
+   - কোনো error না এলে ফোল্ডার boundary + paths ঠিক আছে।
 
 ## Common mistakes
 - Barrel থেকে heavy UI export করে bundle ফোলানো।
