@@ -41,6 +41,47 @@ console.log(sessions.get(user));
 - Set guarantees uniqueness with O(1) ops; great for deduping alerts.  
 - WeakMap keys must be objects; allows garbage collection → good for ephemeral sessions.  
 
+**আরো উদাহরণ (beginner → advanced)**
+1) Beginner — iterate Map entries  
+```js
+for (const [id, pid] of beds) {
+  console.log('bed', id, '->', pid);
+}
+```
+
+2) Beginner — create Set from array  
+```js
+const ids = ['P1', 'P1', 'P2'];
+const uniq = new Set(ids);
+console.log([...uniq]); // ['P1','P2']
+```
+
+3) Intermediate — WeakSet to track visited objects  
+```js
+const seen = new WeakSet();
+const patient = { id: 'P-9' };
+seen.add(patient);
+console.log(seen.has(patient)); // true
+```
+
+4) Intermediate — Map ensure helper  
+```js
+const ensure = (map, key, init) => {
+  if (!map.has(key)) map.set(key, init());
+  return map.get(key);
+};
+
+const meds = new Map();
+ensure(meds, 'AMOX', () => []).push('dose-1');
+console.log(meds.get('AMOX'));
+```
+
+5) Advanced — convert Map to object  
+```js
+const obj = Object.fromEntries(beds);
+console.log(obj);
+```
+
 **Try it**
 - Convert `beds` Map to an Array of `[id, patientId]` and back.  
 - Use Set to dedupe a list of patient IDs then spread back into an array.  

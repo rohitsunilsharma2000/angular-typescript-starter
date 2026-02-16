@@ -41,6 +41,47 @@ assignBed('P-9', 'ICU-0').then(console.log);
 - Always return/await Promises inside async functions to propagate errors.  
 - `async` functions wrap return values into Promises automatically.  
 
+**আরো উদাহরণ (beginner → advanced)**
+1) Beginner — callback to Promise wrapper  
+```js
+function withCallback(cb) {
+  setTimeout(() => cb('done'), 10);
+}
+const p = new Promise(res => withCallback(res));
+p.then(console.log);
+```
+
+2) Beginner — promise chaining transform  
+```js
+fetchBed('ICU-2')
+  .then(bed => ({ ...bed, cleaned: true }))
+  .then(bed => console.log('Cleaned bed', bed));
+```
+
+3) Intermediate — async function auto-wrap  
+```js
+async function ping() {
+  return 'pong';
+}
+ping().then(console.log);
+```
+
+4) Intermediate — bubble error to catch  
+```js
+fetchBed('bad-id')
+  .then(console.log)
+  .catch(err => console.error('Handled:', err.message));
+```
+
+5) Advanced — parallel awaits with Promise.all  
+```js
+async function warmBeds() {
+  const [a, b] = await Promise.all([fetchBed('ICU-1'), fetchBed('ICU-3')]);
+  console.log('Ready:', a.id, b.id);
+}
+warmBeds();
+```
+
 **Try it**
 - Add a timeout Promise and race it with `fetchBed` to simulate SLA breach.  
 - Convert the chaining example to async/await style.  

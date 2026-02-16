@@ -19,6 +19,48 @@ const lastFever = vitals.findLast(v => v >= 100);
 console.log('last fever', lastFever);
 ```
 
+**আরো উদাহরণ (beginner → advanced)**
+1) Beginner — toReversed copy  
+```js
+const ids = ['P1', 'P2', 'P3'];
+const reversed = ids.toReversed();
+console.log(ids, reversed);
+```
+
+2) Beginner — toSpliced insert without mutating  
+```js
+const queue = ['P1', 'P3'];
+const withGapFilled = queue.toSpliced(1, 0, 'P2');
+console.log(queue, withGapFilled);
+```
+
+3) Intermediate — chain immutable helpers  
+```js
+const temps = [98, 99, 101];
+const result = temps
+  .toSorted()
+  .toSpliced(0, 0, 97)
+  .toReversed();
+console.log(result);
+```
+
+4) Intermediate — findLastIndex usage  
+```js
+const readings = [97, 101, 99, 103];
+const idx = readings.findLastIndex(v => v >= 100);
+console.log('last fever index', idx);
+```
+
+5) Advanced — compare mutation vs copy  
+```js
+const original = [1, 2, 3];
+const mutated = original;
+mutated.reverse(); // mutates original
+
+const safeCopy = original.toReversed(); // now original already reversed, but demonstrates copy
+console.log({ original, mutated, safeCopy });
+```
+
 **Interview takeaways**
 - `toSorted/toSpliced/toReversed` return copies; safer for shared state (Redux, signals).  
 - Mutation vs immutability often comes up in UI performance discussions.  

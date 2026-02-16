@@ -27,6 +27,56 @@ console.log(typeof patient, typeof bed, typeof hospital);
 - `let/const` block scope → predictable; const means binding স্থির, value ইমমিউটেবল নয়।  
 - Truthy/falsy: `""`, `0`, `null`, `undefined`, `NaN`, `false` → falsy; admission flags চেক করার সময় খেয়াল রাখুন।  
 
+**আরো উদাহরণ (beginner → advanced)**
+1) Beginner — var/let/const scope
+```js
+var dept = 'ER';
+let shift = 'day';
+const hospital = 'CityCare';
+
+function moveBed() {
+  dept = 'ICU';
+  shift = 'night';
+}
+
+moveBed();
+console.log({ dept, shift, hospital });
+```
+
+2) Beginner — truthy/falsy guard
+```js
+const bed = '';
+console.log(bed ? 'Bed occupied' : 'Bed empty');
+
+const fallback = bed ?? 'ICU-0';
+console.log('Fallback bed ->', fallback);
+```
+
+3) Intermediate — const object but mutable fields
+```js
+const patient = { id: 'P-1' };
+patient.name = 'Ria'; // allowed
+patient.admitted = false;
+console.log(patient);
+```
+
+4) Intermediate — template literal + Number parsing
+```js
+const days = Number('3');
+const bill = days * 5000;
+console.log(`Stay: ${days} days -> $${bill}`);
+```
+
+5) Advanced — default param with destructuring
+```js
+function badge({ id = 'N/A', ward = 'ER' } = {}) {
+  return `${id} @ ${ward}`;
+}
+
+console.log(badge({ id: 'P-9' }));
+console.log(badge());
+```
+
 **Try it**
 - `discharge` ফাংশন লিখুন: `admitted` false, `bed` null করুন।  
 - একটি `isReadyForSurgery` লিখে truthy/falsy পরীক্ষা করুন: `consentSigned`, `fastingHours`, `insuranceApproved`।  

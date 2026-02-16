@@ -30,6 +30,59 @@ describe('billing', () => {
 });
 ```
 
+**আরো উদাহরণ (beginner → advanced)**
+1) Beginner — Node ESM flag in package.json  
+```json
+{
+  "type": "module",
+  "scripts": { "test": "vitest run" }
+}
+```
+
+2) Beginner — basic Vitest mock  
+```js
+import { vi, it, expect } from 'vitest';
+
+const send = vi.fn().mockReturnValue('ok');
+it('sends once', () => {
+  send('msg');
+  expect(send).toHaveBeenCalledTimes(1);
+});
+```
+
+3) Intermediate — tsconfig path alias  
+```json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@services/*": ["src/services/*"]
+    }
+  }
+}
+```
+
+4) Intermediate — Promise.any polyfill import  
+```js
+import 'core-js/es/promise/any';
+console.log(Promise.any ? 'polyfilled' : 'missing');
+```
+
+5) Advanced — smoke test for Promise.any  
+```js
+import { describe, it, expect } from 'vitest';
+
+describe('Promise.any', () => {
+  it('resolves fastest', async () => {
+    const result = await Promise.any([
+      new Promise(res => setTimeout(() => res('slow'), 20)),
+      Promise.resolve('fast'),
+    ]);
+    expect(result).toBe('fast');
+  });
+});
+```
+
 **Interview takeaways**
 - `target` controls emitted syntax; choose based on runtime (Node 18 → ES2021 safe).  
 - `lib` must include DOM if you touch browser APIs.  

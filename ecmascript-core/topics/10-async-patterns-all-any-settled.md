@@ -34,6 +34,47 @@ Promise.race([fetchMock('ct-scan'), timeout(20)])
   .catch(err => console.log('race result', err));
 ```
 
+**আরো উদাহরণ (beginner → advanced)**
+1) Beginner — Promise.all success path  
+```js
+Promise.all([Promise.resolve('A'), Promise.resolve('B')])
+  .then(values => console.log('all', values));
+```
+
+2) Beginner — Promise.all fail-fast  
+```js
+Promise.all([Promise.resolve(1), Promise.reject('oops')])
+  .then(console.log)
+  .catch(err => console.log('failed early', err));
+```
+
+3) Intermediate — Promise.allSettled filtering fulfilled  
+```js
+Promise.allSettled([Promise.resolve('ok'), Promise.reject('bad')])
+  .then(results => {
+    const fulfilled = results.filter(r => r.status === 'fulfilled').map(r => r.value);
+    console.log('fulfilled only', fulfilled);
+  });
+```
+
+4) Intermediate — Promise.any fastest win  
+```js
+Promise.any([
+  new Promise((_, rej) => setTimeout(() => rej('late'), 30)),
+  new Promise(res => setTimeout(() => res('fast'), 10)),
+]).then(console.log);
+```
+
+5) Advanced — race with timeout helper  
+```js
+const withTimeout = (p, ms) =>
+  Promise.race([p, new Promise((_, rej) => setTimeout(() => rej('timeout'), ms))]);
+
+withTimeout(fetchMock('lab1'), 5)
+  .then(console.log)
+  .catch(err => console.log('timed/raced', err));
+```
+
 **Interview takeaways**
 - `all` is fail-fast; use when every call must succeed (e.g., vitals + meds).  
 - `allSettled` suits dashboards where partial data is acceptable.  

@@ -23,6 +23,43 @@ const roomLabel = admission?.room?.name ?? 'TBD';
 console.log(roomLabel);
 ```
 
+**আরো উদাহরণ (beginner → advanced)**
+1) Beginner — array destructuring default  
+```js
+const coords = [10];
+const [x, y = 0] = coords;
+console.log(x, y);
+```
+
+2) Beginner — object rest/spread copy  
+```js
+const base = { id: 'P-1', admitted: false };
+const updated = { ...base, admitted: true };
+console.log(base, updated);
+```
+
+3) Intermediate — nested optional chaining  
+```js
+const lab = { result: { value: 4.5 } };
+console.log(lab?.result?.value ?? 'pending');
+console.log(lab?.comment?.text ?? 'no comment');
+```
+
+4) Intermediate — rest params  
+```js
+function sumVitals(...vals) {
+  return vals.reduce((s, v) => s + v, 0);
+}
+console.log(sumVitals(98, 101, 97));
+```
+
+5) Advanced — destructuring with rename + default  
+```js
+const reading = { hr: 88, bp: '120/80' };
+const { hr: heartRate = 0, bp: bloodPressure = 'N/A' } = reading;
+console.log({ heartRate, bloodPressure });
+```
+
 **Interview takeaways**
 - Spread makes shallow copies; nested objects still shared.  
 - Optional chaining avoids “Cannot read property” crashes on missing data.  
