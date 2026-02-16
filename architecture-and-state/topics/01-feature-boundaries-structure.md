@@ -12,6 +12,18 @@
 - Intermediate: barrel (index.ts) কখন ব্যবহার/কখন এড়ানো; path alias দিয়ে পরিষ্কার import।
 - Advanced: import boundary guard স্ক্রিপ্ট; route-level provider scopes; avoiding cross-feature imports।
 
+## Beginner Setup (step-by-step)
+1) প্রজেক্ট রুটে থেকে ফোল্ডার বানান:
+   ```bash
+   mkdir -p src/app/features/patients src/app/shared/ui src/app/shared/data-access src/app/core src/tools
+   ```
+2) দরকারি dev dependencies যোগ করুন (একবারই যথেষ্ট):
+   ```bash
+   npm i -D ts-node @types/node source-map-explorer
+   ```
+3) `tsconfig.json` (বা থাকলে `tsconfig.base.json`) এ path alias যোগ করুন।
+4) নিচের "Copy-paste Example" এর ফাইলগুলো একই path-এ তৈরি করুন।
+
 ## Copy-paste Example
 ```ts
 // tsconfig.json (excerpt)
@@ -63,8 +75,9 @@ console.log('No boundary issues');
 ```
 
 ## Try it (exercise)
-- Beginner: নিজের প্রজেক্টে `features/patients`, `shared/ui`, `core` ফোল্ডার বানিয়ে path alias যোগ করুন।
-- Advanced: উপরের boundary স্ক্রিপ্ট চালিয়ে ইচ্ছাকৃত cross-feature import তৈরি করে দেখুন রিপোর্ট আসে কিনা।
+- Beginner: `src/app/features/patients`, `src/app/shared/ui`, `src/app/shared/data-access`, `src/app/core` ফোল্ডার বানিয়ে path alias যোগ করুন; তারপর `npx tsc --noEmit` দিয়ে alias resolve হচ্ছে কিনা দেখুন।
+- Intermediate: `src/tools/check-boundary.ts` চালিয়ে boundary স্ক্রিপ্ট ঠিক চলছে কিনা যাচাই করুন।
+- Advanced: ইচ্ছাকৃত cross-feature import তৈরি করে দেখুন স্ক্রিপ্ট রিপোর্ট আসে কিনা।
 
 ## Common mistakes
 - Barrel থেকে heavy UI export করে bundle ফোলানো।
