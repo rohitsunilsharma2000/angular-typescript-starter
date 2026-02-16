@@ -39,6 +39,15 @@
 }
 ```
 ```ts
+// docs-only shim: skip if you're inside a real Angular workspace
+// src/types/angular-core-shim.d.ts
+declare module '@angular/core' {
+  export function Injectable(opts: any): ClassDecorator;
+  export function signal<T>(v: T): { (): T; set(value: T): void };
+  export function computed<T>(fn: () => T): { (): T };
+}
+```
+```ts
 // app/features/patients/patients.facade.ts
 import { Injectable, signal, computed } from '@angular/core';
 import { PatientApi } from './patients.api';
@@ -51,8 +60,24 @@ export class PatientsFacade {
 }
 ```
 ```ts
+// app/features/patients/patients.api.ts
+// Minimal stub so `tsc --noEmit`/VS Code doesn't complain.
+export type PatientDto = { id: string; name: string; bed: string };
+
+export class PatientApi {
+  async fetchAll(): Promise<PatientDto[]> {
+    // swap with real HttpClient call in an Angular app
+    return [
+      { id: '1', name: 'Jane Doe', bed: 'B-12' },
+      { id: '2', name: 'John Smith', bed: 'A-03' },
+    ];
+  }
+}
+```
+```ts
 // tools/check-boundary.ts (run with ts-node)
-import fs from 'node:fs'; import path from 'node:path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 const bad: string[] = [];
 function walk(dir: string) {
   for (const f of fs.readdirSync(dir)) {
