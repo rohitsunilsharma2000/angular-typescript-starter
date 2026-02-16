@@ -1,94 +1,105 @@
 # 11) Data contracts + runtime validation
 
-API থেকে Patient DTO আসে, UI model এ date/enum normalize করি; zod দিয়ে runtime validate।
+লেম্যান-বাংলা: DTO shape আগে ঠিক করুন (contract), তারপর runtime এ validate করুন—ভুল পেলেই UI/log-এ ধরা পড়বে, API দোষ কাটাছেঁড়া কমবে। নিচের CLI ডেমো Zod দিয়ে দেখায়।
 
-## Why this matters (real world)
-- Backend bug থেকে UI crash কমে।
-- Interview: “type safety vs runtime safety” উত্তর।
+## Things to learn (beginner → intermediate → advanced)
+- Beginner: DTO schema define করুন; success pathে parse; failure হলে error বার্তা দেখান।
+- Intermediate: default values, coercion (string→number), safeParse বনাম parse, ফিল্ড-লেভেল error।
+- Advanced: versioned contracts, optional fields handled via `partial`, union schemas (v1/v2), contract tests in CI।
 
-## Concepts (beginner → intermediate → advanced)
-- Beginner: interface + DTO→UI mapping।
-- Intermediate: zod schema parse; friendly error।
-- Advanced: optional fields normalization, enum fallback, server pagination contract।
+## Hands-on (commands + কী দেখবেন)
+1) রেডি ডেমো চালান:
+   ```bash
+   cd architecture-and-state/demos/data-contracts-validation-demo
+   npm install
+   npm run demo       # valid + invalid payload
+   npm run typecheck  # টাইপ সেফটি
+   ```
+2) Expected আউটপুট: প্রথম ব্লকে valid array; দ্বিতীয় ব্লকে validation error তালিকা (ward number, empty id, negative age)।
+3) Break/fix: `contracts.ts` এ `age` কে `z.coerce.number()` করুন → string ages ও চলবে; `nonnegative` মুছে দিন → error যাবে; `bloodType` required করলে API/fixtures না বদলালে আবার ব্যর্থ হবে।
 
-## Copy-paste Example
-> Note: zod লাগবে `npm i zod`.
+## Demos (copy-paste)
+`architecture-and-state/demos/data-contracts-validation-demo/src/` থেকে মূল অংশ:
 ```ts
-// app/shared/data-contracts/patient.dto.ts
-export interface PatientDto {
-  id: string;
-  name: string;
-  ward?: string | null;
-  admittedAt: string; // ISO
-}
-export interface PatientUi {
-  id: string;
-  name: string;
-  ward: string;
-  admittedAt: Date;
-}
-```
-```ts
-// app/shared/data-contracts/patient.mapper.ts
-import { PatientDto, PatientUi } from './patient.dto';
+// app/contracts.ts
 import { z } from 'zod';
-const patientSchema = z.object({
+export const PatientDtoSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
-  ward: z.string().nullable().optional(),
-  admittedAt: z.string().datetime(),
+  age: z.number().int().nonnegative(),
+  ward: z.string().min(1),
+  allergies: z.array(z.string()).default([])
 });
-export function mapPatient(dto: PatientDto): PatientUi {
-  const parsed = patientSchema.parse(dto); // throws with readable errors
-  return {
-    id: parsed.id,
-    name: parsed.name,
-    ward: parsed.ward ?? 'UNKNOWN',
-    admittedAt: new Date(parsed.admittedAt),
-  };
+export type PatientDto = z.infer<typeof PatientDtoSchema>;
+```
+```ts
+// app/validator.ts
+import { z } from 'zod';
+import { PatientDtoSchema, PatientDto } from './contracts';
+export function validatePatients(input: unknown): PatientDto[] {
+  const schema = z.array(PatientDtoSchema);
+  const result = schema.safeParse(input);
+  if (!result.success) {
+    const issues = result.error.issues.map(i => `${i.path.join('.') || 'root'}: ${i.message}`);
+    throw new Error('Validation failed: ' + issues.join('; '));
+  }
+  return result.data;
 }
 ```
 ```ts
-// app/features/patients/patient.api.ts
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { mapPatient } from '../../shared/data-contracts/patient.mapper';
-import { map } from 'rxjs/operators';
-@Injectable({ providedIn: 'root' })
-export class PatientApi {
-  constructor(private http: HttpClient) {}
-  list() {
-    return this.http.get<any[]>('/api/patients').pipe(map(arr => arr.map(mapPatient)));
-  }
+// app/service.ts
+import { validatePatients } from './validator';
+import { PatientDto } from './contracts';
+async function fetchPatients(kind: 'good' | 'bad'): Promise<unknown> {
+  if (kind === 'good') return [
+    { id: 'p1', name: 'Ayman', age: 32, ward: 'A', allergies: ['penicillin'] },
+    { id: 'p2', name: 'Nadia', age: 45, ward: 'B', allergies: [] }
+  ];
+  return [
+    { id: 'p3', name: 'Invalid', ward: 123 },
+    { id: '', name: 'EmptyId', age: -1, ward: 'C', allergies: ['dust'] }
+  ];
+}
+export async function getPatients(kind: 'good' | 'bad'): Promise<PatientDto[]> {
+  const raw = await fetchPatients(kind);
+  return validatePatients(raw);
 }
 ```
 ```ts
-// Error handling sample (friendly message)
-import { ZodError } from 'zod';
-try { /* parse */ } catch (e) {
-  if (e instanceof ZodError) {
-    console.error('Bad payload', e.errors);
-  }
+// main.ts
+import { getPatients } from './app/service';
+async function run() {
+  console.log('--- Valid payload ---');
+  console.log(await getPatients('good'));
+  console.log('\n--- Invalid payload (expect throw) ---');
+  try { await getPatients('bad'); } catch (err: any) { console.error('Validation error:', err.message); }
 }
+run();
 ```
 
-## Try it (exercise)
-- Beginner: `ward` null হলে fallback টেক্সট বদলান (“TBD”).
-- Advanced: pagination contract schema বানান `{ data, total, page, size }`; invalid হলে toast + fallback empty।
+## Ready-to-run demo (repo bundle)
+- Path: `architecture-and-state/demos/data-contracts-validation-demo`
+- Commands:
+  ```bash
+  cd architecture-and-state/demos/data-contracts-validation-demo
+  npm install
+  npm run demo
+  npm run typecheck
+  ```
+- Expected output: valid list, তারপর validation error লাইন যেখানে কোন ফিল্ডে কী ভুল বোঝা যাচ্ছে।
+- Test ideas: coercion যোগ/সরান; নতুন required ফিল্ড দিন; optional করে দেখুন; union schema দিয়ে v1/v2 একইসাথে সাপোর্ট করুন।
 
 ## Common mistakes
-- DTO string date template-এ সরাসরি ব্যবহার → timezone bugs।
-- zod parse না করে unsafe casting।
+- DTO shape না ঠিক করে সরাসরি UI ম্যাপ করা → runtime blow-up।
+- safeParse ফলাফল না দেখেই data ব্যবহার করা।
+- Error message সাধারণ না করে actionable list না দেওয়া।
 
 ## Interview points
-- “compile-time vs runtime” তুলনা করুন; zod mention।
-- Mapping layer রাখলে API change isolation হয়।
+- Contract-first কেন (backend/frontend sync, caching safety)।
+- Zod/Valibot/TypeBox ইত্যাদি vs manual validation ট্রেড-অফ।
+- Parse vs validate vs sanitize (default/transform)।
 
-## Done when…
-- DTO/interface + mapper + zod schema আছে।
-- Errors human-readable; fallback মান সেট।
-
-## How to test this topic
-1) VS Code: mapper import path ঠিক; zod types inference কাজ করছে কিনা hover করে দেখুন (zod না থাকলে install hint অনুসরণ করুন বা ts error দেখুন)। 
-2) Unit test: valid DTO parse → UI model; invalid DTO → ZodError throw এবং message map; date normalization equals expected ISO.
-3) Runtime: `ng serve` → patients fetch; console এ mapper চলেছে ও UI তে normalized values (e.g., date formatted) দেখুন; error হলে toast/log দেখা যায় কিনা।  
+## Quick practice
+- `npm run demo` চালান → error মেসেজ পড়ে ব্যর্থ ফিল্ড চিহ্নিত করুন।
+- একই schema দিয়ে form validation ভাবুন; server response আর form data একই স্কিমায় validate করলে কোড কমে।
+- CI তে contract test লিখতে `safeParse` fail হলে টেস্ট ফেল করার ব্যবস্থা করুন।

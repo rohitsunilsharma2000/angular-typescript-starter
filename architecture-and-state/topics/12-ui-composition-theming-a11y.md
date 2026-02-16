@@ -1,97 +1,82 @@
 # 12) UI composition: theming + accessibility
 
-HMS UI তে common button/input/dialog দরকার; theme tokens দিয়ে consistent look, a11y-first navigation।
+লেম্যান-বাংলা: থিম টোকেন (রঙ/স্পেসিং) + কম্পোনেন্ট কম্পোজিশন + a11y গার্ড একসাথে রাখুন। নিচের CLI ডেমোতে contrast চেক ও accessible name বাধ্যতামূলক।
 
-## Why this matters (real world)
-- Reuse করলে ডিজাইন debt কমে।
-- Dark/light switch সহজ।
-- ইন্টারভিউ: a11y প্রশ্ন (keyboard, aria) + design system tokens।
+## Things to learn (beginner → intermediate → advanced)
+- Beginner: design tokens (color, radius, spacing) আলাদা রাখা; কম্পোনেন্ট ফাংশন টোকেন খায়, CSS স্ট্রিং বানায়।
+- Intermediate: WCAG contrast >= 4.5 যাচাই; aria-label/visible label বাধ্যতামূলক; light/dark theme swap।
+- Advanced: semantic tokens (surface/primary/onPrimary), motion-reduce টোকেন, per-component slot override, theme-driven states (hover/disabled) ।
 
-## Concepts (beginner → intermediate → advanced)
-- Beginner: theme tokens as CSS vars; standalone UI components।
-- Intermediate: tokens import in components; focus-visible, aria-label।
-- Advanced: dialog with role, keyboard trap; token-based spacing/typography; Tailwind or Material interop।
+## Hands-on (commands + কী দেখবেন)
+1) রেডি ডেমো চালান:
+   ```bash
+   cd architecture-and-state/demos/ui-composition-theming-a11y-demo
+   npm install
+   npm run demo       # light + dark button render + contrast + a11y guard
+   npm run typecheck  # টাইপ সেফটি
+   ```
+2) Expected আউটপুট: light/dark দুই থিমে button HTML ও contrast মেটা; শেষ লাইনে missing label এর জন্য error।
+3) Break/fix: `tokens.ts` এ onPrimary হালকা করে contrast error ট্রিগার করুন; `composeButton` এ `secondary` variant যোগ করুন; `assertContrast` এর থ্রেশহোল্ড 7.0 করে কঠোর করুন।
 
-## Copy-paste Example
+## Demos (copy-paste)
+`architecture-and-state/demos/ui-composition-theming-a11y-demo/src/` থেকে মূল ফাইল:
 ```ts
-// architecture-and-state/demos/shared-ui-kit/theme-tokens.ts
-export const themeTokens = {
-  colorPrimary: '#2563eb',
-  colorSurface: '#ffffff',
-  colorSurfaceMuted: '#f8fafc',
-  textPrimary: '#0f172a',
-  radius: '8px',
-  spacing: '12px',
-  shadow: '0 4px 12px rgba(0,0,0,0.08)'
-};
+// tokens.ts
+export type Theme = { name: 'light' | 'dark'; colors: { bg: string; surface: string; primary: string; onPrimary: string; text: string; muted: string }; radius: string; spacing: (step: 1|2|3|4) => string; };
+export const lightTheme: Theme = { name: 'light', colors: { bg: '#f8fafc', surface: '#ffffff', primary: '#2563eb', onPrimary: '#ffffff', text: '#0f172a', muted: '#475569' }, radius: '8px', spacing: s => `${s*4}px` };
+export const darkTheme: Theme = { name: 'dark', colors: { bg: '#0f172a', surface: '#111827', primary: '#60a5fa', onPrimary: '#0b1221', text: '#e2e8f0', muted: '#94a3b8' }, radius: '8px', spacing: s => `${s*4}px` };
 ```
 ```ts
-// app/shared/ui/button/button.component.ts
-import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { themeTokens } from 'architecture-and-state/demos/shared-ui-kit/theme-tokens';
-@Component({
-  standalone: true,
-  selector: 'hms-button',
-  imports: [CommonModule],
-  host: { '[attr.role]': "'button'", '[attr.tabindex]': '0' },
-  styles: [`
-    :host { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; padding: ${themeTokens.spacing}; border-radius: ${themeTokens.radius}; background: ${themeTokens.colorPrimary}; color: white; box-shadow: ${themeTokens.shadow}; }
-    :host(:focus-visible) { outline: 2px solid black; outline-offset: 2px; }
-  `],
-  template: `<ng-content></ng-content>`
-})
-export class ButtonComponent {
-  @Input() kind: 'primary' | 'ghost' = 'primary';
+// a11y.ts
+export function contrastRatio(fgHex: string, bgHex: string): number { /* WCAG calc */ }
+export function assertContrast(fgHex: string, bgHex: string, min = 4.5) { /* throws if low */ }
+```
+```ts
+// components.ts
+import { Theme } from './tokens';
+import { assertContrast } from './a11y';
+export function composeButton(theme: Theme, props: { label: string; ariaLabel?: string; variant?: 'primary'|'ghost'; disabled?: boolean }) {
+  if (!props.label && !props.ariaLabel) throw new Error('Accessible name required');
+  const variant = props.variant ?? 'primary';
+  const styles = variant === 'primary'
+    ? { background: theme.colors.primary, color: theme.colors.onPrimary, border: `1px solid ${theme.colors.primary}` }
+    : { background: 'transparent', color: theme.colors.text, border: `1px solid ${theme.colors.muted}` };
+  const ratio = assertContrast(styles.color, variant === 'primary' ? styles.background : theme.colors.surface, 4.5);
+  return { role: 'button', ariaLabel: props.ariaLabel ?? props.label, styles: { ...styles, padding: `${theme.spacing(2)} ${theme.spacing(3)}`, borderRadius: theme.radius }, meta: { theme: theme.name, variant, contrast: ratio.toFixed(2) } };
 }
+export function renderButton(vnode: ReturnType<typeof composeButton>) { /* returns HTML string */ }
 ```
 ```ts
-// app/shared/ui/dialog/dialog.component.ts (keyboard + aria)
-import { Component, EventEmitter, Input, Output, HostListener } from '@angular/core';
-import { CommonModule } from '@angular/common';
-@Component({
-  standalone: true,
-  selector: 'hms-dialog',
-  imports: [CommonModule],
-  template: `
-    <div class="fixed inset-0 bg-black/30" role="presentation" (click)="close.emit()"></div>
-    <section class="fixed inset-0 flex items-center justify-center" role="dialog" aria-modal="true" [attr.aria-label]="title">
-      <div class="bg-white p-4 rounded shadow max-w-md w-full" (click)="$event.stopPropagation()">
-        <header class="flex justify-between items-center">
-          <h2 class="font-semibold">{{ title }}</h2>
-          <button (click)="close.emit()" aria-label="Close">✕</button>
-        </header>
-        <div class="mt-3"><ng-content></ng-content></div>
-      </div>
-    </section>
-  `
-})
-export class DialogComponent {
-  @Input() title = 'Dialog';
-  @Output() close = new EventEmitter<void>();
-  @HostListener('document:keydown.escape') onEsc() { this.close.emit(); }
-}
+// main.ts
+import { lightTheme, darkTheme } from './tokens';
+import { composeButton, renderButton } from './components';
+function demo(themeName: 'light' | 'dark') { const theme = themeName==='light'?lightTheme:darkTheme; const primary = composeButton(theme,{label:'Save'}); const ghost = composeButton(theme,{label:'Cancel',variant:'ghost'}); console.log(renderButton(primary), primary.meta); console.log(renderButton(ghost), ghost.meta); }
+try { demo('light'); demo('dark'); composeButton(lightTheme,{label:''}); } catch(e){ console.error(e);} 
 ```
 
-## Try it (exercise)
-- Beginner: ButtonComponent এ `kind="ghost"` prop যোগ করে style swap করুন।
-- Advanced: Dialog এ focus trap যোগ করুন (first/last focusable cycling), aria-describedby সাপোর্ট দিন।
+## Ready-to-run demo (repo bundle)
+- Path: `architecture-and-state/demos/ui-composition-theming-a11y-demo`
+- Commands:
+  ```bash
+  cd architecture-and-state/demos/ui-composition-theming-a11y-demo
+  npm install
+  npm run demo
+  npm run typecheck
+  ```
+- Expected output: light/dark button HTML + contrast meta; missing label case throws a11y error.
+- Test ideas: contrast fail করে দেখুন; নতুন variant যোগ করুন; assertContrast মিন 7.0 করুন।
 
 ## Common mistakes
-- Tokens hardcode না করে CSS var ব্যবহার না করা।
-- Dialog এ aria-modal/role বাদ দেওয়া।
-- focus-visible ছাড়া keyboard users বাদ পড়ে।
+- টোকেন hardcode করে কম্পোনেন্টে রাখা (re-use কঠিন)।
+- contrast না মেপে primary/onPrimary বাছা।
+- aria-label বা visible label বাদ দিয়ে বাটন রেন্ডার করা।
 
 ## Interview points
-- Theme tokens ফাইল mention করুন; CSS var vs design tokens।
-- a11y: keyboard nav, aria-label, escape-close।
+- Token → component → theme separation; WCAG 2.1 contrast 4.5/3.0 ন্যূনতম।
+- Light/dark swapping without rewriting components (tokens only)।
+- a11y guards build-time/lint/runtime কিভাবে বসাবেন।
 
-## Done when…
-- Tokens ফাইল আছে ও কম্পোনেন্টে ব্যবহার।
-- Button/Dialog accessible (role, focus-visible)।
-- Token-driven spacing/color বজায়।
-
-## How to test this topic
-1) VS Code: CSS vars/tokens imports resolve; no hardcoded color lint warnings (if using stylelint/ESLint rules).
-2) Storybook/manual: Button/Dialog render করে keyboard tab/Shift+Tab দিয়ে focus-visible ও aria role কাজ করছে কিনা দেখুন।
-3) Browser: data-theme switch করলে রঙ/spacing সঠিকভাবে বদলাচ্ছে কিনা; axe devtools দিয়ে dialog role/aria-modal violation নেই নিশ্চিত করুন।  
+## Quick practice
+- `npm run demo` চালিয়ে meta contrast পড়ুন।
+- নতুন semantic color (e.g., danger) যোগ করে contrast চেক করুন।
+- টোকেন ফাইলে spacing বদলে padding কীভাবে বদলায় দেখুন।

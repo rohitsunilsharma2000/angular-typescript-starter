@@ -1,62 +1,76 @@
 # 13) Quality gates checklist
 
-ফিচার শেষ করার আগে দ্রুত চেকলিস্ট।
+লেম্যান-বাংলা: রিলিজ/PR আগে ছোট ছোট গেট পাস করুন—lint, typecheck, tests, a11y, bundle-size। নিচের CLI ডেমো দিয়ে অনুশীলন করুন।
 
-## Why this matters (real world)
-- Release আগে common breakage আটকায়।
-- ইন্টারভিউ: “How do you ensure quality?” উত্তর।
+## Things to learn (beginner → intermediate → advanced)
+- Beginner: lint + typecheck + unit tests বাধ্যতামূলক, circular/import boundary ধরুন।
+- Intermediate: a11y/contrast checks, bundle-size budget, mock CI matrix (separate steps)।
+- Advanced: contract tests, visual diff (Percy), flaky-test quarantine, per-feature quality bar।
 
-## Concepts (beginner → intermediate → advanced)
-- Beginner: lint, no circular imports।
-- Intermediate: selector memoization; heavy compute template-এ নয়।
-- Advanced: shared UI docs; a11y audit; state tests।
+## Hands-on (commands + কী দেখবেন)
+1) রেডি ডেমো চালান:
+   ```bash
+   cd architecture-and-state/demos/quality-gates-checklist-demo
+   npm install
+   npm run demo                 # সব গেট pass
+   FAIL=lint,tests npm run demo # ফেল সিমুলেট করুন
+   npm run typecheck            # tsc --noEmit
+   ```
+2) Expected আউটপুট: সবুজ চেক; FAIL সেট করলে সংশ্লিষ্ট গেট ❌ হবে এবং exit code 1।
+3) Break/fix: `src/gates.ts` এ নতুন gate (e.g., e2e) যোগ করুন; বা `bundle-size` গেট fail করুন দেখে CI ম্যাট্রিক্স ভাবুন।
 
-## Copy-paste Example
+## Demos (copy-paste)
+`architecture-and-state/demos/quality-gates-checklist-demo/src/` থেকে মূল কোড:
 ```ts
-// tools/check-circular.ts (simple guard)
-import madge from 'madge';
-(async () => {
-  const res = await madge('src/app');
-  const cycles = res.circular();
-  if (cycles.length) { console.error('Circular deps', cycles); process.exit(1); }
-  console.log('No circular deps');
-})();
+// gates.ts
+export type Gate = { name: string; description: string; run: () => Promise<{ gate: string; status: 'pass'|'fail'; details?: string }> };
+const maybeFail = (name: string) => (process.env.FAIL?.split(',').map(s=>s.trim().toLowerCase()) ?? []).includes(name.toLowerCase());
+export const gates: Gate[] = [
+  { name: 'lint', description: 'ESLint/import-boundary rules', run: async () => ({ gate:'lint', status: maybeFail('lint')?'fail':'pass', details:'mocked ESLint run' }) },
+  { name: 'typecheck', description: 'tsc --noEmit', run: async () => ({ gate:'typecheck', status: maybeFail('typecheck')?'fail':'pass', details:'mocked tsc run' }) },
+  { name: 'tests', description: 'unit/integration tests', run: async () => ({ gate:'tests', status: maybeFail('tests')?'fail':'pass', details:'mocked test suite' }) },
+  { name: 'a11y', description: 'basic accessibility checks (aria/contrast)', run: async () => ({ gate:'a11y', status: maybeFail('a11y')?'fail':'pass', details:'mocked axe run' }) },
+  { name: 'bundle-size', description: 'bundle size budget', run: async () => ({ gate:'bundle-size', status: maybeFail('bundle-size')?'fail':'pass', details:'mocked budget check' }) }
+];
 ```
-> Note: `npm i -D madge` প্রয়োজন।
 ```ts
-// Memoized selector pattern
-import { createSelector } from '@ngrx/store';
-const selectPatients = (s: any) => s.patients;
-export const selectIcuCount = createSelector(selectPatients, p => p.data.filter((x: any) => x.ward.startsWith('ICU')).length);
-```
-```md
-<!-- shared UI docs template: architecture-and-state/demos/shared-ui-kit/button.md -->
-Props: label, kind, disabled
-Events: click
-Examples: primary/ghost, loading state
-A11y: role="button", keyboard focus-visible
+// main.ts
+import { gates } from './gates';
+async function run() {
+  console.log('Quality gates demo (set FAIL=lint,tests to simulate failures)');
+  const results = [] as Awaited<ReturnType<(typeof gates)[number]['run']>>[];
+  for (const gate of gates) {
+    const res = await gate.run();
+    results.push(res);
+    const icon = res.status === 'pass' ? '✅' : '❌';
+    console.log(`${icon} ${gate.name} — ${gate.description}` + (res.details ? ` (${res.details})` : ''));
+  }
+  const failed = results.filter(r => r.status === 'fail');
+  console.log('\nSummary:', failed.length ? `${failed.length} gate(s) failed` : 'all gates passed');
+  if (failed.length) {
+    console.log('Failed gates:', failed.map(f => f.gate).join(', '));
+    process.exitCode = 1;
+  }
+}
+run();
 ```
 
-## Try it (exercise)
-- Beginner: madge চালিয়ে রিপোর্ট করুন; প্রথম cycle ঠিক করুন।
-- Advanced: selector heavy compute হলে memo test লিখুন (same input → same reference)।
+## Ready-to-run demo (repo bundle)
+- Path: `architecture-and-state/demos/quality-gates-checklist-demo`
+- Commands: উপরে “Hands-on” সেকশনে দেওয়া আছে।
+- Test ideas: FAIL env দিয়ে আউটপুট/exit কোড যাচাই; নতুন gate যোগ; gate description আপডেট করুন CI স্টেপের সঙ্গে মিলিয়ে।
 
 ## Common mistakes
-- selector memoize না করে প্রতি change detection এ heavy filter।
-- shared UI props ডকুমেন্ট না করা।
-- circular dep স্ক্রিপ্ট CI তে না চালানো।
+- সব গেট এক কমান্ডে বেঁধে ফেললে কোনটা ফেল করেছে বোঝা কঠিন; স্টেপ আলাদা রাখুন।
+- a11y/ bundle-size উপেক্ষা করা, শুধু lint/test এ থেমে যাওয়া।
+- ফেইলিং গেটের exit code 0 রেখে CI সবুজ বানানো।
 
 ## Interview points
-- Mention CI gates: lint, circular check, selector memo check, minimal tests।
-- Shared UI docs = onboarding speed।
+- “Quality bar” বলতে কোন গেট চালান ও কেন—lint/typecheck/tests/a11y/budget/contract।
+- প্রতি PR-এ ছোট, দ্রুত গেট; nightly তে ভারী গেট (visual diff, e2e)।
+- Fail fast + clear message + owner signal (which team fixes)।
 
-## Done when…
-- Circular check পাস।
-- Memoized selectors ব্যবহার।
-- Shared UI docs আপডেটেড।
-- a11y basics (aria/keyboard) চেকড।
-
-## How to test this topic
-1) VS Code: lint errors (circular deps) নেই; ESLint/import-boundary rules থাকলে Problems panel দেখুন।
-2) CLI/CI: `node tools/check-circular.ts` (madge) চালিয়ে cycles খুঁজুন; `npm run lint` চালান।
-3) Runtime/Storybook: shared UI docs (button/input etc.) দেখা যায়; selectors heavy compute করছে না (Angular DevTools change detection count পর্যবেক্ষণ)।  
+## Quick practice
+- `FAIL=tests npm run demo` দিয়ে fail scenario দেখুন।
+- নিজের প্রজেক্টের আসল কমান্ড ম্যাপ করুন: lint → `npm run lint`, typecheck → `npx tsc --noEmit`, a11y → `npm run a11y` ইত্যাদি।
+- CI তে parallel matrix ভাবুন (lint/typecheck/tests আলাদা জবে)।
