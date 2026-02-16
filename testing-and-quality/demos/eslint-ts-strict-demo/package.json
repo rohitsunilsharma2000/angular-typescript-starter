@@ -1,0 +1,8 @@
+{
+  "name": "eslint-ts-strict-demo",
+  "private": true,
+  "version": "1.0.0",
+  "type": "commonjs",
+  "scripts": {"demo":"node src/main.js"},
+  "devDependencies": {}
+}

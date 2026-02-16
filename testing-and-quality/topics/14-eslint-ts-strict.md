@@ -1,56 +1,16 @@
 # 14) Static quality: ESLint + TS strictness
 
-TS strict + ESLint rules না থাকলে runtime বাগ বাড়ে। HMS ফর্মে টাইপ ত্রুটি ধরা যাবে আগেই।
+লেম্যান-বাংলা: ESLint নিয়ম + TS strict চালু রাখুন; noImplicitAny, strictNullChecks ইত্যাদি।
 
-## Why this matters (real-world)
-- Null/any থেকে প্রড বাগ এড়ানো।
-- CI তে দ্রুত ফিডব্যাক।
-
-## Concepts
-### Beginner
-- ESLint Angular plugin, template lint।
-- strict mode (`strict`, `noImplicitAny`, `strictNullChecks`).
-### Intermediate
-- lint rules: unused imports, eqeqeq, rxjs/no-ignored-subscription।
-- typed forms (`TypedFormGroup`).
-### Advanced
-- lint-staged + format on commit; custom rule waivers with expiry।
-
-## Copy-paste Example
-```json
-// .eslintrc.json (excerpt)
-{
-  "extends": ["plugin:@angular-eslint/recommended"],
-  "rules": {
-    "@typescript-eslint/no-explicit-any": "error",
-    "@angular-eslint/component-class-suffix": "error",
-    "rxjs/no-ignored-subscription": "warn"
-  }
-}
-```
-```json
-// tsconfig.json (excerpt)
-{
-  "compilerOptions": {
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true
-  }
-}
-```
-
-## Try it
-- Beginner: lint চালিয়ে প্রথম error ঠিক করুন।
-- Advanced: `no-explicit-any` violation এ small typed alias যোগ করুন; waiver হলে comment এ expiry লিখুন।
-
-## Common mistakes
-- strictNullChecks বন্ধ রেখে runtime NPE।
-- lint warning উপেক্ষা; CI gate না রাখা।
-
-## Interview points
-- Strict flags + ESLint rules prevent runtime bugs; lint-staged mention।
+## Hands-on
+1) চালান (হিন্ট দেখার জন্য):
+   ```bash
+   cd testing-and-quality/demos/eslint-ts-strict-demo
+   npm install
+   npm run demo
+   ```
+2) আউটপুটে সুপারিশকৃত eslint/ts strict সেটিং দেখুন।
+3) আপনার প্রজেক্টের config-এ প্রয়োগ করুন।
 
 ## Done when…
-- ESLint চলমান; strict true।
-- CI তে lint gate আছে।
-- Waiver থাকলে expiry নথিভুক্ত।
+- ESLint + TS strict সক্রিয়; নতুন ফাইল strict failing হলে টিম ঠিক করে।

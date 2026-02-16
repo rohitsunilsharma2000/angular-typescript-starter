@@ -1,0 +1,9 @@
+{
+  "name": "jest-vitest-setup-demo",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "demo": "node src/main.js"
+  }
+}
