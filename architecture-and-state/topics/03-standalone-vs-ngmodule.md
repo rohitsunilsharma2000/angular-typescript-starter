@@ -1,125 +1,140 @@
 # 03) Standalone routing + NgModule interop
 
-Angular 17+ এ standalone default, কিন্তু অনেক কোডবেসে পুরনো NgModule আছে। HMS উদাহরণ: appointments feature standalone, পুরনো billing module পুনঃব্যবহার।
+লেম্যানদের জন্য: নতুন Angular প্রজেক্টে standalone route/component রাখা বেস্ট; পুরনো NgModule ফিচার থাকলে “interop layer” দিয়ে একসাথে চালান। নিচের হাতে-কলমে ডেমো দিয়ে শুরু করুন।
 
-## Why this matters (real world)
-- ধীরে ধীরে migration করা যায়; monolith ভাগ করা সহজ।
-- Route-level provider scope ঠিক থাকলে memory leak কমে।
-- ইন্টারভিউতে “interop strategy?” প্রশ্নে পয়েন্ট।
+## Things to learn (Bengali + simple)
+1) **Standalone route**: `loadComponent` দিয়ে সরাসরি কম্পোনেন্ট lazy-load হয়; NgModule দরকার নেই।
+2) **Legacy NgModule interop**: পুরনো মডিউল থাকলে `loadChildren` বা wrapper module দিয়ে রুটে প্লাগ করুন।
+3) **Boundary রুল**: standalone ফিচার নিজের ভিতরে ডিপেনডেন্সি রাখবে; legacy জিনিস আলাদা ফোল্ডারে রাখুন।
+4) **Public surface**: route config + minimal provider/facade; module/ component ইন্টার্নাল ডিটেলস বাইরে শেয়ার করবেন না।
+5) **Migration পাথ**: আগে route → তারপর ফিচারের UI/সার্ভিসগুলো ধাপে ধাপে standalone এ উঠিয়ে আনুন।
 
-## Concepts (beginner → intermediate → advanced)
-- Beginner: standalone component, standalone route, lazy load।
-- Intermediate: route-level providers, mixing legacy NgModule via `imports`. 
-- Advanced: provideHttpClient scoped, feature guard/resolver providers, avoiding provider duplication।
+## Hands-on (step-by-step + commands)
+1) রেডি ডেমো চালান:
+   ```bash
+   cd architecture-and-state/demos/standalone-vs-ngmodule-demo
+   npm install
+   npm run demo       # home (standalone) + legacy (NgModule) রাউট আউটপুট
+   npm run typecheck  # টাইপ সেফটি ও path ঠিক আছে কিনা
+   ```
+2) কী দেখবেন:
+   - `home` রুট: `[standalone] Home standalone works`
+   - `legacy` রুট: `[ngmodule] Legacy dashboard via NgModule`
+   - অজানা রুট: `404: unknown route`
+3) ইচ্ছাকৃত পরীক্ষা (interop বুঝতে):
+   - `app.routes.ts` এ `legacy` রুটের `kind` কে `standalone` করে দিন → `npm run demo` এ দেখবেন module route ঠিকমতো কাজ করবে না (কারণ loadChildren দরকার)।
+   - আবার `kind: 'ngmodule'` ফিরিয়ে দিন, `npm run demo` ঠিক হবে।
+4) নিজে বানাতে চাইলে (সল্প কপি):
+   ```bash
+   mkdir -p src/app/features/{home,legacy}
+   # নিচের "Demos" সেকশনের কোড কপি করুন
+   ```
 
-## Copy-paste Example
+### Done when
+- Standalone রুট থেকে কম্পোনেন্ট লোড হয়, NgModule রুট থেকে module→component সঠিকভাবে resolve হয়।
+- Commands চালালে প্রত্যাশিত তিনটি আউটপুট লাইন পান।
+
+## Demos (copy-paste)
+`architecture-and-state/demos/standalone-vs-ngmodule-demo/src/` থেকে মূল অংশ:
 ```ts
-// app/app.routes.ts
-import { Routes } from '@angular/router';
-export const routes: Routes = [
-  {
-    path: 'appointments',
-    loadChildren: () => import('./features/appointments/appointments.routes').then(m => m.APPOINTMENT_ROUTES),
-  },
-  { path: '', redirectTo: 'appointments', pathMatch: 'full' }
-];
-```
-```ts
-// app/features/appointments/appointments.routes.ts
-import { Routes } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
-import { AppointmentContainer } from './appointments.container';
-import { AppointmentApi } from './appointments.api';
-export const APPOINTMENT_ROUTES: Routes = [
-  {
-    path: '',
-    component: AppointmentContainer,
-    providers: [AppointmentApi, provideHttpClient()],
-  },
-];
-```
-```ts
-// app/features/appointments/appointments.container.ts
-import { Component, inject, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { AppointmentList } from './appointments.list';
-import { AppointmentApi } from './appointments.api';
-@Component({
-  standalone: true,
-  selector: 'hms-appointments-container',
-  imports: [CommonModule, AppointmentList],
-  template: `<hms-appointment-list [vm]="vm()" />`,
-})
-export class AppointmentContainer {
-  private api = inject(AppointmentApi);
-  private loading = signal(false);
-  private items = signal<{ id: string; patient: string; slot: string }[]>([]);
-  vm = computed(() => ({ loading: this.loading(), items: this.items() }));
-  constructor() { this.load(); }
-  async load() {
-    this.loading.set(true);
-    try { this.items.set(await this.api.list()); }
-    finally { this.loading.set(false); }
+// app/router.ts (mini router to illustrate loadComponent vs loadChildren)
+export type StandaloneComponent = { render(): string };
+export type NgModule = { getRootComponent(): StandaloneComponent };
+export type Route =
+  | { path: string; kind: 'standalone'; loadComponent: () => Promise<StandaloneComponent> }
+  | { path: string; kind: 'ngmodule'; loadChildren: () => Promise<NgModule> };
+
+export async function navigate(routes: Route[], path: string): Promise<string> {
+  const route = routes.find(r => r.path === path);
+  if (!route) return '404: unknown route';
+  if (route.kind === 'standalone') {
+    const cmp = await route.loadComponent();
+    return `[standalone] ${cmp.render()}`;
   }
+  const mod = await route.loadChildren();
+  return `[ngmodule] ${mod.getRootComponent().render()}`;
 }
 ```
 ```ts
-// app/features/appointments/appointments.api.ts
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-@Injectable()
-export class AppointmentApi {
-  constructor(private http: HttpClient) {}
-  list() { return this.http.get<{ id: string; patient: string; slot: string }[]>('/api/appointments').toPromise(); }
+// app/features/home/home.component.ts (standalone-style component)
+export class HomeComponent {
+  render() { return 'Home standalone works'; }
 }
 ```
 ```ts
-// app/shared/ui/legacy-ui.module.ts (legacy NgModule reuse)
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LegacyCardComponent } from './legacy-card.component';
-@NgModule({ declarations: [LegacyCardComponent], imports: [CommonModule], exports: [LegacyCardComponent] })
-export class LegacyUiModule {}
+// app/features/legacy/legacy-dashboard.component.ts
+export class LegacyDashboardComponent {
+  render() { return 'Legacy dashboard via NgModule'; }
+}
 ```
 ```ts
-// app/features/appointments/appointments.list.ts
-import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LegacyUiModule } from '../../shared/ui/legacy-ui.module';
-@Component({
-  standalone: true,
-  selector: 'hms-appointment-list',
-  imports: [CommonModule, LegacyUiModule],
-  template: `
-    <legacy-card *ngFor="let a of vm.items">
-      {{ a.patient }} — {{ a.slot }}
-    </legacy-card>
-  `,
-})
-export class AppointmentList {
-  @Input({ required: true }) vm!: { loading: boolean; items: { id: string; patient: string; slot: string }[] };
+// app/features/legacy/legacy.module.ts (shim for legacy NgModule)
+import { LegacyDashboardComponent } from './legacy-dashboard.component';
+export class LegacyModule {
+  getRootComponent() { return new LegacyDashboardComponent(); }
 }
+```
+```ts
+// app/app.routes.ts (interop route table)
+import { Route } from './router';
+
+export const routes: Route[] = [
+  {
+    path: 'home',
+    kind: 'standalone',
+    loadComponent: async () => new (await import('./features/home/home.component')).HomeComponent()
+  },
+  {
+    path: 'legacy',
+    kind: 'ngmodule',
+    loadChildren: async () => new (await import('./features/legacy/legacy.module')).LegacyModule()
+  }
+];
+```
+```ts
+// main.ts (demo runner)
+import { routes } from './app/app.routes';
+import { navigate } from './app/router';
+
+async function run() {
+  console.log(await navigate(routes, 'home'));
+  console.log(await navigate(routes, 'legacy'));
+  console.log(await navigate(routes, 'missing'));
+}
+
+run();
 ```
 
-## Try it (exercise)
-- Beginner: provideHttpClient সরিয়ে অ্যাপ চালিয়ে দেখুন কোথায় fail হয়; পরে ফিরিয়ে দিন।
-- Advanced: legacy billing NgModule import করে standalone container-এ ব্যবহার করুন এবং provider scope leakage পরীক্ষা করুন।
+## Ready-to-run demo (repo bundle)
+- Path: `architecture-and-state/demos/standalone-vs-ngmodule-demo`
+- Commands:
+  ```bash
+  cd architecture-and-state/demos/standalone-vs-ngmodule-demo
+  npm install
+  npm run demo       # দেখুন standalone বনাম NgModule রাউট আউটপুট
+  npm run typecheck  # টাইপচেক/paths ঠিক আছে
+  ```
+- Expected output:
+  ```
+  [standalone] Home standalone works
+  [ngmodule] Legacy dashboard via NgModule
+  404: unknown route
+  ```
+- Test ideas:
+  - `kind` ভুল সেট করে interop ভাঙা দেখুন, পরে ফিরিয়ে দিন।
+  - `legacy.module.ts` এ `getRootComponent` অন্য কম্পোনেন্ট রিটার্ন করিয়ে আউটপুট বদলান।
 
 ## Common mistakes
-- provideHttpClient root scope-এ দিয়ে সব lazy feature একই interceptor শেয়ার করে unintended effect।
-- standalone route-এ providers ভুলে যাওয়া, ফলে service singleton হয়ে থাকে।
+- Legacy module-কে সরাসরি standalone route-এ বসানো (`loadComponent`)—রুট রেজল্ভ হবে না।
+- Standalone কম্পোনেন্টকে module-এর declarations/provider-এর উপর নির্ভর করানো—interop কঠিন হয়।
+- Mixed barrel export থেকে module/standalone path গুলিয়ে ফেলা।
 
 ## Interview points
-- “Interop during migration” উত্তর দিতে এই উদাহরণ দিন।
-- Route-level providers দিয়ে scoped HttpClient দেখানো যায়।
+- কেন standalone route সরল ও tree-shakable, আর কখন NgModule interop দরকার।
+- Migration strategy: route shell প্রথমে, পরে ধাপে ধাপে providers/components standalone করা।
+- Lazy loading surface মিনিমাল রাখার উপকারিতা (bundle size, testability)।
 
-## Done when…
-- Standalone routes lazy-load হয়।
-- Legacy NgModule interop কাজ করে।
-- Providers feature scope-এ সীমাবদ্ধ।
-
-## How to test this topic
-1) VS Code: Ctrl/Cmd+Click করে lazy route import path resolve হচ্ছে কিনা দেখুন; providers array তে HttpClient/feature API উপস্থিত কিনা চেক করুন।
-2) Run guard build: `ng test` বা `ng build`—module not found/circular error না এলে ঠিক আছে।
-3) Browser: `ng serve` → `/appointments` lazy route লোড হচ্ছে কিনা Network tab এ নতুন chunk দেখুন; API call success হলে list render হচ্ছে।
-4) Optional: Add legacy NgModule component; ensure template renders without injector errors.  
+## Quick practice
+- `npm run demo` চালিয়ে আউটপুট মিলিয়ে নিন।
+- `legacy` রুটকে standalone বানিয়ে ব্যর্থতা দেখুন, তারপর revert।
+- নতুন feature (e.g., `reports`) standalone route হিসেবে যোগ করুন, একই pattern অনুসরণ করে।
