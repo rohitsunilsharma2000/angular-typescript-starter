@@ -1,61 +1,21 @@
 # 14) Monorepo (Nx/Turbo) basics
 
-একাধিক অ্যাপ (admin/patient-portal) ও লাইব (ui/state/api) থাকলে monorepo productivity কাজে আসে।
+লেম্যান-বাংলা: এক রেপোতে বহু অ্যাপ/লাইব্রেরি; কমান্ড ক্যাশ ও গ্রাফ দিয়ে কাজ দ্রুত।
 
-## Why this matters (real-world)
-- কোডশেয়ার (UI, state) সহজ; boundary guard দিয়ে স্থায়ী আর্কিটেকচার।
-- Affected builds/tests দিয়ে CI দ্রুত।
+## Hands-on (mock)
+1) চালান:
+   ```bash
+   cd advanced-topics/demos/monorepo-basics-demo
+   npm install
+   npm run demo
+   npm run typecheck
+   ```
+2) আউটপুটে projects ও উদাহরণ nx কমান্ড দেখুন।
+3) আপনার প্রজেক্টের নাম/কমান্ড বসিয়ে rerun করুন।
 
-## Concepts
-### Beginner
-- Nx/Turbo overview; apps/ libs separation।
-- Path alias, tsconfig base।
-### Intermediate
-- Implicit/explicit dep graph; lint boundary rules।
-- Affected commands: `nx affected:test --base=origin/main --head=HEAD`।
-### Advanced
-- Remote cache, distributed tasks; generators for scaffolding।
-
-## Copy-paste Example
-```txt
-apps/
-  admin/
-  patient-portal/
-libs/
-  ui/
-  state/
-  api/
-```
-```json
-// tsconfig.base.json (paths excerpt)
-{
-  "compilerOptions": {
-    "paths": {
-      "@hms/ui": ["libs/ui/src/index.ts"],
-      "@hms/state": ["libs/state/src/index.ts"],
-      "@hms/api": ["libs/api/src/index.ts"]
-    }
-  }
-}
-```
-```bash
-# Nx init
-npx create-nx-workspace@latest hms-monorepo --preset=apps
-# Affected tests
-nx affected:test --base=origin/main --head=HEAD
-```
-
-## Try it
-- Beginner: path alias দিয়ে shared UI import করুন।
-- Advanced: affected:test CI স্টেপ যোগ করুন এবং boundary lint rule চালান।
-
-## Common mistakes
-- libs থেকে apps import করা (উল্টো দিক) → circular risk।
-- tsconfig paths sync না রাখা।
-
-## Interview points
-- apps/libs separation; path alias; affected builds; remote cache।
+## Real workspace এ
+- `nx graph`, `nx affected:test`, বা `turbo run lint` চালান।
+- cache ব্যবহার হচ্ছে কিনা দেখুন।
 
 ## Done when…
-- Monorepo layout ডক; path aliases সেট।
-- Affected build/test কমান্ড জানা।
+- মৌলিক nx/turbo কমান্ড চালাতে পারেন; প্রকল্প গ্রাফ বোঝেন।

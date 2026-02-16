@@ -1,82 +1,21 @@
 # 11) WebSockets with RxJS
 
-Appointment waiting-room live queue আপডেট দিতে WebSocket দরকার; RxJS দিয়ে reconnect/backoff শিখুন।
+লেম্যান-বাংলা: RxJS stream দিয়ে socket ইভেন্ট হ্যান্ডল; retry/backoff ভাবুন।
 
-## Why this matters (real-world)
-- Live status না এলে ফ্রন্টডেস্ক ভুল তথ্য দেয়।
-- Disconnect হলে silent failure সমস্যা।
-
-## Concepts
-### Beginner
-- `webSocket` (rxjs/webSocket) basic connect; message stream।
-### Intermediate
-- Reconnect with backoff; heartbeats; close codes।
-### Advanced
-- Topic routing (join room), offline fallback, auth token attach।
-
-## Copy-paste Example
-```ts
-// websocket-waiting-room.service.ts
-import { Injectable } from '@angular/core';
-import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
-import { retryBackoff } from 'backoff-rxjs';
-import { shareReplay } from 'rxjs/operators';
-
-type Event = { type: 'ping' } | { type: 'queue', patients: number };
-
-@Injectable({ providedIn: 'root' })
-export class WaitingRoomSocket {
-  private socket?: WebSocketSubject<Event>;
-  stream$ = this.connect();
-
-  private connect() {
-    this.socket = webSocket<Event>({ url: 'wss://api.hms.example.com/ws/waiting-room' });
-    return this.socket.pipe(
-      retryBackoff({ initialInterval: 1000, maxInterval: 10000, resetOnSuccess: true }),
-      shareReplay({ bufferSize: 1, refCount: true })
-    );
-  }
-
-  send(msg: Event) { this.socket?.next(msg); }
-}
-```
-```ts
-// websocket-widget.component.ts
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { WaitingRoomSocket } from './websocket-waiting-room.service';
-@Component({
-  standalone: true,
-  selector: 'hms-waiting-room-widget',
-  imports: [CommonModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <p *ngIf="count === null">Connecting…</p>
-    <p *ngIf="count !== null">Waiting patients: {{ count }}</p>
-  `
-})
-export class WaitingRoomWidgetComponent {
-  count: number | null = null;
-  socket = inject(WaitingRoomSocket);
-  constructor() {
-    this.socket.stream$.subscribe(ev => {
-      if (ev.type === 'queue') this.count = ev.patients;
-    });
-  }
-}
-```
-
-## Try it
-- Beginner: console.log events; disconnect server করে backoff দেখুন।
-- Advanced: auth token query param যোগ করুন এবং refresh হলে reconnect করুন।
+## Hands-on
+1) চালান:
+   ```bash
+   cd advanced-topics/demos/websockets-rxjs-demo
+   npm install
+   npm run demo
+   npm run typecheck
+   ```
+2) আউটপুটে simulated connected/update মেসেজ দেখুন।
+3) take/count বাড়িয়ে দেখুন; retry/catchError যোগ করুন।
 
 ## Common mistakes
-- retry without backoff → tight loop।
-- shareReplay বাদ দিয়ে বহু subscription এ multiple sockets।
-
-## Interview points
-- webSocket + retryBackoff + shareReplay; auth token attach।
+- share না করে বহু সাবস্ক্রিপশন থেকে ডুপ্লিকেট কল।
+- disconnect/reconnect ভাবা না।
 
 ## Done when…
-- Socket reconnect/backoff কাজ করে।
-- Widget live count দেখায়; multiple subscribers হলে single connection।
+- stream থেকে মেসেজ আসে; reconnect/cleanup পরিকল্পনা আছে।
