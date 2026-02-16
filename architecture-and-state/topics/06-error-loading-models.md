@@ -7,10 +7,28 @@ HMS অ্যাপে patients list, billing invoice, pharmacy stock—সব �
 - Observability সহজ: state log এ একই ফিল্ড।
 - ইন্টারভিউ: error handling standard জিজ্ঞেস করা হয়।
 
+## Things to learn (Bengali + beginner)
+1) একই state shape রাখুন: `{ loading, error?, data, lastUpdated? }` — loading enum `idle|loading|refreshing|saving|deleting` হলে স্ক্রিন জুড়ে ভাষা এক।  
+2) Error model structure: `{ code?, message, correlationId?, fieldErrors? }` রাখুন যাতে toast/log/inline একই ফরম্যাটে দেখায়।  
+3) Refresh বনাম loading আলাদা করুন: cached data থাকলে `refreshing`, না থাকলে `loading`; saving/deleting আলাদা signal দিন।  
+4) Observability: `lastUpdated` বা `attempt` কাউন্ট থাকলে ডিবাগ সহজ।  
+5) Cleanup: success/error উভয় ক্ষেত্রেই `loading` ফিরিয়ে আনুন, নইলে UI স্টাক হবে।  
+
 ## Concepts (beginner → intermediate → advanced)
 - Beginner: state shape `{ loading: 'idle' | 'loading'; error?: string }`।
 - Intermediate: আরও স্টেট `refreshing | saving | deleting`; error model `{ code, message, fieldErrors?, correlationId? }`।
 - Advanced: empty/no-permission states; toast বনাম inline; retry/backoff; global error boundary।
+
+## Hands-on (commands + কী দেখবেন)
+1) রেডি ডেমো চালান:  
+   ```bash
+   cd architecture-and-state/demos/loading-error-model-demo
+   npm install
+   npm run demo       # success + error + saving ফ্লো লগ দেখুন
+   npm run typecheck  # state model টাইপ ঠিক আছে কিনা
+   ```
+2) Expected logs: initial idle → load success → load error (code/correlationId সহ) → save শেষে data ১টি বাড়বে।  
+3) Break/fix: `store.load(true)` কে `store.load(false)` করুন (বা সরিয়ে দিন) → error গায়েব হবে; `lastUpdated` আপডেট কমেন্ট করে দেখুন লগে টাইমস্ট্যাম্প হারায়।  
 
 ## Copy-paste Example
 ```ts
@@ -80,6 +98,18 @@ export class BillingView {
 ## Try it (exercise)
 - Beginner: `loading` enum-এ `saving` যোগ করে create flow-এ ব্যবহার করুন।
 - Advanced: correlationId যোগ করে error toast এ দেখান; logger এ push করুন।
+
+## Ready-to-run demo (repo bundle)
+- Path: `architecture-and-state/demos/loading-error-model-demo`
+- Commands:
+  ```bash
+  cd architecture-and-state/demos/loading-error-model-demo
+  npm install
+  npm run demo
+  npm run typecheck
+  ```
+- Expected output (সংক্ষিপ্ত): initial idle → success data আসে → error state সেট হয় (code+correlationId) → save এর পর আইটেম বাড়ে ও loading আবার idle।
+- Test ideas: `simulateError` টগল করে error/UI কেমন বদলায় দেখুন; `loading` স্টেট `refreshing`/`saving` আলাদা করলে লগ পার্থক্য লক্ষ্য করুন।
 
 ## Common mistakes
 - loading boolean একটাই রেখে refresh/saving পৃথক না করা।
