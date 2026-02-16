@@ -48,6 +48,18 @@ Note: Minimal stub versions of the files shown above now live in `src/` so you c
   npm run typecheck
   ```
 
+## Things to learn (Angular Feature / Module Boundaries)
+1) Feature slice কী, boundary কেন: Feature = user-facing capability (Appointment, Billing, Pharmacy, Auth); boundary মানে ভেতরের routes/state/API/UI বাইরে leak করবে না—goal হলো change blast কমানো, reuse বাড়ানো, circular আটকানো।  
+2) Folder & import hard rules: Feature code কেবল নিজের feature বা shared থেকে নেবে; shared → feature নয়। cross-feature লাগলে facade/service contract দিয়ে bridge, direct component import নয়; barrel (index.ts) শুধু ছোট surface এ safe, over-export করলে boundary ভাঙে।  
+3) Layering (feature-এর ভিতর): ui/ (presentational), pages/ বা containers/ (smart, route-driven), data-access/ (API/adapters/facades), state/ (ComponentStore/NgRx), models/ (types/DTO mapping), utils/ (pure helpers). Rule: UI layer কখনো HttpClient/Store/Effect জানবে না—container/state/data-access সামলাবে।  
+4) Smart vs Presentational: Presentational = `@Input()` + `@Output()` only, no API calls; Smart = data fetch/state select/routing/orchestration. Pattern: “data down, events up” with typed outputs।  
+5) Standalone বনাম NgModule interop: Prefer standalone feature shell; legacy NgModule হলে wrapper/interoperability layer রাখুন। Feature পাবলিক API ছোট রাখুন (routes + facade types), বাকি internals private।  
+6) Routing boundary: Per-feature `feature.routes.ts`, lazy load করলে feature-এর state/data-access-ই লোড হবে; resolver/guard feature-level এ রাখুন।  
+7) Shared vs Core vs Feature: `core/` = app-wide singleton (auth, interceptors, config); `shared/ui` = reusable UI; `shared/util` = pure helpers/constants/tokens; Feature = domain logic + screens + state + API mapping. Anti-pattern: “mega shared” এ domain ঢুকে যাওয়া।  
+8) Data contracts: API DTO ↔ ViewModel mapping data-access বা state layer এ করুন; component এ raw API ব্যবহার করবেন না; error/loading shape feature state মালিকানায় থাকবে (shared shapes চলবে)।  
+9) Dependency direction ও circular detection: Allowed উদাহরণ → feature/pages → feature/state → feature/data-access → shared/util. Disallowed → shared/ui → feature/state (circular শুরু). Practice: path alias + lint/guard enforce করুন।  
+10) Public API কী expose করবে: routes (lazy entry), facade interface (optional), ছোট কিছু models (প্রয়োজনে), UI components সাধারণত export করবে না—shared/ui প্রার্থী হলে তবেই। Demo: `architecture-and-state/demos/feature-boundaries-demo`।  
+
 ## Why this matters (real world)
 - দ্রুত অনবোর্ডিং: নতুন ডেভেলপার বুঝতে পারে patients/billing/appointments কোথায়।
 - ডেপ্লয় ঝুঁকি কম: feature আলাদা থাকলে blast radius কমে।
