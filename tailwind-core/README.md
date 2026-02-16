@@ -38,6 +38,15 @@ Minimal Tailwind path using the Play CDN (no build step) so you can copy-paste i
 10) [topics/10-animations-effects.md](topics/10-animations-effects.md) — Transitions, keyframes, shadows, glass.
 11) [topics/11-accessibility.md](topics/11-accessibility.md) — Focus states, skip links, reduced motion.
 12) [topics/12-performance-notes.md](topics/12-performance-notes.md) — CDN caveats, when to move to build.
+13) [topics/13-advanced-theming.md](topics/13-advanced-theming.md) — CSS variables + arbitrary values.
+14) [topics/14-advanced-animations.md](topics/14-advanced-animations.md) — Custom keyframes, stagger, motion-safe.
+15) [topics/15-state-variants.md](topics/15-state-variants.md) — data-/aria- driven variants, peer/group states.
+16) [topics/16-grid-masonry-effects.md](topics/16-grid-masonry-effects.md) — Dense grid, aspect ratios, media tiles.
+17) [topics/17-tailwind-core-basics.md](topics/17-tailwind-core-basics.md) — Utility-first core (spacing, colors, typography, layout).
+18) [topics/18-components-patterns.md](topics/18-components-patterns.md) — Buttons→skeletons patterns.
+19) [topics/19-responsive-accessibility.md](topics/19-responsive-accessibility.md) — Mobile-first, dark, focus, ARIA, motion-safe.
+20) [topics/20-advanced-tailwind.md](topics/20-advanced-tailwind.md) — Config, @apply guidance, variants, performance/debug.
+21) [topics/21-utility-reference.md](topics/21-utility-reference.md) — One-page utility cheat-sheet with examples.
 
 ## How to use
 - Open the topic file, copy the HTML block, save as `index.html` (or drop into your page), run `live-server`.
