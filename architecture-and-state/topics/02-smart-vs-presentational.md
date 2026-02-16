@@ -1,104 +1,160 @@
-# 02) Smart vs Presentational
+# 02) Smart vs Presentational components
 
-সংক্ষিপ্ত ভূমিকা: HMS ড্যাশবোর্ডে PatientsContainer (smart) ডেটা টানে, PatientsList (presentational) শুধু render করে।
+বেগিনারদের জন্য হাতে-কলমে: স্মার্ট কম্পোনেন্ট data এনে orchestrate করে; প্রেজেন্টেশনাল কম্পোনেন্ট শুধু UI রেন্ডার করে ও ইভেন্ট তোলে (data down, events up).
 
-## Why this matters (real world)
-- দায়িত্ব আলাদা থাকায় UI বদলালে API স্তর ভাঙে না।
-- টেস্ট সহজ: presentational component pure template হিসেবে টেস্ট করা যায়।
-- ইন্টারভিউতে layering বোঝানো যায়।
+## Things to learn (layman + Bengali)
+1) **কী পার্থক্য**: Smart = data/state + routing orchestration; Presentational = UI-only, `@Input` + `@Output` ধাঁচের props/callback।
+2) **দায়িত্বের সীমানা**: UI কখনো API/Store জানবে না; ফেচ/রাউটিং সব Smart/Container সামলাবে।
+3) **ফোল্ডার ম্যাপ**: `features/<domain>/pages` (smart), `shared/ui` (presentational), `features/<domain>/data-access|state` (API/store)।
+4) **Data down, events up**: Smart data দেয়, Presentational ইভেন্ট তুলে। টাইপ্ড callback দিয়ে contract স্পষ্ট করুন।
+5) **টেস্ট ফোকাস**: Presentational = render snapshot + ইভেন্ট; Smart = orchestration/side-effects।
 
-## Concepts (beginner → intermediate → advanced)
-- Beginner: smart/container data fetch + pass @Input; presentational কেবল template.
-- Intermediate: ViewModel (vm) object/signal; change detection OnPush; route-level providers।
-- Advanced: Facade service hide store choice (signals/ComponentStore/NgRx); composable UI (slots/inputs) reuse।
+## Hands-on (step-by-step, কমান্ডসহ)
+1) **রেডি-টু-রান ডেমো ব্যবহার করুন**:
+   ```bash
+   cd architecture-and-state/demos/smart-vs-presentational-demo
+   npm install
+   npm run demo       # smart -> presentational flow + console output
+   npm run typecheck  # path alias + typings ঠিক আছে কিনা
+   ```
+2) **নিজে বানাতে চাইলে (quick scaffold)**:
+   ```bash
+   mkdir -p src/app/shared/ui src/app/features/catalog/{data-access,pages}
+   ```
+   এরপর নিচের "Demos" ব্লক থেকে ফাইলগুলো কপি করুন।
+3) **Boundary ভাঙা দেখুন**:
+   - ভুল: `products-list.component.ts` এ API ফেচ যোগ করে `npm run typecheck` চালান—নিয়ম ভাঙা বোঝা সহজ হবে।
+   - ঠিক: API কল শুধু `catalog.api.ts`/`catalog.facade.ts` এ রাখুন।
+4) **ইভেন্ট ফ্লো বুঝুন**:
+   - `npm run demo` শেষে লগে দেখবেন `[event up] selected product id: ...`—এটাই presentational → smart ইভেন্ট।
 
-## Copy-paste Example
+### Done when
+- Presentational কোডে কোনো API/Store/Router নেই; শুধুই props + callbacks।
+- Smart কম্পোনেন্ট data ফেচ করে, state ধরে, presentational-এ দেয়, ইভেন্টে action নেয়।
+- কমান্ড চালালে লজিক ও আউটপুট পরিষ্কার বোঝা যায়।
+
+## Demos (copy-paste)
+`architecture-and-state/demos/smart-vs-presentational-demo/src/` থেকে মূল অংশগুলি:
+
 ```ts
-// app/features/patients/patients.routes.ts
-import { Routes } from '@angular/router';
-import { PatientsContainer } from './patients.container';
-export const PATIENT_ROUTES: Routes = [
-  { path: '', component: PatientsContainer, providers: [] }
-];
-```
-```ts
-// app/features/patients/patients.container.ts
-import { Component, inject, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { PatientsListComponent } from './patients.list';
-import { PatientApi } from './patients.api';
-@Component({
-  standalone: true,
-  selector: 'hms-patients-container',
-  imports: [CommonModule, PatientsListComponent],
-  template: `<hms-patients-list [vm]="vm()" />`,
-})
-export class PatientsContainer {
-  private api = inject(PatientApi);
-  private patients = signal<{ id: string; name: string; bed: string }[]>([]);
-  private loading = signal(false);
-  vm = computed(() => ({ patients: this.patients(), loading: this.loading() }));
-  constructor() { this.load(); }
-  async load() {
-    this.loading.set(true);
-    try { this.patients.set(await this.api.fetchAll()); }
-    finally { this.loading.set(false); }
+// app/shared/ui/products-list.component.ts (Presentational)
+export type ProductVM = { id: string; name: string; price: number };
+export class ProductsListComponent {
+  constructor(private props: { products: ProductVM[]; onSelect: (id: string) => void }) {}
+  render(): string {
+    if (!this.props.products.length) return 'No products yet';
+    return this.props.products.map(p => `• ${p.name} ($${p.price.toFixed(2)})`).join('\n');
+  }
+  clickFirst(): void {
+    const first = this.props.products[0];
+    if (first) this.props.onSelect(first.id);
   }
 }
 ```
 ```ts
-// app/features/patients/patients.list.ts
-import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
-@Component({
-  standalone: true,
-  selector: 'hms-patients-list',
-  imports: [CommonModule],
-  template: `
-  <section class="p-4 bg-white rounded shadow">
-    <h2 class="font-semibold">Patients</h2>
-    <ng-container *ngIf="!vm.loading; else loading">
-      <ul>
-        <li *ngFor="let p of vm.patients" class="flex justify-between">
-          <span>{{ p.name }}</span><span class="text-xs text-slate-500">{{ p.bed }}</span>
-        </li>
-      </ul>
-    </ng-container>
-    <ng-template #loading>Loading patients…</ng-template>
-  </section>`
-})
-export class PatientsListComponent {
-  @Input({ required: true }) vm!: { patients: { id: string; name: string; bed: string }[]; loading: boolean };
+// app/features/catalog/data-access/catalog.api.ts (API stub)
+export type ProductDto = { id: string; name: string; price: number };
+export class CatalogApi {
+  async fetchAll(): Promise<ProductDto[]> {
+    return [
+      { id: 'p1', name: 'Stethoscope', price: 120 },
+      { id: 'p2', name: 'Blood Pressure Cuff', price: 65 }
+    ];
+  }
 }
 ```
 ```ts
-// app/features/patients/patients.api.ts
-import { Injectable } from '@angular/core';
-@Injectable({ providedIn: 'root' })
-export class PatientApi {
-  async fetchAll() { return [{ id: 'P1', name: 'Rima', bed: 'ICU-1' }]; }
+// app/features/catalog/data-access/catalog.facade.ts (Smart data layer)
+import { CatalogApi, ProductDto } from './catalog.api';
+export type CatalogVM = { products: ProductDto[] };
+export class CatalogFacade {
+  private products: ProductDto[] = [];
+  constructor(private api: CatalogApi) {}
+  async load(): Promise<void> { this.products = await this.api.fetchAll(); }
+  vm(): CatalogVM { return { products: this.products }; }
 }
 ```
+```ts
+// app/features/catalog/pages/catalog.page.ts (Smart container/page)
+import { CatalogFacade } from '../data-access/catalog.facade';
+import { ProductsListComponent } from '../../../shared/ui/products-list.component';
 
-## Try it (exercise)
-- Beginner: PatientsList এ skeleton state (3টি gray div) যোগ করুন, loading true হলে দেখান।
-- Advanced: PatientsContainer এ `computed` vm-এ a11y-ready empty/error flags যোগ করুন এবং template এ state-based UI দিন।
+export class CatalogPage {
+  private list?: ProductsListComponent;
+  constructor(private facade: CatalogFacade) {}
+
+  async init(): Promise<void> {
+    await this.facade.load();
+    this.list = new ProductsListComponent({
+      products: this.facade.vm().products,
+      onSelect: this.handleSelect
+    });
+  }
+
+  render(): string {
+    return this.list ? this.list.render() : 'Loading...';
+  }
+
+  simulateUserClick(): void {
+    this.list?.clickFirst();
+  }
+
+  private handleSelect = (id: string) => {
+    console.log('[event up] selected product id:', id);
+  };
+}
+```
+```ts
+// main.ts (runner for the demo)
+import { CatalogApi } from './app/features/catalog/data-access/catalog.api';
+import { CatalogFacade } from './app/features/catalog/data-access/catalog.facade';
+import { CatalogPage } from './app/features/catalog/pages/catalog.page';
+
+async function run() {
+  const page = new CatalogPage(new CatalogFacade(new CatalogApi()));
+  await page.init();
+  console.log('--- Rendered UI (presentational) ---');
+  console.log(page.render());
+  console.log('--- Simulate click ---');
+  page.simulateUserClick();
+}
+
+run();
+```
+
+## Ready-to-run demo (repo bundle)
+- Path: `architecture-and-state/demos/smart-vs-presentational-demo`
+- Commands:
+  ```bash
+  cd architecture-and-state/demos/smart-vs-presentational-demo
+  npm install
+  npm run demo       # smart -> presentational output + event log
+  npm run typecheck  # নিশ্চিত করুন boundary রক্ষা হয়েছে
+  ```
+- Output আশা করুন:
+  ```
+  --- Rendered UI (presentational) ---
+  • Stethoscope ($120.00)
+  • Blood Pressure Cuff ($65.00)
+  --- Simulate click ---
+  [event up] selected product id: p1
+  ```
+ - কী টেস্ট করবেন:
+   - `npm run demo`: data down/events up প্রবাহ ঠিক চলছে কিনা (console log এ event id দেখা উচিত)।
+   - `npm run typecheck`: path alias/contract সঠিক ও presentational এ কোনো data-access leak নেই কিনা।
+   - Boundary ব্রেক এক্সপেরিমেন্ট: `src/app/shared/ui/products-list.component.ts` এ ইচ্ছাকৃত API কল যোগ করে আবার `npm run typecheck` চালান—expect error; তারপর কোড সরিয়ে পুনরায় চালান।
 
 ## Common mistakes
-- Smart component থেকে DOM logic রাখা (JSX-style) → presentational এ নামিয়ে আনুন।
-- Facade না করে সরাসরি HttpClient কল করে testability নষ্ট।
+- Presentational কম্পোনেন্টে API কল বা Router inject করা।
+- Smart কম্পোনেন্ট সরাসরি DOM/UI ম্যানিপুলেট করে ফেলা (UI লেয়ারের কাজ)।
+- Props/callback টাইপ না করা, ফলে contract অস্পষ্ট।
 
 ## Interview points
-- Container-presentational split বুঝে বলুন: “low churn UI vs stable data flow”.
-- উল্লেখ করুন route-level provider scope কিভাবে memory leak কমায়।
+- "data down, events up" ব্যাখ্যা + উদাহরণ দিতে পারবেন।
+- Smart vs Presentational separation কেন performance ও testability বাড়ায় তা ব্যাখ্যা করুন।
+- Standalone world-এও একই boundary নিয়ম কীভাবে প্রয়োগ হয় জানেন।
 
-## Done when…
-- Container শুধু data/orchestration; Presentational শুধু template/style.
-- vm object/signal আছে; template এ state branches স্পষ্ট।
-- Route-level providers ঠিকভাবে scoped।
-
-## How to test this topic
-1) VS Code: Ctrl/Cmd+Click করে container থেকে facade/service imports resolve হচ্ছে কিনা দেখুন; Problems panel এ unused input/output নেই নিশ্চিত করুন।
-2) Unit/component test: Angular Testing Library দিয়ে container render করে loading→success assert করুন; presentational component এ @Input required ঠিক আছে কিনা।
-3) Boundary: নিশ্চিত করুন container কোনো heavy UI barrel থেকে ইমপোর্ট করছে না (direct path); optional guard স্ক্রিপ্ট চালান।
-4) Browser sanity: `ng serve` → patients route খুলে container-presentational split কাজ করছে কিনা (state updates reflect).  
+## How to practice quickly
+- `npm run demo` চালিয়ে আউটপুট দেখুন।
+- Presentational এ API যোগ করে boundary ভেঙে দেখুন; তারপর সরিয়ে পুনরায় চালান।
+- নতুন feature (e.g., Pharmacy) যোগ করে একই pattern অনুসরণ করুন।
