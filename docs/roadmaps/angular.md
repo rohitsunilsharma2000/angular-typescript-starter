@@ -14,32 +14,6 @@ Purpose: actionable ladder from zero → production-ready Angular engineer. Each
 | 14–16 | Advanced | Storybook design system slice, PWA/offline or real-time demo |
 | 16–18 | Portfolio | Public repo + deployed app + ADRs + perf/a11y report |
 
-## Quick Links / Index
-- Timeline at a Glance → [anchor](#timeline-at-a-glance)
-- 0. Foundations (Week 0–2) → [anchor](#0-foundations-week-0-2)
-- 1. Angular Fundamentals (Week 2–5) → [module](../../angular-fundamentals/README.md) | Sub:
-  - HTML & CSS (Always-on) → [module](../../html-css-core/README.md)
-  - Version Control & Tooling → [anchor](#version-control--tooling)
-  - TypeScript (Highly Recommended) → [module](../../typescript-core/README.md)
-- 2. Architecture & State (Week 5–8) → [module](../../architecture-and-state/README.md)
-- 3. Performance & UX (Week 8–10) → [module](../../performance-and-ux/README.md)
-- 4. Testing & Quality (Week 10–12) → [module](../../testing-and-quality/README.md)
-- 5. Build, Ops, Security (Week 12–14) → [module](../../build-ops-security/README.md)
-- 6. Advanced Topics (Week 14–16) → [module](../../advanced-topics/README.md)
-- 7. Portfolio & Interview Prep (Week 16–18) → [anchor](#7-portfolio--interview-prep-week-16-18)
-- APIs & Backend Basics → [anchor](#apis--backend-basics)
-- State Management (Angular flavor) → [anchor](#state-management-angular-flavor)
-- Testing (recap + specifics) → [anchor](#testing-recap--specifics)
-- Performance & Optimization (recap) → [anchor](#performance--optimization-recap)
-- Deployment & DevOps Basics → [anchor](#deployment--devops-basics)
-- Advanced Topics (To Stand Out) → [anchor](#advanced-topics-to-stand-out)
-- Build Projects (VERY IMPORTANT) → [anchor](#build-projects-very-important)
-- Become Job Ready → [anchor](#become-job-ready)
-- Practice Projects (progressively harder) → [anchor](#practice-projects-progressively-harder)
-- Habit Checklist (keep recurring) → [anchor](#habit-checklist-keep-recurring)
-- Suggested Weekly Cadence (lightweight) → [anchor](#suggested-weekly-cadence-lightweight)
-- Minimal Resource Pack → [anchor](#minimal-resource-pack)
-
 ## 0. Foundations (Week 0–2)
 - HTML5 semantics, forms, media; CSS layout (Flexbox/Grid), responsive units, accessibility basics (labels, landmarks, contrast).
 - Modern JavaScript: ES modules, async/await, Promise patterns, array/object helpers, fetch/AbortController.
@@ -48,7 +22,7 @@ Purpose: actionable ladder from zero → production-ready Angular engineer. Each
 - What to ship: single-page responsive layout (header/hero/form/table) + TS kata notebook (map/filter/reduce, async/await fetch mock).
 - Checkpoint: Lighthouse a11y ≥ 90, ESLint/Prettier on save, `tsc --noEmit` clean.
 
-## 1. Angular Fundamentals (Week 2–5)
+## [1. Angular Fundamentals (Week 2–5)](../../angular-fundamentals/README.md)
 - Install Node LTS + Angular CLI; generate a project; CLI anatomy.
 - Components: decorators, templates, style scoping, inputs/outputs, content projection.
 - Templates: binding syntax, structural directives (`*ngIf`, `*ngFor`, `ngSwitch`), pipes, template refs, standalone components.
@@ -59,7 +33,7 @@ Purpose: actionable ladder from zero → production-ready Angular engineer. Each
 - What to ship: CRUD feature with list + detail route, reactive form with validation, API calls via HttpClient (can be json-server/mock).
 - Checkpoint: No template errors, strict TS enabled, `async` pipe replaces manual subscriptions where possible.
 
-## HTML & CSS (Always-on)
+## [HTML & CSS (Always-on)](../../html-css-core/README.md)
 - Semantic HTML, ARIA basics; forms with proper labels; media responsiveness.
 - Layout: Flexbox, Grid, stacking contexts, positioning; responsive patterns (fluid, clamp()).
 - Styling systems: CSS variables, BEM/utility-first hybrids; theming tokens; dark/light toggles.
@@ -70,12 +44,12 @@ Purpose: actionable ladder from zero → production-ready Angular engineer. Each
 - Tooling: npm/yarn/pnpm, package scripts, Nx/Turbo basics, lint-staged + husky pre-commit.
 - IDE setup: ESLint, Prettier, EditorConfig, Angular Language Service.
 
-## TypeScript (Highly Recommended)
+## [TypeScript (Highly Recommended)](../../typescript-core/README.md)
 - Strict mode everywhere; enums vs unions; generics in components/services; utility types (Partial, Pick, Omit).
 - Narrowing patterns (in, instanceof, discriminated unions); mapped/conditional types for API DTOs.
 - What to ship: Type-safe HttpClient wrappers; shared model library; zero `any` in app code.
 
-## 2. Architecture & State (Week 5–8)
+## [2. Architecture & State (Week 5–8)](../../architecture-and-state/README.md)
 - Feature/module boundaries; smart vs presentational components; standalone vs NgModule interop.
 - State choices: RxJS services with signals/subjects; ComponentStore; NgRx (actions, reducers, effects, selectors, entity adapters).
 - Data contracts: API typing with interfaces/zod/io-ts; error and loading models; optimistic updates.
@@ -83,7 +57,7 @@ Purpose: actionable ladder from zero → production-ready Angular engineer. Each
 - What to ship: One feature slice using ComponentStore/NgRx (load/list/create/update), optimistic update example, theme tokens file.
 - Checkpoint: No circular deps; selectors/memoized derived state; shared UI components documented.
 
-## 3. Performance & UX (Week 8–10)
+## [3. Performance & UX (Week 8–10)](../../performance-and-ux/README.md)
 - Change detection: default vs `OnPush`, signals, zone-less options; async pipe vs manual subscribe.
 - Code splitting: route-level lazy loading, `import()`-based feature chunks, preloading strategies.
 - Rendering: SSR/SSG with Angular Universal; hydration; defer/lazy images; CDK virtual scroll.
@@ -92,7 +66,7 @@ Purpose: actionable ladder from zero → production-ready Angular engineer. Each
 - What to ship: Enable OnPush or signals in hot paths, lazy-load at least one route, skeleton loader, bundle size report.
 - Checkpoint: Bundle < target budget (set a KB budget), LCP within goal on lab run, no major hydration errors.
 
-## 4. Testing & Quality (Week 10–12)
+## [4. Testing & Quality (Week 10–12)](../../testing-and-quality/README.md)
 - Unit tests with TestBed + Jest/Vitest + Angular Testing Library; component harnesses; mocking HttpClient/Router.
 - Integration/e2e: Playwright or Cypress; network stubbing; visual regression (optional).
 - Accessibility checks: axe-core/Pa11y CI gates; keyboard traps; focus management tests.
@@ -100,7 +74,7 @@ Purpose: actionable ladder from zero → production-ready Angular engineer. Each
 - What to ship: 80%+ critical-path coverage; e2e smoke for auth + main flow; a11y lint step in CI.
 - Checkpoint: CI green on lint/test/e2e; flaky tests addressed; axe violations fixed.
 
-## 5. Build, Ops, Security (Week 12–14)
+## [5. Build, Ops, Security (Week 12–14)](../../build-ops-security/README.md)
 - Environments & configs; secret handling; API gateway auth (JWT/OAuth2), HttpInterceptor for auth/refresh.
 - CI/CD: GitHub Actions pipeline (lint → test → build → preview deploy); artifact caching.
 - Deploy targets: static hosting + functions (Netlify/Vercel), container image (Node 22 LTS) for SSR.
@@ -109,7 +83,7 @@ Purpose: actionable ladder from zero → production-ready Angular engineer. Each
 - What to ship: CI/CD workflow file, env var strategy, auth interceptor + refresh, error monitoring hook.
 - Checkpoint: Deploy preview per PR; bundle-size check in pipeline; dependency scan passes.
 
-## 6. Advanced Topics (Week 14–16)
+## [6. Advanced Topics (Week 14–16)](../../advanced-topics/README.md)
 - Design systems: tokens, theming, story-driven development with Storybook; snapshot + interaction tests.
 - Forms at scale: dynamic forms, stepper/wizard flows, complex validation UX.
 - Internationalization: built-in i18n; locale data; ICU messages; RTL support.
