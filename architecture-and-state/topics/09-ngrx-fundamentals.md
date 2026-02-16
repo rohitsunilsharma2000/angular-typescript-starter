@@ -1,146 +1,142 @@
 # 09) NgRx fundamentals
 
-Appointments cross-feature শেয়ার্ড হলে NgRx slice উপযোগী।
+লেম্যান-বাংলা: action → reducer → selector → effect এই চার ধাপ বুঝুন; এখানে Angular ছাড়া ছোট ডেমো আছে, পরে একই প্যাটার্ন Angular NgRx API তে বসান।
 
-## Why this matters (real world)
-- বহুল ব্যবহারযোগ্য ডেটা (appointments) বহু পেজে লাগবে।
-- Effects দিয়ে side-effect আলাদা; testing সহজ।
-- ইন্টারভিউ: action → reducer → selector স্টোরি।
+## Things to learn (beginner → intermediate → advanced)
+- Beginner: action স্ট্রিং, pure reducer, state shape `{data, loading, error}`; selector = state পড়ার ফাংশন; store.dispatch → reducer.
+- Intermediate: effect দিয়ে async API call (switchMap), error হ্যান্ডলিং; loading flag; success/failure action।
+- Advanced: feature-level provideState/provideEffects (Angular), memoized selectors with props, guard against duplicate loads (lastUpdated/force flag)।
 
-## Concepts (beginner → intermediate → advanced)
-- Beginner: actions, reducer, selectors, provideState/provideEffects (standalone-ready)।
-- Intermediate: effects with switchMap/catchError; loading flags; router integration।
-- Advanced: memoized selectors with props; derived UI flags; feature-level provideState.
+## Hands-on (commands + কী দেখবেন)
+1) রেডি ডেমো চালান:
+   ```bash
+   cd architecture-and-state/demos/ngrx-fundamentals-demo
+   npm install
+   npm run demo       # load success + failure
+   npm run typecheck  # টাইপ ঠিক আছে কিনা
+   ```
+2) Expected আউটপুট: প্রথম লোডে data আসে, দ্বিতীয় লোডে error='Server 500' কিন্তু আগের data থাকে, loading=false।
+3) Break/fix: `store.setFailNext(true/false)` বদলে success/fail দেখুন; reducer-এ loading flag যোগ/সরিয়ে লগে পার্থক্য দেখুন; নতুন selector যোগ করে `main.ts` এ ব্যবহার করুন।
 
-## Copy-paste Example
+## Demos (copy-paste)
+`architecture-and-state/demos/ngrx-fundamentals-demo/src/` থেকে মূল ফাইল:
 ```ts
-// app/features/appointments/state/appointments.actions.ts
-import { createActionGroup, props } from '@ngrx/store';
-export const AppointmentsActions = createActionGroup({
-  source: 'Appointments',
-  events: {
-    'Load': props<{ force?: boolean }>(),
-    'Load Success': props<{ data: Appointment[] }>(),
-    'Load Failure': props<{ error: string }>(),
+// app/actions.ts
+import { Appointment } from './types';
+export type Action =
+  | { type: 'load' }
+  | { type: 'load success'; data: Appointment[] }
+  | { type: 'load failure'; error: string };
+export const AppointmentsActions = {
+  load: (): Action => ({ type: 'load' }),
+  loadSuccess: (data: Appointment[]): Action => ({ type: 'load success', data }),
+  loadFailure: (error: string): Action => ({ type: 'load failure', error })
+};
+```
+```ts
+// app/reducer.ts
+import { Action } from './actions';
+import { State } from './types';
+export const initialState: State = { data: [], loading: false };
+export function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case 'load': return { ...state, loading: true, error: undefined };
+    case 'load success': return { ...state, loading: false, data: action.data };
+    case 'load failure': return { ...state, loading: false, error: action.error };
+    default: return state;
   }
-});
-export type Appointment = { id: string; patient: string; slot: string };
-```
-```ts
-// app/features/appointments/state/appointments.reducer.ts
-import { createFeature, createReducer, on } from '@ngrx/store';
-import { AppointmentsActions } from './appointments.actions';
-export type State = { data: Appointment[]; loading: boolean; error?: string; lastUpdated?: number };
-const initialState: State = { data: [], loading: false };
-const feature = createFeature({
-  name: 'appointments',
-  reducer: createReducer(
-    initialState,
-    on(AppointmentsActions.load, (state) => ({ ...state, loading: true, error: undefined })),
-    on(AppointmentsActions.loadSuccess, (state, { data }) => ({ ...state, data, loading: false, lastUpdated: Date.now() })),
-    on(AppointmentsActions.loadFailure, (state, { error }) => ({ ...state, loading: false, error }))
-  )
-});
-export const { name: appointmentsFeatureKey, reducer: appointmentsReducer, selectAppointmentsState } = feature;
-export const { selectData, selectLoading, selectError } = feature;
-```
-```ts
-// app/features/appointments/state/appointments.effects.ts
-import { inject, Injectable } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { HttpClient } from '@angular/common/http';
-import { AppointmentsActions } from './appointments.actions';
-import { switchMap, map, catchError, of, finalize } from 'rxjs';
-@Injectable()
-export class AppointmentsEffects {
-  private actions$ = inject(Actions);
-  private http = inject(HttpClient);
-
-  load$ = createEffect(() => this.actions$.pipe(
-    ofType(AppointmentsActions.load),
-    switchMap(() => this.http.get<any[]>('/api/appointments').pipe(
-      map(data => AppointmentsActions.loadSuccess({ data })),
-      catchError(err => of(AppointmentsActions.loadFailure({ error: err.message ?? 'Failed' })))
-    ))
-  ));
 }
 ```
 ```ts
-// app/features/appointments/state/appointments.selectors.ts
-import { createSelector } from '@ngrx/store';
-import { selectAppointmentsState } from './appointments.reducer';
-export const selectAppointmentsVm = createSelector(
-  selectAppointmentsState,
-  s => ({ data: s.data, loading: s.loading, error: s.error })
-);
-```
-```ts
-// app/features/appointments/appointments.provider.ts
-import { provideState, provideEffects } from '@ngrx/store';
-import { appointmentsFeatureKey, appointmentsReducer } from './state/appointments.reducer';
-import { AppointmentsEffects } from './state/appointments.effects';
-export const provideAppointmentsStore = [
-  provideState(appointmentsFeatureKey, appointmentsReducer),
-  provideEffects(AppointmentsEffects),
-];
-```
-```ts
-// app/features/appointments/appointments.routes.ts
-import { Routes } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
-import { provideAppointmentsStore } from './appointments.provider';
-import { AppointmentsContainer } from './appointments.container';
-export const APPT_ROUTES: Routes = [
-  { path: '', component: AppointmentsContainer, providers: [provideHttpClient(), ...provideAppointmentsStore] }
-];
-```
-```ts
-// app/features/appointments/appointments.container.ts
-import { Component, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { CommonModule } from '@angular/common';
-import { selectAppointmentsVm } from './state/appointments.selectors';
-import { AppointmentsActions } from './state/appointments.actions';
-@Component({
-  standalone: true,
-  selector: 'hms-appointments-ngrx',
-  imports: [CommonModule],
-  template: `
-    <button class="border px-2" (click)="reload()">Load</button>
-    <p *ngIf="vm$ | async as vm">
-      <span *ngIf="vm.loading">Loading…</span>
-      <span *ngIf="vm.error" class="text-red-600">{{ vm.error }}</span>
-      <ul><li *ngFor="let a of vm.data">{{ a.patient }} — {{ a.slot }}</li></ul>
-    </p>
-  `
-})
-export class AppointmentsContainer {
-  private store = inject(Store);
-  vm$ = this.store.select(selectAppointmentsVm);
-  constructor() { this.reload(); }
-  reload() { this.store.dispatch(AppointmentsActions.load({})); }
+// app/store.ts
+import { BehaviorSubject, Subject, filter, map, switchMap } from 'rxjs';
+import { Action, AppointmentsActions } from './actions';
+import { FakeApi } from './fake-api';
+import { reducer, initialState } from './reducer';
+import { State } from './types';
+export class Store {
+  private state$ = new BehaviorSubject<State>(initialState);
+  private actions$ = new Subject<Action>();
+  private subscriptions: Array<{ unsubscribe: () => void }> = [];
+  private shouldFail = false;
+  constructor(private api: FakeApi) {
+    const sub = this.actions$.pipe(map(a => reducer(this.state$.value, a))).subscribe(s => this.state$.next(s));
+    this.subscriptions.push(sub);
+    const loadEffect = this.actions$.pipe(filter(a => a.type === 'load')).pipe(
+      switchMap(() => this.api.list(this.shouldFail).then(
+        data => AppointmentsActions.loadSuccess(data),
+        err => AppointmentsActions.loadFailure(err.message ?? 'Failed')
+      ))
+    ).subscribe(a => this.dispatch(a));
+    this.subscriptions.push(loadEffect);
+  }
+  setFailNext(v: boolean) { this.shouldFail = v; }
+  dispatch(action: Action) { this.actions$.next(action); }
+  select(): State { return this.state$.value; }
+  destroy() { this.subscriptions.forEach(s => s.unsubscribe()); }
 }
 ```
+```ts
+// app/fake-api.ts
+import { Appointment } from './types';
+const wait = (ms: number) => new Promise(res => setTimeout(res, ms));
+export class FakeApi {
+  private data: Appointment[] = [
+    { id: 'a1', patient: 'Ayman', slot: '10:00' },
+    { id: 'a2', patient: 'Nadia', slot: '10:30' }
+  ];
+  async list(simulateFail = false): Promise<Appointment[]> {
+    await wait(50);
+    if (simulateFail) throw new Error('Server 500');
+    return this.data;
+  }
+}
+```
+```ts
+// main.ts
+import { Store } from './app/store';
+import { AppointmentsActions } from './app/actions';
+import { FakeApi } from './app/fake-api';
+function logState(label: string, state: ReturnType<Store['select']>) {
+  console.log(`\n=== ${label} ===`); console.log(state);
+}
+async function run() {
+  const store = new Store(new FakeApi());
+  store.dispatch(AppointmentsActions.load());
+  await new Promise(r => setTimeout(r, 70));
+  logState('after load success', store.select());
+  store.setFailNext(true);
+  store.dispatch(AppointmentsActions.load());
+  await new Promise(r => setTimeout(r, 70));
+  logState('after load failure', store.select());
+  store.destroy();
+}
+run();
+```
 
-## Try it (exercise)
-- Beginner: Load action dispatch করে selector তে empty state দেখান।
-- Advanced: lastUpdated চেক করুন; 5s এর মধ্যে হলে load skip করতে guard effect লিখুন।
+## Ready-to-run demo (repo bundle)
+- Path: `architecture-and-state/demos/ngrx-fundamentals-demo`
+- Commands:
+  ```bash
+  cd architecture-and-state/demos/ngrx-fundamentals-demo
+  npm install
+  npm run demo
+  npm run typecheck
+  ```
+- Expected output: success load (data 2 আইটেম, loading=false) → failure load (error='Server 500', data আগের মতো, loading=false)।
+- Test ideas: loading flag reducer-এ যোগ/সরান; আরেকটি action (Add) বানিয়ে reduce করুন; selector ফাংশন লিখে `main.ts` এ ব্যবহার করুন।
 
 ## Common mistakes
-- provideState root এ দিয়ে lazy feature double registration।
-- selector memoization ভুলে যাওয়া → recompute heavy।
-- effects এ finalize ভুলে loading reset হয় না।
+- reducer pure না রাখা (API call ভিতরে করা)।
+- error set করেও loading false না করা।
+- effect subscribe না করে থাকা (stream চালু হয় না)।
 
 ## Interview points
-- Standalone provideState/provideEffects উল্লেখ করুন।
-- Memoized selector + props উদাহরণ দিতে প্রস্তুত থাকুন।
+- Action → reducer → selector → effect গল্প টাইটভাবে বলতে পারা।
+- কেন pure reducer গুরুত্বপূর্ণ; কেন effects এ side-effect রাখা হয়।
+- Standalone Angular এ provideState/provideEffects দিয়ে slice scope করা যায়।
 
-## Done when…
-- Actions/Reducer/Effects/Selectors সম্পূর্ণ ও compile হয়।
-- Route-level providers দিয়ে slice scoped।
-- Loading/error UI হ্যান্ডল।
-
-## How to test this topic
-1) VS Code: action/reducer/selectors auto-import এবং feature key মিসম্যাচ নেই নিশ্চিত করুন।
-2) Unit test: reducer pure tests (load → success/error), selector memo test; effects with provideMockActions + HttpTestingController stub.
-3) Runtime: `ng serve` → appointments container খুলে Load বাটন চাপুন; state devtools/console এ load-success events দেখতে পাবেন, UI loading/error ঠিক আছে কিনা দেখুন।  
+## Quick practice
+- `npm run demo` চালান; তারপর `setFailNext(false)` করে দুইবার success দেখে নিন।
+- New selector যোগ করুন (e.g., selectLoading) এবং লগ করুন।
+- Debounce/throttle যোগ করার কথা ভাবুন যখন লোড বাটন বারবার চাপা হয়।
