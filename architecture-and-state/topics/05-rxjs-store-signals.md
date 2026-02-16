@@ -1,136 +1,147 @@
 # 05) RxJS service store + signals bridge
 
-Appointments তালিকা feature-এ RxJS store service দিয়ে state রাখা, signals দিয়ে template simple করা।
+বেগিনারদের জন্য: RxJS BehaviorSubject-ভিত্তিক সার্ভিস স্টোর থেকে কীভাবে signal-ধাঁচের getter বানিয়ে UI/কম্পোনেন্টে ফিড দেবেন (Angular ছাড়াই বোঝার জন্য মিনিমাল ডেমো)।
 
-## Why this matters (real world)
-- Http + caching + loading/error মান統; template সরল।
-- Signals bridge করলে ভবিষ্যতে Angular signal APIs কাজে লাগে।
+## Things to learn (Bengali + layman)
+1) **Service store (RxJS)**: BehaviorSubject এ state রাখা, `select` করে Observable আউট করা।
+2) **Signals bridge**: Observable → signal getter wrapper, যাতে `todosSignal()` কল করলেই লেটেস্ট ভ্যালু মেলে।
+3) **Where to use**: Angular signals UI-তে, RxJS data/side-effect এ; ব্রিজ রাখলে দুই দুনিয়ার মাঝে coupling কমে।
+4) **Double-subscribe এড়ানো**: distinctUntilChanged/selectors দিয়ে duplicate emission কমান।
+5) **Cleanup**: signal/destroy সময় subscription ছাড়তে হবে, নইলে মেমরি লিক।
 
-## Concepts (beginner → intermediate → advanced)
-- Beginner: BehaviorSubject store shape {data, loading, error}।
-- Intermediate: switchMap + catchError + finalize; shareReplay(1) দিয়ে caching।
-- Advanced: signals bridge via `toSignal`; staleTime/forceReload; tearDown।
+## Hands-on (step-by-step + commands)
+1) রেডি ডেমো চালান:
+   ```bash
+   cd architecture-and-state/demos/rxjs-store-signals-bridge-demo
+   npm install
+   npm run demo       # BehaviorSubject -> signal আউটপুট দেখুন
+   npm run typecheck  # টাইপ/কনফিগ ঠিক আছে কিনা
+   ```
+2) কী দেখবেন:
+   - শুরুতে `undefined` (signal এখনও ভ্যালু পায়নি)।
+   - দুইটা `add` পরে signal array দেখাবে।
+   - `toggle` এর পর প্রথম আইটেমের `done` true হবে।
+3) ব্রেক/ফিক্স এক্সপেরিমেন্ট:
+   - `fromObservable` এর `destroy()` কল না করে দেখুন (কোড কমেন্ট করুন) → সাবস্ক্রিপশন ঝুলে থাকে; বাস্তবে এটি মেমরি/teardown ইস্যু।
+   - `distinctUntilChanged` সরিয়ে দিন → একই স্টেট রেফারেন্সে-ও emission পাবেন; লগ ভরবে।
+4) নিজে বানাতে চাইলে: `mkdir -p src/app` করে নিচের "Demos" কোড কপি করুন।
 
-## Copy-paste Example
+### Done when
+- কমান্ড চালিয়ে প্রত্যাশিত তিন ধাপের আউটপুট পেয়েছেন।
+- ব্রিজ/ডেস্ট্রয় ও distinctUntilChanged এর প্রভাব বোঝেন।
+
+## Demos (copy-paste)
+`architecture-and-state/demos/rxjs-store-signals-bridge-demo/src/` থেকে মূল ফাইল:
 ```ts
-// app/features/appointments/appointments.store.ts
-import { Injectable, computed, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, of } from 'rxjs';
-import { switchMap, catchError, finalize, shareReplay } from 'rxjs/operators';
+// app/store.ts
+import { BehaviorSubject, Observable } from 'rxjs';
+import { map, distinctUntilChanged } from 'rxjs/operators';
 
-type State = { data: Appointment[]; loading: boolean; error?: string; lastUpdated?: number };
-export type Appointment = { id: string; patient: string; slot: string };
+export type Todo = { id: string; title: string; done: boolean };
+export type TodoState = { todos: Todo[] };
 
-@Injectable({ providedIn: 'root' })
-export class AppointmentStore {
-  private trigger$ = new BehaviorSubject<boolean>(true);
-  private state$ = this.trigger$.pipe(
-    switchMap(force => this.load(force)),
-    shareReplay(1)
-  );
+export class TodoStore {
+  private state$ = new BehaviorSubject<TodoState>({ todos: [] });
 
-  private signalState = signal<State>({ data: [], loading: false });
-  vm = computed(() => this.signalState());
-
-  constructor(private http: HttpClient) {
-    this.state$.subscribe();
+  add(title: string) {
+    const todo: Todo = { id: crypto.randomUUID(), title, done: false };
+    const next = { todos: [...this.state$.value.todos, todo] };
+    this.state$.next(next);
   }
 
-  refresh(force = false) { this.trigger$.next(force); }
+  toggle(id: string) {
+    const next = {
+      todos: this.state$.value.todos.map(t =>
+        t.id === id ? { ...t, done: !t.done } : t
+      )
+    };
+    this.state$.next(next);
+  }
 
-  private load(force: boolean) {
-    const now = Date.now();
-    const s = this.signalState();
-    if (!force && s.lastUpdated && now - s.lastUpdated < 5000 && s.data.length) {
-      return of(s); // cached
-    }
-    this.signalState.update(v => ({ ...v, loading: true, error: undefined }));
-    return this.http.get<Appointment[]>('/api/appointments').pipe(
-      switchMap(data => {
-        this.signalState.set({ data, loading: false, lastUpdated: Date.now() });
-        return of(this.signalState());
-      }),
-      catchError(err => {
-        this.signalState.update(v => ({ ...v, loading: false, error: err.message ?? 'Load failed' }));
-        return of(this.signalState());
-      }),
-      finalize(() => this.signalState.update(v => ({ ...v, loading: false })))
-    );
+  selectAll(): Observable<Todo[]> {
+    return this.state$.pipe(map(s => s.todos), distinctUntilChanged());
   }
 }
 ```
 ```ts
-// app/features/appointments/appointments.container.ts
-import { Component, computed, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { AppointmentStore } from './appointments.store';
-import { AppointmentList } from './appointments.list';
-@Component({
-  standalone: true,
-  selector: 'hms-appointments-container',
-  imports: [CommonModule, AppointmentList],
-  template: `<hms-appointment-list [vm]="vm()" (refresh)="store.refresh(true)"></hms-appointment-list>`
-})
-export class AppointmentContainer {
-  store = inject(AppointmentStore);
-  vm = computed(() => this.store.vm());
+// app/signals-bridge.ts
+import { Observable, Subscription } from 'rxjs';
+
+export type Signal<T> = { (): T; destroy(): void };
+
+export function fromObservable<T>(source$: Observable<T>): Signal<T> {
+  let latest: T | undefined;
+  const sub: Subscription = source$.subscribe(v => { latest = v; });
+  const fn = (() => latest as T) as Signal<T>;
+  fn.destroy = () => sub.unsubscribe();
+  return fn;
 }
 ```
 ```ts
-// app/features/appointments/appointments.list.ts
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
-@Component({
-  standalone: true,
-  selector: 'hms-appointment-list',
-  imports: [CommonModule],
-  template: `
-    <section class="p-4 bg-white rounded shadow space-y-2">
-      <header class="flex justify-between items-center">
-        <h2 class="font-semibold">Appointments</h2>
-        <button class="text-sm px-3 py-1 border rounded" (click)="refresh.emit()">Refresh</button>
-      </header>
-      <ng-container *ngIf="!vm.loading && !vm.error; else stateBlock">
-        <ul>
-          <li *ngFor="let a of vm.data" class="flex justify-between">
-            <span>{{ a.patient }}</span><span class="text-xs text-slate-500">{{ a.slot }}</span>
-          </li>
-        </ul>
-      </ng-container>
-      <ng-template #stateBlock>
-        <p *ngIf="vm.loading">Loading…</p>
-        <p *ngIf="vm.error" class="text-red-600">{{ vm.error }}</p>
-      </ng-template>
-    </section>
-  `
-})
-export class AppointmentList {
-  @Input({ required: true }) vm!: { data: any[]; loading: boolean; error?: string };
-  @Output() refresh = new EventEmitter<void>();
+// main.ts
+import { TodoStore } from './app/store';
+import { fromObservable } from './app/signals-bridge';
+
+async function run() {
+  const store = new TodoStore();
+  const todosSignal = fromObservable(store.selectAll());
+
+  console.log('--- Initial ---');
+  console.log(todosSignal());
+
+  store.add('Write docs');
+  store.add('Ship demo');
+  await new Promise(r => setTimeout(r, 0));
+  console.log('\n--- After adds (signal) ---');
+  console.log(todosSignal());
+
+  const firstId = todosSignal()?.[0]?.id;
+  if (firstId) store.toggle(firstId);
+  await new Promise(r => setTimeout(r, 0));
+  console.log('\n--- After toggle (signal) ---');
+  console.log(todosSignal());
+
+  todosSignal.destroy();
 }
+
+run();
 ```
 
-## Try it (exercise)
-- Beginner: stale cache সময় 5s থেকে 1s করুন এবং log করুন কতবার API কল হয়।
-- Advanced: `refresh(force=true)` এ loading state `refreshing` আলাদা ফ্ল্যাগ যোগ করুন ও UI তে দেখান।
+## Ready-to-run demo (repo bundle)
+- Path: `architecture-and-state/demos/rxjs-store-signals-bridge-demo`
+- Commands:
+  ```bash
+  cd architecture-and-state/demos/rxjs-store-signals-bridge-demo
+  npm install
+  npm run demo
+  npm run typecheck
+  ```
+- Expected output (সংক্ষিপ্ত):
+  ```
+  --- Initial ---
+  undefined
+
+  --- After adds (signal) ---
+  [ { id: '...', title: 'Write docs', done: false }, { id: '...', title: 'Ship demo', done: false } ]
+
+  --- After toggle (signal) ---
+  [ { id: '...', title: 'Write docs', done: true }, { id: '...', title: 'Ship demo', done: false } ]
+  ```
+- Test ideas:
+  - `distinctUntilChanged` সরালে duplicate emission লক্ষ্য করুন।
+  - `destroy()` না করলে সম্ভাব্য লিক/লগ বাড়বে—ডেমোতে নিজে পরীক্ষা করুন।
 
 ## Common mistakes
-- BehaviorSubject initial undefined রেখে template ত্রুটি।
-- catchError ছাড়া switchMap করলে stream break হয়ে যায়।
-- shareReplay ছাড়া একই ডেটার জন্য বহু সাবস্ক্রিপশন।
+- signal ব্রিজে subscription teardown ভুলে যাওয়া।
+- একই store থেকে সরাসরি `subscribe` করে UI-তে setState কল করা (double source of truth)।
+- selectors এ memo/distinct না করা।
 
 ## Interview points
-- Signals bridge বোঝাতে `toSignal` বা signal state mention করুন।
-- switchMap + finalize ব্যবহার করে loading reset করা দেখান।
+- কেন RxJS data/side-effect আর signals UI reactive tree—ব্রিজে separation রাখার সুবিধা।
+- Teardown/cleanup কেন জরুরি (component destroy, route change)।
+- selectors + distinctUntilChanged এর পারফরম্যান্স ইফেক্ট।
 
-## Done when…
-- Store shape documented; cache policy লেখা।
-- shareReplay(1) ব্যবহার হয়েছে।
-- Template এ loading/error/empty branches আছে।
-
-## How to test this topic
-1) VS Code: hover করে store state টাইপ ঠিক আছে কিনা দেখুন; missing return/any নেই।
-2) Unit/component test: ATL দিয়ে container render করে loading → success → error UI assert করুন; `HttpTestingController` দিয়ে API stub করুন।
-3) Runtime: `ng serve` চালিয়ে Refresh বোতাম চাপুন; Network panel এ 5s cache window respected কিনা ও UI loading state কাজ করছে কিনা দেখুন।  
+## Quick practice
+- `npm run demo` চালান; আউটপুট মিলে কিনা দেখুন।
+- `toggle` অন্য আইডিতে দিন, লগ কীভাবে বদলায় দেখুন।
+- fromObservable কে পরিবর্তন করে ব্যাক-প্রেশার/বাফার যোগ করার চিন্তা করুন।
