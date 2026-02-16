@@ -1,159 +1,176 @@
 # 10) NgRx Entity + pagination/filtering
 
-Billing invoice তালিকা normalized রাখলে pagination ও filter দ্রুত হয়।
+লেম্যান-বাংলা: Entity adapter দিয়ে IDs + entities রাখলে pagination/filter সহজ হয়। এই ডেমো Angular ছাড়া—প্যাটার্ন বুঝে নিলে NgRx Entity API-তে map হবে।
 
-## Why this matters (real world)
-- বড় লিস্টে O(1) lookup; memoized selectors দ্রুত।
-- Pagination/filter UI lightweight হয়।
-- ইন্টারভিউ: Entity adapter ও selectors প্রশ্ন আসে।
+## Things to learn (beginner → intermediate → advanced)
+- Beginner: Entity shape `{ ids, entities }` + state `{ pagination, loading, error }`; action = load page/filter; reducer pure।
+- Intermediate: Effect দিয়ে API কল; total গণনা; failure এ পুরনো data রাখা।
+- Advanced: Memo selectors (page slice, byId), cache guard (same page/filter skip), delete/insert updateOne/removeOne।
 
-## Concepts (beginner → intermediate → advanced)
-- Beginner: Entity adapter ids/entities shape।
-- Intermediate: selectors for page, filter params; derived total pages।
-- Advanced: server-driven cursor pagination; parametric selectors; memoization।
+## Hands-on (commands + কী দেখবেন)
+1) রেডি ডেমো চালান:
+   ```bash
+   cd architecture-and-state/demos/ngrx-entity-pagination-demo
+   npm install
+   npm run demo       # page 1 → page 2 → filter → failure
+   npm run typecheck  # টাইপ সেফটি
+   ```
+2) Expected লগ: page1 মোট 25; page2 অন্য ids; filter "5" এ total 3; failure এর পর error আসে কিন্তু আগের filtered data বজায় থাকে।
+3) Break/fix: `setFailNext(true)` সরিয়ে success-only দেখুন; `pageSize` 3 করে pagination বদলান; `removeOne` ব্যবহার করে delete সিমুলেট করুন।
 
-## Copy-paste Example
+## Demos (copy-paste)
+`architecture-and-state/demos/ngrx-entity-pagination-demo/src/` থেকে মূল কোড:
 ```ts
-// app/features/billing/state/billing.actions.ts
-import { createActionGroup, props } from '@ngrx/store';
-export const BillingActions = createActionGroup({
-  source: 'Billing',
-  events: {
-    'Load Page': props<{ page: number; size: number; status?: string }>(),
-    'Load Success': props<{ data: Invoice[]; total: number }>(),
-    'Load Failure': props<{ error: string }>(),
+// app/entity-adapter.ts
+export type EntityState<T extends { id: string }> = { ids: string[]; entities: Record<string, T> };
+export function getInitialState<T extends { id: string }>(): EntityState<T> { return { ids: [], entities: {} }; }
+export function setAll<T extends { id: string }>(state: EntityState<T>, items: T[]): EntityState<T> {
+  const ids = items.map(i => i.id); const entities: Record<string, T> = {}; items.forEach(i => (entities[i.id] = i));
+  return { ids, entities };
+}
+export function addMany<T extends { id: string }>(state: EntityState<T>, items: T[]): EntityState<T> {
+  const ids = [...state.ids]; const entities = { ...state.entities } as Record<string, T>;
+  for (const item of items) { if (!entities[item.id]) ids.push(item.id); entities[item.id] = item; }
+  return { ids, entities };
+}
+export function removeOne<T extends { id: string }>(state: EntityState<T>, id: string): EntityState<T> {
+  const ids = state.ids.filter(x => x !== id); const { [id]: _, ...entities } = state.entities; return { ids, entities } as EntityState<T>;
+}
+```
+```ts
+// app/fake-api.ts
+import { Patient } from './types';
+const wait = (ms: number) => new Promise(res => setTimeout(res, ms));
+const MASTER: Patient[] = Array.from({ length: 25 }).map((_, idx) => ({ id: `p${idx + 1}`, name: `Patient ${idx + 1}`, ward: idx % 2 === 0 ? 'A' : 'B' }));
+export class FakeApi {
+  async list(page: number, pageSize: number, filter = '', fail = false) {
+    await wait(40);
+    if (fail) throw new Error('Server 500');
+    const filtered = filter ? MASTER.filter(p => p.name.toLowerCase().includes(filter.toLowerCase())) : MASTER;
+    const start = (page - 1) * pageSize;
+    const data = filtered.slice(start, start + pageSize);
+    return { data, total: filtered.length };
   }
-});
-export type Invoice = { id: string; amount: number; status: 'paid' | 'due'; patient: string };
-```
-```ts
-// app/features/billing/state/billing.reducer.ts
-import { createEntityAdapter, EntityState } from '@ngrx/entity';
-import { createFeature, createReducer, on } from '@ngrx/store';
-import { BillingActions, Invoice } from './billing.actions';
-
-type State = EntityState<Invoice> & { loading: boolean; error?: string; total: number; page: number; size: number; status?: string };
-const adapter = createEntityAdapter<Invoice>();
-const initialState: State = adapter.getInitialState({ loading: false, total: 0, page: 1, size: 10 });
-const feature = createFeature({
-  name: 'billing',
-  reducer: createReducer(
-    initialState,
-    on(BillingActions.loadPage, (state, { page, size, status }) => ({ ...state, loading: true, error: undefined, page, size, status })),
-    on(BillingActions.loadSuccess, (state, { data, total }) => adapter.setAll(data, { ...state, loading: false, total })),
-    on(BillingActions.loadFailure, (state, { error }) => ({ ...state, loading: false, error }))
-  )
-});
-export const { name: billingFeatureKey, reducer: billingReducer, selectBillingState } = feature;
-export const { selectIds, selectEntities, selectAll } = adapter.getSelectors(selectBillingState);
-export const selectPagination = feature.selectors.selectBillingState;
-```
-```ts
-// app/features/billing/state/billing.selectors.ts
-import { createSelector } from '@ngrx/store';
-import { selectAll, selectBillingState } from './billing.reducer';
-export const selectBillingVm = createSelector(selectBillingState, selectAll, (state, list) => ({
-  list,
-  loading: state.loading,
-  error: state.error,
-  page: state.page,
-  size: state.size,
-  total: state.total,
-  pages: Math.ceil(state.total / state.size || 1),
-  status: state.status,
-}));
-```
-```ts
-// app/features/billing/state/billing.effects.ts
-import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BillingActions } from './billing.actions';
-import { switchMap, map, catchError, of } from 'rxjs';
-@Injectable()
-export class BillingEffects {
-  private actions$ = inject(Actions);
-  private http = inject(HttpClient);
-  loadPage$ = createEffect(() => this.actions$.pipe(
-    ofType(BillingActions.loadPage),
-    switchMap(({ page, size, status }) => this.http.get<{ data: any[]; total: number }>(`/api/invoices?page=${page}&size=${size}&status=${status ?? ''}`).pipe(
-      map(resp => BillingActions.loadSuccess({ data: resp.data, total: resp.total })),
-      catchError(err => of(BillingActions.loadFailure({ error: err.message ?? 'Failed' })))
-    ))
-  ));
 }
 ```
 ```ts
-// app/features/billing/billing.routes.ts
-import { Routes } from '@angular/router';
-import { provideState, provideEffects } from '@ngrx/store';
-import { billingFeatureKey, billingReducer } from './state/billing.reducer';
-import { BillingEffects } from './state/billing.effects';
-import { BillingContainer } from './billing.container';
-import { provideHttpClient } from '@angular/common/http';
-export const BILLING_ROUTES: Routes = [
-  { path: '', component: BillingContainer, providers: [provideHttpClient(), provideState(billingFeatureKey, billingReducer), provideEffects(BillingEffects)] }
-];
+// app/actions.ts
+import { Patient } from './types';
+export type Action =
+  | { type: 'load page'; page: number; pageSize: number; filter: string }
+  | { type: 'load success'; data: Patient[]; total: number; page: number; pageSize: number; filter: string }
+  | { type: 'load failure'; error: string };
+export const Actions = {
+  loadPage: (page: number, pageSize: number, filter = ''): Action => ({ type: 'load page', page, pageSize, filter }),
+  loadSuccess: (data: Patient[], total: number, page: number, pageSize: number, filter: string): Action => ({ type: 'load success', data, total, page, pageSize, filter }),
+  loadFailure: (error: string): Action => ({ type: 'load failure', error })
+};
 ```
 ```ts
-// app/features/billing/billing.container.ts
-import { Component, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { CommonModule } from '@angular/common';
-import { BillingActions } from './state/billing.actions';
-import { selectBillingVm } from './state/billing.selectors';
-@Component({
-  standalone: true,
-  selector: 'hms-billing-container',
-  imports: [CommonModule],
-  template: `
-    <div *ngIf="vm$ | async as vm" class="space-y-2">
-      <div class="flex gap-2 items-center">
-        <button class="border px-2" (click)="page(-1)" [disabled]="vm.page===1">Prev</button>
-        <button class="border px-2" (click)="page(1)">Next</button>
-        <select [value]="vm.status ?? ''" (change)="status(($event.target as HTMLSelectElement).value)">
-          <option value="">All</option>
-          <option value="paid">Paid</option>
-          <option value="due">Due</option>
-        </select>
-      </div>
-      <p *ngIf="vm.loading">Loading…</p>
-      <p *ngIf="vm.error" class="text-red-600">{{ vm.error }}</p>
-      <ul>
-        <li *ngFor="let i of vm.list">{{ i.patient }} — ₹{{ i.amount }} ({{ i.status }})</li>
-      </ul>
-      <p class="text-xs">Page {{ vm.page }} / {{ vm.pages }}</p>
-    </div>
-  `
-})
-export class BillingContainer {
-  private store = inject(Store);
-  vm$ = this.store.select(selectBillingVm);
-  constructor() { this.store.dispatch(BillingActions.loadPage({ page: 1, size: 5 })); }
-  page(delta: number) { this.store.dispatch(BillingActions.loadPage({ page: Math.max(1, (this.getPage() + delta)), size: 5, status: this.currentStatus })); }
-  status(status: string) { this.currentStatus = status || undefined; this.store.dispatch(BillingActions.loadPage({ page: 1, size: 5, status: this.currentStatus })); }
-  private currentStatus?: string;
-  private getPage() { let value = 1; this.vm$.subscribe(vm => value = vm.page).unsubscribe(); return value; }
+// app/reducer.ts
+import { Action } from './actions';
+import { EntityState, getInitialState, setAll } from './entity-adapter';
+import { Patient, ViewState } from './types';
+const initialState: ViewState = {
+  data: getInitialState<Patient>(),
+  pagination: { page: 1, pageSize: 5, total: 0, filter: '' },
+  loading: false,
+  error: undefined
+};
+export function reducer(state: ViewState = initialState, action: Action): ViewState {
+  switch (action.type) {
+    case 'load page':
+      return { ...state, loading: true, error: undefined, pagination: { ...state.pagination, page: action.page, pageSize: action.pageSize, filter: action.filter } };
+    case 'load success':
+      return { ...state, loading: false, data: setAll(state.data, action.data), pagination: { page: action.page, pageSize: action.pageSize, total: action.total, filter: action.filter } };
+    case 'load failure':
+      return { ...state, loading: false, error: action.error };
+    default: return state;
+  }
+}
+export { initialState };
+```
+```ts
+// app/store.ts
+import { BehaviorSubject, Subject, filter, map, switchMap } from 'rxjs';
+import { Actions, Action } from './actions';
+import { reducer, initialState } from './reducer';
+import { FakeApi } from './fake-api';
+import { ViewState } from './types';
+export class Store {
+  private state$ = new BehaviorSubject<ViewState>(initialState);
+  private actions$ = new Subject<Action>();
+  private subs: Array<{ unsubscribe: () => void }> = [];
+  private failNext = false;
+  constructor(private api: FakeApi) {
+    const sub = this.actions$.pipe(map(a => reducer(this.state$.value, a))).subscribe(s => this.state$.next(s));
+    this.subs.push(sub);
+    const loadEffect = this.actions$.pipe(filter(a => a.type === 'load page')).pipe(
+      switchMap(a => this.api.list(a.page, a.pageSize, a.filter, this.failNext).then(
+        ({ data, total }) => Actions.loadSuccess(data, total, a.page, a.pageSize, a.filter),
+        err => Actions.loadFailure(err.message ?? 'Failed')
+      ))
+    ).subscribe(next => this.dispatch(next));
+    this.subs.push(loadEffect);
+  }
+  dispatch(action: Action) { this.actions$.next(action); }
+  select(): ViewState { return this.state$.value; }
+  setFailNext(v: boolean) { this.failNext = v; }
+  destroy() { this.subs.forEach(s => s.unsubscribe()); this.actions$.complete(); this.state$.complete(); }
 }
 ```
+```ts
+// main.ts
+import { Store } from './app/store';
+import { Actions } from './app/actions';
+import { FakeApi } from './app/fake-api';
+function logState(label: string, state: ReturnType<Store['select']>) {
+  console.log(`\n=== ${label} ===`);
+  console.log({ page: state.pagination.page, pageSize: state.pagination.pageSize, total: state.pagination.total, filter: state.pagination.filter, loading: state.loading, error: state.error, ids: state.data.ids, first: state.data.ids[0] ? state.data.entities[state.data.ids[0]] : undefined });
+}
+async function run() {
+  const store = new Store(new FakeApi());
+  store.dispatch(Actions.loadPage(1, 5, ''));
+  await new Promise(r => setTimeout(r, 70));
+  logState('page 1', store.select());
+  store.dispatch(Actions.loadPage(2, 5, ''));
+  await new Promise(r => setTimeout(r, 70));
+  logState('page 2', store.select());
+  store.dispatch(Actions.loadPage(1, 5, '5'));
+  await new Promise(r => setTimeout(r, 70));
+  logState('filter name contains "5"', store.select());
+  store.setFailNext(true);
+  store.dispatch(Actions.loadPage(1, 5, ''));
+  await new Promise(r => setTimeout(r, 70));
+  logState('failure (keeps old data)', store.select());
+  store.destroy();
+}
+run();
+```
 
-## Try it (exercise)
-- Beginner: size 10 করলে pages হিসাব ঠিক আছে কিনা দেখুন।
-- Advanced: cursor-based API ধরুন (`nextCursor`)—state এ রাখুন, selector আপডেট করুন।
+## Ready-to-run demo (repo bundle)
+- Path: `architecture-and-state/demos/ngrx-entity-pagination-demo`
+- Commands:
+  ```bash
+  cd architecture-and-state/demos/ngrx-entity-pagination-demo
+  npm install
+  npm run demo
+  npm run typecheck
+  ```
+- Expected output: page1 total=25 → page2 অন্য IDs → filter "5" total=3 → failure পরে error দেখায় কিন্তু আগের filtered data থাকে।
+- Test ideas: `pageSize` বদলান; `setFailNext(false)` রাখুন; delete scenario জন্য `removeOne` কল যোগ করুন।
 
 ## Common mistakes
-- Entity adapter ব্যবহার না করে বড় লিস্টে O(n) lookup।
-- memoized selector ছাড়া filter করলে change detection heavy।
+- Entity state আপডেট না করে array replace করা (ids/entities mismatch)।
+- total না সেট করে pagination UI বিভ্রান্ত করা।
+- error এ পুরনো data মুছে ফেলা (UX ঝাঁকুনি)।
 
 ## Interview points
-- Entity adapter ids/entities shape ব্যাখ্যা করুন; selectors বের করার কথা বলুন।
-- Pagination/filter state reducer-এ রাখার কথা উল্লেখ করুন।
+- কেন Entity adapter IDs + map দ্রুত lookup ও আপডেট দেয়।
+- Pagination/filter request key (page+filter) ক্যাশিং; stale data vs UX trade-off।
+- Effects এ debounce/mergeMap vs switchMap পছন্দ (newest wins)।
 
-## Done when…
-- Entity adapter wired; pagination/filter selectors কাজ করে।
-- Route-level provideState/provideEffects করা।
-
-## How to test this topic
-1) VS Code: adapter selectors imports resolve; feature key spelling ঠিক আছে।
-2) Unit test: reducer pagination state change; selector pages math; effect success/error with HttpTestingController.
-3) Runtime: `ng serve` → billing route খুলে Prev/Next/Filter ব্যবহার করুন; Network panel এ calls expected params পাঠাচ্ছে কিনা ও UI pages count আপডেট হচ্ছে কিনা দেখুন।  
+## Quick practice
+- ডেমো চালিয়ে আউটপুট মিলান।
+- filter + pagination একসাথে পরিবর্তন করে দেখুন total/ids কিভাবে বদলায়।
+- cache guard ভাবুন: একই page/filter এ already-loaded হলে effect skip।
