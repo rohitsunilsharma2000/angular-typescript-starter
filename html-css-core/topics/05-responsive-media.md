@@ -53,55 +53,45 @@ p  { font-size: var(--step-0); }
 - `aspect-ratio` ও `object-fit` দিয়ে ছবি বিকৃতি রোধ; placeholder সাইজ consistent রাখুন।
 
 **আরো উদাহরণ (beginner → advanced)**
-1) Beginner — simple media query
-```css
-@media (max-width: 600px) { body { padding: 12px; } }
-```
-2) Beginner — fluid heading with clamp
-```css
-h1 { font-size: clamp(1.6rem, 2vw + 1rem, 2.4rem); }
-```
-3) Intermediate — auto-fit cards
-```css
-.cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; }
-```
-4) Intermediate — aspect-ratio utility
-```css
- .thumb { width:100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 8px; }
-```
-5) Advanced — container width clamp
-```css
-.page { width: min(1100px, 92vw); margin: 0 auto; }
-```
-6) Intermediate — responsive picture element
+1) Media query padding
 ```html
-<picture>
-  <source media="(min-width:900px)" srcset="ward-large.jpg" />
-  <img src="ward-small.jpg" alt="Ward view" style="width:100%; aspect-ratio: 16/9;" />
-</picture>
+<style>@media (max-width:600px){body{padding:12px}}</style><p>Resize to see padding change.</p>
 ```
-7) Intermediate — `sizes` with `srcset`
+2) Fluid heading
 ```html
-<img
-  src="bed-640.jpg"
-  srcset="bed-320.jpg 320w, bed-640.jpg 640w, bed-960.jpg 960w"
-  sizes="(max-width:600px) 90vw, 400px"
-  alt="ICU bed" />
+<style>h1{font-size:clamp(1.6rem,2vw+1rem,2.4rem)}</style><h1>Fluid</h1>
 ```
-8) Advanced — responsive embed with `aspect-ratio`
-```css
-.video { aspect-ratio: 16/9; width:100%; }
-.video iframe { width:100%; height:100%; border:0; }
+3) Auto-fit grid
+```html
+<style>.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem}</style><div class="cards"><article>ICU</article><article>Ward</article></div>
 ```
-9) Advanced — clamp spacing token
-```css
-.section { padding: clamp(16px, 4vw, 48px); }
+4) Aspect-ratio thumb
+```html
+<img src="ward.jpg" alt="Ward" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;">
 ```
-10) Advanced — `@media (prefers-reduced-data)` for lighter assets
-```css
-@media (prefers-reduced-data: reduce) {
-  .hero { background-image: none; }
-}
+5) Container width clamp
+```html
+<div style="width:min(1100px,92vw);margin:0 auto;border:1px dashed #ccc;">Content</div>
+```
+6) Picture sources
+```html
+<picture><source media="(min-width:900px)" srcset="ward-large.jpg"><img src="ward-small.jpg" alt="Ward" style="width:100%;aspect-ratio:16/9;"></picture>
+```
+7) Srcset + sizes
+```html
+<img src="bed-640.jpg" srcset="bed-320.jpg 320w, bed-640.jpg 640w, bed-960.jpg 960w" sizes="(max-width:600px) 90vw, 400px" alt="ICU bed">
+```
+8) Responsive embed
+```html
+<div class="video" style="aspect-ratio:16/9;width:100%;"><iframe src="https://example.com" title="Demo" style="width:100%;height:100%;border:0;"></iframe></div>
+```
+9) Clamp spacing
+```html
+<div style="padding:clamp(16px,4vw,48px);background:#f8fafc;">Section</div>
+```
+10) Prefers-reduced-data
+```html
+<style>@media (prefers-reduced-data: reduce){.hero{background-image:none}}</style><div class="hero" style="height:200px;background:#e0f2fe;">Hero</div>
 ```
 
 **Try it**

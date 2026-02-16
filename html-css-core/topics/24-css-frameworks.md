@@ -34,42 +34,39 @@
 ```
 2) Flex utilities
 ```html
-<div class="flex items-center gap-2"><button class="btn-primary">...</button></div>
+<div class="flex items-center gap-2"><button class="btn-primary">Save</button></div>
 ```
-3) Theme config hint (tailwind.config.js)
-```js
-module.exports = { theme: { extend: { colors: { accent: '#2563eb' } } } };
+3) Tailwind theme config
+```html
+<!-- tailwind.config.js: module.exports={theme:{extend:{colors:{accent:'#2563eb'}}}} -->
 ```
 4) Component extraction
 ```html
-<div class="card shadow-sm border rounded-lg p-4">...</div>
+<div class="card shadow-sm border rounded-lg p-4">Card</div>
 ```
-5) Purge/JIT note
-```js
-module.exports = { content: ['./index.html'], mode: 'jit' };
-```
-6) @apply to extract component
-```css
-.btn { @apply inline-flex items-center gap-2 px-3 py-2 rounded-md text-white bg-blue-600 hover:bg-blue-700; }
-```
-7) Custom container width
-```js
-module.exports = { theme: { container: { center: true, padding: '1rem', screens: { lg: '1100px' } } } };
-```
-8) Forms plugin enable
-```js
-module.exports = { plugins: [require('@tailwindcss/forms')] };
-```
-9) Utility merge with clsx (React)
-```jsx
-import clsx from 'clsx';
-<button className={clsx('btn', disabled && 'opacity-50 cursor-not-allowed')}>Save</button>
-```
-10) DaisyUI theme swap example
+5) Purge/JIT
 ```html
-<html data-theme="corporate">
-  <button class="btn btn-primary">Admit</button>
-</html>
+<!-- tailwind.config.js: module.exports={content:['./index.html'],mode:'jit'} -->
+```
+6) @apply button
+```html
+<style>.btn{@apply inline-flex items-center gap-2 px-3 py-2 rounded-md text-white bg-blue-600 hover:bg-blue-700;}</style><button class="btn">Admit</button>
+```
+7) Custom container
+```html
+<!-- tailwind.config.js: module.exports={theme:{container:{center:true,padding:'1rem',screens:{lg:'1100px'}}}} -->
+```
+8) Forms plugin
+```html
+<!-- tailwind.config.js: module.exports={plugins:[require('@tailwindcss/forms')]} -->
+```
+9) clsx merge
+```html
+<!-- React: className={clsx('btn', disabled && 'opacity-50 cursor-not-allowed')} -->
+```
+10) DaisyUI theme
+```html
+<html data-theme="corporate"><button class="btn btn-primary">Admit</button></html>
 ```
 
 **Try it**

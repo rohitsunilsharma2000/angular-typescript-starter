@@ -29,52 +29,44 @@
 
 **আরো উদাহরণ (beginner → advanced)**
 1) Fixed tracks
-```css
-.g { display:grid; grid-template-columns: 200px 1fr; }
+```html
+<div style="display:grid;grid-template-columns:200px 1fr;gap:12px;"><aside>Nav</aside><main>Main</main></div>
 ```
 2) Named areas
-```css
-.layout { display:grid;
-  grid-template-areas:"h h" "s m" "f f";
-  grid-template-columns: 240px 1fr;
-}
-header{grid-area:h;} aside{grid-area:s;} main{grid-area:m;} footer{grid-area:f;}
+```html
+<div style="display:grid;grid-template-areas:'h h' 's m' 'f f';grid-template-columns:240px 1fr;gap:12px;"><header style="grid-area:h">H</header><aside style="grid-area:s">S</aside><main style="grid-area:m">M</main><footer style="grid-area:f">F</footer></div>
 ```
-3) Align/justify items
-```css
-.cards { justify-items: stretch; align-items: start; }
+3) Justify/align items
+```html
+<div style="display:grid;grid-template-columns:1fr 1fr;justify-items:stretch;align-items:start;gap:12px;"><div style="border:1px solid #cbd5e1;">A</div><div style="border:1px solid #cbd5e1;">B</div></div>
 ```
-4) Implicit rows sizing
-```css
-.g { grid-auto-rows: minmax(120px, auto); }
+4) Implicit rows
+```html
+<div style="display:grid;grid-auto-rows:minmax(120px,auto);gap:12px;"><div style="border:1px solid #cbd5e1;">Row</div></div>
 ```
-5) auto-fill vs auto-fit demo
-```css
-.auto-fill { grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); }
-.auto-fit  { grid-template-columns: repeat(auto-fit,  minmax(180px,1fr)); }
+5) auto-fill vs auto-fit
+```html
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;"><div>1</div><div>2</div></div>
 ```
 6) Gap shorthand
-```css
-.grid { display:grid; gap: 12px 20px; } /* row col */
+```html
+<div style="display:grid;gap:12px 20px;"><div>A</div><div>B</div><div>C</div></div>
 ```
-7) Full-bleed hero within centered page
-```css
-.page { display:grid; grid-template-columns: 1fr minmax(0, 960px) 1fr; }
-.page > * { grid-column: 2; }
-.hero { grid-column: 1 / -1; }
+7) Full-bleed hero
+```html
+<div style="display:grid;grid-template-columns:1fr minmax(0,960px) 1fr;"><section style="grid-column:1/-1;background:#e0f2fe;padding:20px;">Hero</section><p style="grid-column:2;">Body</p></div>
 ```
-8) Track repeat shortcut
-```css
-.stats { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); }
+8) Track repeat
+```html
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;"><div>1</div><div>2</div><div>3</div></div>
 ```
 9) Justify/align content
-```css
-.board { display:grid; justify-content:center; align-content:start; height:400px; }
+```html
+<div style="display:grid;justify-content:center;align-content:start;height:200px;border:1px dashed #cbd5e1;"><div style="width:120px;height:80px;background:#e0f2fe;"></div></div>
 ```
-10) Subgrid (Firefox/modern)
-```css
-.list { display:grid; grid-template-columns: 1fr 1fr; }
-.item { display:grid; grid-template-columns: subgrid; grid-column: span 2; }
+10) Subgrid (if supported)
+```html
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" class="list"><div style="display:grid;grid-template-columns:subgrid;grid-column:span 2;">Item spans</div></div>
 ```
 
 **Try it**

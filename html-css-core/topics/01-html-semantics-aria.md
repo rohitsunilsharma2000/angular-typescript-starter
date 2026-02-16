@@ -72,74 +72,47 @@
 - List বা টেবিল ডেটা উপস্থাপন করতে সঠিক সেম্যান্টিক ট্যাগ ব্যবহার করুন—এতে a11y + SEO দুটোই লাভবান।
 
 **আরো উদাহরণ (beginner → advanced)**
-1) Beginner — মিনিমাল ল্যান্ডমার্ক
+1) Minimal landmarks
 ```html
-<header>CityCare</header>
-<main><h1>Patients</h1></main>
-<footer>&copy; 2026</footer>
+<header>CityCare</header><main><h1>Patients</h1></main><footer>&copy; 2026</footer>
 ```
-2) Beginner — label/for ও hint
+2) Label + hint
 ```html
 <label for="pname">Name</label>
-<input id="pname" />
+<input id="pname" aria-describedby="pname-hint">
 <small id="pname-hint">Full legal name</small>
 ```
-3) Intermediate — definition list for vitals
+3) Definition list
 ```html
-<dl>
-  <dt>Heart Rate</dt><dd>88</dd>
-  <dt>SpO2</dt><dd>96%</dd>
-</dl>
+<dl><dt>Heart Rate</dt><dd>88</dd><dt>SpO2</dt><dd>96%</dd></dl>
 ```
-4) Intermediate — table with caption
+4) Table with caption
 ```html
-<table>
-  <caption>Bed Status</caption>
-  <thead><tr><th>Bed</th><th>Status</th></tr></thead>
-  <tbody>
-    <tr><td>ICU-1</td><td>Occupied</td></tr>
-    <tr><td>ICU-2</td><td>Empty</td></tr>
-  </tbody>
-</table>
+<table><caption>Bed Status</caption><thead><tr><th>Bed</th><th>Status</th></tr></thead><tbody><tr><td>ICU-1</td><td>Occupied</td></tr><tr><td>ICU-2</td><td>Empty</td></tr></tbody></table>
 ```
-5) Advanced — visually hidden text for icon buttons
+5) Icon button with aria-label
 ```html
-<button aria-label="Open pharmacy panel">
- <svg aria-hidden="true" viewBox="0 0 16 16">...</svg>
-</button>
+<button aria-label="Open pharmacy panel"><svg aria-hidden="true" width="16" height="16"></svg></button>
 ```
-6) Intermediate — landmark order for screen reader
+6) Landmark order
 ```html
-<header>...</header>
-<main>
-  <section aria-labelledby="labs"><h2 id="labs">Lab Results</h2></section>
-</main>
-<footer>Contacts</footer>
+<header>Top</header><main><section aria-labelledby="labs"><h2 id="labs">Labs</h2></section></main><footer>Contacts</footer>
 ```
-7) Intermediate — breadcrumb with `aria-current`
+7) Breadcrumb
 ```html
-<nav aria-label="Breadcrumb">
-  <ol>
-    <li><a href="/">Home</a></li>
-    <li><a href="/patients">Patients</a></li>
-    <li aria-current="page">P-101</li>
-  </ol>
-</nav>
+<nav aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li><li><a href="/patients">Patients</a></li><li aria-current="page">P-101</li></ol></nav>
 ```
-8) Advanced — `aria-live` error summary
+8) Live error
 ```html
-<div role="alert" aria-live="assertive">
-  Please fill insurance ID.
-</div>
+<div role="alert" aria-live="assertive">Please fill insurance ID.</div>
 ```
-9) Advanced — `aria-label` for icon-only inputs
+9) Search aria-label
 ```html
-<input type="search" aria-label="Search patients" placeholder="Search" />
+<input type="search" aria-label="Search patients" placeholder="Search">
 ```
-10) Advanced — `role="status"` for async updates
+10) Status live update
 ```html
-<p id="sync" role="status" aria-live="polite">Syncing...</p>
-<script>setTimeout(()=>sync.textContent='Updated from server',1200);</script>
+<p id="sync" role="status" aria-live="polite">Syncing...</p><script>setTimeout(()=>sync.textContent='Updated from server',1200);</script>
 ```
 
 **Try it**

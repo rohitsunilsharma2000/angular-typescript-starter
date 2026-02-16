@@ -21,49 +21,45 @@
 - z-index শুধুমাত্র positioned এলিমেন্টে কার্যকর; stacking context প্রায়শই transform/opacity দিয়ে নতুন হয়।
 
 **আরো উদাহরণ (beginner → advanced)**
-1) Inline বনাম block
+1) Inline vs block
 ```html
-<span style="display:block">Block span</span>
-<span>Inline span</span>
+<span style="display:block">Block span</span><span>Inline span</span>
 ```
 2) Relative + absolute badge
-```css
-.pill { position: relative; padding: 10px 14px; }
-.pill__dot { position: absolute; top: -4px; right: -4px; width: 10px; height: 10px; background:#ef4444; border-radius: 50%; }
+```html
+<div style="position:relative;padding:10px 14px;border:1px solid #cbd5e1;">P-11<span style="position:absolute;top:-4px;right:-4px;width:10px;height:10px;background:#ef4444;border-radius:50%;"></span></div>
 ```
 3) Fixed bar
-```css
-.status { position: fixed; bottom: 16px; right: 16px; background: #2563eb; color: #fff; padding: 10px; }
+```html
+<div style="position:fixed;bottom:16px;right:16px;background:#2563eb;color:#fff;padding:10px;">Status</div>
 ```
 4) Sticky subheader
-```css
-.subhead { position: sticky; top: 64px; background: #fff; }
+```html
+<div style="height:160px;overflow:auto;"><h3 style="position:sticky;top:0;background:#fff;">Subhead</h3><p>Long content...</p></div>
 ```
-5) Stacking context trap
-```css
-.modal { position: fixed; z-index: 100; }
-.modal * { position: relative; z-index: 1; } /* avoid unexpected overlay under transform parents */
+5) Stacking context
+```html
+<div style="position:relative;z-index:1;background:#fff;">Modal shell</div>
 ```
 6) Inline-block gap fix
-```css
-nav a { display:inline-block; margin-right: -4px; }
+```html
+<nav><a style="display:inline-block;margin-right:-4px;">Home</a><a style="display:inline-block;">Beds</a></nav>
 ```
-7) Absolute center shortcut
-```css
-.center { position:absolute; inset:0; display:grid; place-items:center; }
+7) Absolute center
+```html
+<div style="position:relative;height:200px;background:#e2e8f0;"><div style="position:absolute;inset:0;display:grid;place-items:center;">Centered</div></div>
 ```
-8) `display: contents` for layout-only wrapper
-```css
-.row { display: contents; } /* children participate in parent grid/flex */
+8) display: contents
+```html
+<div style="display:grid;grid-template-columns:1fr 1fr;"><div style="display:contents"><div>Row1</div><div>Row2</div></div></div>
 ```
 9) Overlay with pointer-events none
-```css
-.glass { position:fixed; inset:0; background:rgba(15,23,42,.4); pointer-events:none; }
+```html
+<div style="position:fixed;inset:0;background:rgba(15,23,42,.4);pointer-events:none;"></div>
 ```
-10) Sticky inside scrolling container
-```css
-.panel { max-height: 60vh; overflow:auto; }
-.panel h3 { position: sticky; top: 0; background:#fff; }
+10) Sticky in scroll area
+```html
+<div style="max-height:200px;overflow:auto;border:1px solid #cbd5e1;"><h3 style="position:sticky;top:0;background:#fff;">Beds</h3><p>...</p></div>
 ```
 
 **Try it**

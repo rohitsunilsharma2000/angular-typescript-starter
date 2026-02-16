@@ -27,49 +27,45 @@
 - Contrast ratio AA (4.5:1) লক্ষ্য রাখুন; DevTools/axe দিয়ে মাপুন।
 
 **আরো উদাহরণ (beginner → advanced)**
-1) Focus ring on buttons/links
-```css
-button:focus-visible, a:focus-visible { box-shadow: 0 0 0 3px rgba(37,99,235,0.35); }
+1) Focus ring
+```html
+<style>button:focus-visible,a:focus-visible{box-shadow:0 0 0 3px rgba(37,99,235,0.35)}</style><button>Focus</button>
 ```
-2) Hover vs focus parity
-```css
-.card:hover, .card:focus-within { border-color: #2563eb; }
+2) Hover/focus parity
+```html
+<style>.card{border:1px solid #cbd5e1}.card:hover,.card:focus-within{border-color:#2563eb}</style><div class="card" tabindex="0">Card</div>
 ```
-3) Reduced motion on parallax
-```css
-@media (prefers-reduced-motion: reduce) { .parallax { background-attachment: initial; } }
+3) Reduced motion
+```html
+<style>@media (prefers-reduced-motion: reduce){.parallax{background-attachment:initial}}</style><div class="parallax" style="height:120px;background:#e0f2fe;">Parallax</div>
 ```
-4) High contrast alt theme
-```css
-@media (forced-colors: active) {
-  * { border-color: ButtonText !important; }
-}
+4) Forced colors
+```html
+<style>@media (forced-colors: active){*{border-color:ButtonText!important}}</style><div style="border:1px solid currentColor;padding:8px;">FC</div>
 ```
-5) Visible skip link
-```css
-.skip { position:absolute; left:-999px; }
-.skip:focus { left: 12px; top:12px; background:#fff; padding:8px; }
+5) Skip link
+```html
+<a class="skip" href="#main" style="position:absolute;left:-999px;">Skip to main</a><main id="main">Main</main><style>.skip:focus{left:12px;top:12px;background:#fff;padding:8px}</style>
 ```
-6) `:target` highlight for in-page links
-```css
-:target { outline: 3px solid #22c55e; outline-offset: 4px; }
+6) :target highlight
+```html
+<style>:target{outline:3px solid #22c55e;outline-offset:4px}</style><a href="#labs">Go labs</a><h2 id="labs">Labs</h2>
 ```
-7) sr-only utility
-```css
-.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); }
+7) sr-only
+```html
+<style>.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);}</style><span class="sr-only">Hidden text</span>
 ```
-8) Form error border + message spacing
-```css
-.field[aria-invalid="true"] { border-color: #ef4444; }
-.field + .error { color:#b91c1c; margin-top:4px; }
+8) Error styling
+```html
+<style>.field[aria-invalid="true"]{border-color:#ef4444}.error{color:#b91c1c;margin-top:4px}</style><div class="field" aria-invalid="true" style="border:1px solid #cbd5e1;padding:6px;">Field</div><p class="error">Required</p>
 ```
-9) Prefers-reduced-transparency fallback
-```css
-@media (prefers-reduced-transparency: reduce) { .glass { background: #0f172a; backdrop-filter: none; } }
+9) Reduced transparency
+```html
+<style>@media (prefers-reduced-transparency: reduce){.glass{background:#0f172a;backdrop-filter:none}}</style><div class="glass" style="backdrop-filter:blur(8px);padding:10px;color:#fff;">Glass</div>
 ```
-10) Larger tap targets on mobile
-```css
-@media (max-width: 640px) { button, a { min-height: 44px; padding: 12px 14px; } }
+10) Larger tap targets
+```html
+<style>@media (max-width:640px){button,a{min-height:44px;padding:12px 14px}}</style><button>Tap me</button>
 ```
 
 **Try it**

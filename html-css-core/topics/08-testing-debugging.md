@@ -30,51 +30,45 @@ test('nav and form render', async ({ page }) => {
 - Tab-order ও focus-visible চেক করা a11y সচেতনতা দেখায়।
 
 **আরো উদাহরণ (beginner → advanced)**
-1) Beginner — manual contrast check
-```md
-Chrome DevTools → Elements → Styles → color picker → Contrast ratio shown; adjust until AA/AAA.
+1) Contrast check
+```html
+<!-- Chrome DevTools color picker shows contrast ratio; aim AA 4.5:1 -->
 ```
-2) Beginner — simple tab walk
-```md
-Press Tab through intake form; ensure visible focus ring on every control.
+2) Tab walk
+```html
+<!-- Press Tab through form; ensure focus ring visible -->
 ```
-3) Intermediate — Lighthouse CLI
-```bash
-npx lighthouse http://localhost:5500 --only-categories=accessibility --quiet
+3) Lighthouse CLI
+```html
+<!-- Run: npx lighthouse http://localhost:5500 --only-categories=accessibility --quiet -->
 ```
-4) Intermediate — axe-core in Playwright
-```ts
-import AxeBuilder from '@axe-core/playwright';
-const results = await new AxeBuilder({ page }).analyze();
-console.log(results.violations);
+4) Axe with Playwright
+```html
+<!-- JS: import AxeBuilder from '@axe-core/playwright'; await new AxeBuilder({page}).analyze(); -->
 ```
-5) Advanced — visual diff hint (Playwright)
-```ts
-await expect(page).toHaveScreenshot('beds.png', { fullPage: true });
+5) Visual diff
+```html
+<!-- Playwright: await expect(page).toHaveScreenshot('beds.png',{fullPage:true}); -->
 ```
-6) Intermediate — CSS outline debug helper
-```css
-* { outline: 1px solid rgba(255,0,0,0.08); }
+6) CSS outline debug
+```html
+<style>*{outline:1px solid rgba(255,0,0,0.08);}</style><div>Outline debug</div>
 ```
-7) Intermediate — grid/flex overlays in DevTools
-```md
-Chrome DevTools → Layout panel → check "Display area info" for Grid/Flex; toggle overlay.
+7) Grid/flex overlay note
+```html
+<!-- DevTools Layout panel → toggle Grid/Flex overlays -->
 ```
-8) Advanced — network throttling check
-```bash
-chromium --remote-debugging-port=9222 --user-data-dir=/tmp/chrome --proxy-server="direct://" --proxy-bypass-list="*" --force-fieldtrials="Throttling/enable"
+8) Network throttle launch
+```html
+<!-- chromium --remote-debugging-port=9222 ... --force-fieldtrials="Throttling/enable" -->
 ```
-9) Advanced — performance mark/measure
-```js
-performance.mark('render-start');
-// render UI
-performance.mark('render-end');
-performance.measure('render', 'render-start', 'render-end');
-console.log(performance.getEntriesByName('render')[0].duration);
+9) Performance mark/measure
+```html
+<script>performance.mark('s');performance.mark('e');performance.measure('render','s','e');console.log(performance.getEntriesByName('render')[0].duration);</script>
 ```
-10) Advanced — emulate reduced motion in Playwright
-```ts
-await page.emulateMedia({ reducedMotion: 'reduce' });
+10) Reduced motion in Playwright
+```html
+<!-- await page.emulateMedia({reducedMotion:'reduce'}); -->
 ```
 
 **Try it**

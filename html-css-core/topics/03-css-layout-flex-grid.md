@@ -57,68 +57,45 @@ footer { grid-area: footer; padding: 1rem; background: #0f172a; color: #fff; }
 - Desktop-first বা mobile-first—Grid টেম্পলেটে `minmax()` ও মিডিয়া কুয়েরি দিয়ে সিদ্ধান্ত নিন।
 
 **আরো উদাহরণ (beginner → advanced)**
-1) Beginner — flex row nav
+1) Flex nav
 ```html
-<nav style="display:flex; gap:8px;">
-  <a>Home</a><a>Beds</a><a>Pharmacy</a>
-</nav>
+<nav style="display:flex;gap:8px;"><a>Home</a><a>Beds</a><a>Pharmacy</a></nav>
 ```
-2) Beginner — flex wrap cards
+2) Flex wrap cards
 ```html
-<div style="display:flex; gap:12px; flex-wrap:wrap;">
-  <div style="flex:1 1 160px; border:1px solid #ccc;">ICU-1</div>
-  <div style="flex:1 1 160px; border:1px solid #ccc;">ICU-2</div>
-</div>
+<div style="display:flex;gap:12px;flex-wrap:wrap;"><div style="flex:1 1 160px;border:1px solid #ccc;">ICU-1</div><div style="flex:1 1 160px;border:1px solid #ccc;">ICU-2</div></div>
 ```
-3) Intermediate — grid shell areas
+3) Grid shell areas
 ```html
-<div style="display:grid;grid-template-areas:'h h''s m''f f';grid-template-columns:220px 1fr;min-height:100vh;">
-  <header style="grid-area:h">Header</header>
-  <aside style="grid-area:s">Sidebar</aside>
-  <main style="grid-area:m">Main</main>
-  <footer style="grid-area:f">Footer</footer>
-</div>
+<div style="display:grid;grid-template-areas:'h h''s m''f f';grid-template-columns:220px 1fr;min-height:100vh;"><header style="grid-area:h">Header</header><aside style="grid-area:s">Sidebar</aside><main style="grid-area:m">Main</main><footer style="grid-area:f">Footer</footer></div>
 ```
-4) Intermediate — auto-fit cards
+4) Auto-fit cards
 ```html
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;">
-  <article class="card">Bed A</article>
-  <article class="card">Bed B</article>
-</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;"><article class="card">Bed A</article><article class="card">Bed B</article></div>
 ```
-5) Advanced — sticky header + scroll area
+5) Sticky header layout
 ```html
-<style>
-.layout { display:grid; grid-template-rows:64px 1fr; height:100vh; }
-.top { position:sticky; top:0; background:#0f172a; color:#fff; padding:12px; }
-.scroll { overflow:auto; padding:12px; }
-</style>
-<div class="layout">
-  <div class="top">Sticky Ops Bar</div>
-  <div class="scroll">...long bed list...</div>
-</div>
+<style>.layout{display:grid;grid-template-rows:64px 1fr;height:100vh}.top{position:sticky;top:0;background:#0f172a;color:#fff;padding:12px}.scroll{overflow:auto;padding:12px}</style><div class="layout"><div class="top">Sticky Ops Bar</div><div class="scroll">...long bed list...</div></div>
 ```
-6) Intermediate — equal-height cards with grid auto-rows
+6) Equal-height grid cards
 ```html
-.cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); grid-auto-rows:1fr; gap:12px; }
-.cards article { padding:12px; border:1px solid #d0d7de; }
+<style>.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));grid-auto-rows:1fr;gap:12px;} .cards article{padding:12px;border:1px solid #d0d7de;}</style><div class="cards"><article>ICU-1</article><article>ICU-2</article></div>
 ```
-7) Intermediate — flexbox for action bar spacing
+7) Flex action bar
 ```html
-.actions { display:flex; gap:8px; justify-content:space-between; align-items:center; }
+<div style="display:flex;gap:8px;justify-content:space-between;align-items:center;"><span>Patients</span><button>New</button></div>
 ```
-8) Advanced — grid with named lines
+8) Grid named lines
 ```html
-.shell { display:grid; grid-template-columns:[sidebar] 240px [content] 1fr [end]; }
+<div style="display:grid;grid-template-columns:[sidebar]240px [content]1fr [end];gap:16px;"><aside>Nav</aside><main>Main</main></div>
 ```
-9) Advanced — clamp() container width + center
+9) Clamp page width
 ```html
-.page { width:clamp(320px, 90vw, 1100px); margin:0 auto; }
+<div style="width:clamp(320px,90vw,1100px);margin:0 auto;border:1px dashed #ccc;">Content</div>
 ```
-10) Advanced — CSS grid masonry-ish via `grid-auto-flow: dense`
+10) Dense grid
 ```html
-.feed { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); grid-auto-flow:dense; gap:10px; }
-.wide { grid-column:span 2; }
+<style>.feed{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));grid-auto-flow:dense;gap:10px;} .wide{grid-column:span 2;}</style><div class="feed"><article class="wide">ICU</article><article>Ward</article><article>OPD</article></div>
 ```
 
 **Try it**

@@ -24,50 +24,45 @@ html { scroll-behavior: smooth; }
 - Scroll snap/behavior মাইক্রো-UX কিন্তু `prefers-reduced-motion` বিবেচনা করুন।
 
 **আরো উদাহরণ (beginner → advanced)**
-1) clamp spacing
-```css
-.section { padding: clamp(1rem, 2vw, 2rem); }
+1) Clamp spacing
+```html
+<div style="padding:clamp(1rem,2vw,2rem);background:#f8fafc;">Section</div>
 ```
-2) min/max math
-```css
-.sidebar { width: min(320px, 28vw); }
+2) min()/max()
+```html
+<div style="width:min(320px,28vw);border:1px solid #cbd5e1;">Sidebar</div>
 ```
 3) Object-fit cover
-```css
-.thumb { width:100%; height:160px; object-fit: cover; }
+```html
+<img src="ward.jpg" alt="" style="width:100%;height:160px;object-fit:cover;">
 ```
 4) Scroll snap
-```css
-.carousel { scroll-snap-type: x mandatory; display:flex; overflow-x:auto; }
-.slide { scroll-snap-align: start; min-width: 280px; }
+```html
+<div style="scroll-snap-type:x mandatory;display:flex;overflow:auto;gap:12px;"><article style="scroll-snap-align:start;min-width:280px;">Card</article><article style="scroll-snap-align:start;min-width:280px;">Card</article></div>
 ```
-5) Container query (syntax preview)
-```css
-@container (min-width: 600px) {
-  .card { display: grid; grid-template-columns: 1fr 1fr; }
-}
+5) Container query
+```html
+<style>@container (min-width:600px){.card{display:grid;grid-template-columns:1fr 1fr}}</style><div style="container-type:inline-size;"><div class="card" style="border:1px solid #cbd5e1;">CQ card</div></div>
 ```
-6) accent-color for form controls
-```css
-input[type="checkbox"] { accent-color: #22c55e; }
+6) accent-color
+```html
+<input type="checkbox" style="accent-color:#22c55e">
 ```
-7) `:has()` parent styling
-```css
-.field:has(input:invalid) { border-color: #ef4444; }
+7) :has parent
+```html
+<div class="field" style="border:1px solid #cbd5e1;padding:8px;"><input required></div><style>.field:has(input:invalid){border-color:#ef4444}</style>
 ```
-8) `color-mix()` experimental
-```css
-.pill { background: color-mix(in srgb, #0ea5e9 70%, white); }
+8) color-mix
+```html
+<div style="background:color-mix(in srgb,#0ea5e9 70%,white);padding:12px;border-radius:8px;">Mix</div>
 ```
-9) View transitions toggle (Chrome)
-```css
-::view-transition-old(root), ::view-transition-new(root) { animation-duration: 180ms; }
+9) View transitions
+```html
+<style>::view-transition-old(root),::view-transition-new(root){animation-duration:180ms}</style>
 ```
-10) `@supports` guard
-```css
-@supports (backdrop-filter: blur(10px)) {
-  .glass { backdrop-filter: blur(10px); }
-}
+10) @supports guard
+```html
+<style>@supports(backdrop-filter:blur(10px)){.glass{backdrop-filter:blur(10px)}}.glass{padding:12px;border:1px solid #cbd5e1}</style><div class="glass">Glass</div>
 ```
 
 **Try it**

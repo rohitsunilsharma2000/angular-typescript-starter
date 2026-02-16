@@ -28,46 +28,44 @@
 
 **আরো উদাহরণ (beginner → advanced)**
 1) Grouping
-```css
-h1, h2, h3 { font-family: "Inter"; }
+```html
+<style>h1,h2,h3{font-family:"Inter"}</style><h2>Title</h2>
 ```
-2) Sibling (adjacent)
-```css
-label + input { margin-top: 4px; }
+2) Adjacent sibling
+```html
+<style>label+input{margin-top:4px}</style><label>Phone</label><input>
 ```
 3) General sibling
-```css
-.alert ~ .hint { opacity: 0.7; }
+```html
+<style>.alert~.hint{opacity:.7}</style><div class="alert">Alert</div><p class="hint">Hint</p>
 ```
-4) :nth-child pattern
-```css
-.beds li:nth-child(odd) { background: #f8fafc; }
+4) nth-child
+```html
+<style>.beds li:nth-child(odd){background:#f8fafc}</style><ul class="beds"><li>1</li><li>2</li><li>3</li></ul>
 ```
-5) Specificity demo
-```css
-.card p { color: #0f172a; }
-.card .highlight { color: #2563eb; } /* wins over element rule */
-#main .card .highlight { color: #dc2626; }   /* id wins */
+5) Specificity ladder
+```html
+<style>.card p{color:#0f172a}.card .highlight{color:#2563eb}#main .card .highlight{color:#dc2626}</style><div id="main" class="card"><p class="highlight">Hi</p></div>
 ```
 6) Attribute selector
-```css
-input[readonly] { background: #f3f4f6; }
+```html
+<style>input[readonly]{background:#f3f4f6}</style><input readonly value="Lock">
 ```
-7) :not filter
-```css
-.nav a:not(.active) { color: #475569; }
+7) :not
+```html
+<style>.nav a:not(.active){color:#475569}</style><nav class="nav"><a class="active">Home</a><a>Bed</a></nav>
 ```
-8) :is with low specificity
-```css
-:is(h1, h2, h3) { margin-bottom: 0.4em; }
+8) :is
+```html
+<style>:is(h1,h2,h3){margin-bottom:.4em}</style><h3>Heading</h3>
 ```
-9) :where zero specificity helper
-```css
-.card :where(h3, p) { margin: 0; }
+9) :where zero spec
+```html
+<style>.card :where(h3,p){margin:0}</style><div class="card"><h3>H3</h3><p>Body</p></div>
 ```
-10) :has parent selector (modern)
-```css
-.field:has(input:invalid) { border-color: #ef4444; }
+10) :has parent
+```html
+<style>.field:has(input:invalid){border:1px solid #ef4444}</style><div class="field"><input required></div>
 ```
 
 **Try it**

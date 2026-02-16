@@ -55,67 +55,45 @@
 - Focus-visible ব্যবহার করুন—keyboard users এর জন্য স্পষ্ট ফোকাস রিং দিন।
 
 **আরো উদাহরণ (beginner → advanced)**
-1) Beginner — pill badge
+1) Pill badge
 ```html
 <span style="display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;background:#eef2ff;color:#3730a3;">ICU</span>
 ```
-2) Beginner — utility stack
+2) Utility stack
 ```html
-<div style="display:flex;gap:8px;flex-wrap:wrap;">
-  <button class="btn btn--primary">Admit</button>
-  <button class="btn btn--ghost">Cancel</button>
-</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;"><button>Admit</button><button>Cancel</button></div>
 ```
-3) Intermediate — icon button a11y
+3) Icon button
 ```html
-<button class="btn btn--ghost" aria-label="Refresh beds">
-  &#x21bb;
-</button>
+<button aria-label="Refresh beds" style="border:1px solid #cbd5e1;padding:8px;border-radius:8px">&#x21bb;</button>
 ```
-4) Intermediate — disabled style
-```css
-.btn[disabled] { opacity: 0.55; cursor: not-allowed; }
-```
-5) Advanced — utility for stack/cluster
-```css
-.stack { display:flex; flex-direction:column; gap:12px; }
-.cluster { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
-```
+4) Disabled button
 ```html
-<div class="stack">
-  <div class="cluster"><span class="badge">HR 88</span><span class="badge">BP 120/80</span></div>
-  <div class="cluster"><button class="btn btn--primary">Save</button></div>
-</div>
+<button disabled style="opacity:0.55;cursor:not-allowed;">Disabled</button>
 ```
-6) Intermediate — focus-visible utility
-```css
-.focus-ring:focus-visible { outline:2px solid #2563eb; outline-offset:2px; }
-```
-7) Intermediate — toggle switch markup
+5) Stack + cluster
 ```html
-<label class="toggle">
-  <input type="checkbox" aria-label="Enable alerts" />
-  <span></span>
-</label>
+<div style="display:flex;flex-direction:column;gap:12px;"><div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;"><span>HR 88</span><span>BP 120/80</span></div><div><button>Save</button></div></div>
 ```
-8) Advanced — skeleton loader
-```css
-.skeleton { background:linear-gradient(90deg,#e5e7eb 25%,#f3f4f6 37%,#e5e7eb 63%); background-size:400% 100%; animation: shimmer 1.2s infinite; }
-@keyframes shimmer { 100% { background-position: -100% 0; } }
-```
-9) Advanced — tooltip with data attribute
+6) Focus-visible utility
 ```html
-<button data-tip="Edit patient" class="btn btn--ghost">✎</button>
+<style>.focus-ring:focus-visible{outline:2px solid #2563eb;outline-offset:2px}</style><button class="focus-ring">Focusable</button>
 ```
-```css
-[data-tip]{ position:relative; }
-[data-tip]::after{ content:attr(data-tip); position:absolute; inset:auto auto 110% 50%; transform:translateX(-50%); background:#111827; color:#fff; padding:4px 8px; border-radius:6px; opacity:0; pointer-events:none; transition:opacity .15s; }
-[data-tip]:hover::after,[data-tip]:focus-visible::after{ opacity:1; }
-```
-10) Advanced — modal shell
+7) Toggle switch
 ```html
-<dialog id="assign"><p>Assign bed?</p><button onclick="assign.close()">Close</button></dialog>
-<button onclick="assign.showModal()">Open</button>
+<label style="display:inline-flex;align-items:center;gap:8px;"><input type="checkbox"> Enable alerts</label>
+```
+8) Skeleton loader
+```html
+<style>.skeleton{width:160px;height:14px;border-radius:6px;background:linear-gradient(90deg,#e5e7eb 25%,#f3f4f6 37%,#e5e7eb 63%);background-size:400% 100%;animation:shimmer 1.2s infinite}@keyframes shimmer{100%{background-position:-100% 0}}</style><div class="skeleton"></div>
+```
+9) Tooltip data-tip
+```html
+<style>[data-tip]{position:relative}[data-tip]::after{content:attr(data-tip);position:absolute;inset:auto auto 110% 50%;transform:translateX(-50%);background:#111827;color:#fff;padding:4px 8px;border-radius:6px;opacity:0;pointer-events:none;transition:opacity .15s}[data-tip]:hover::after,[data-tip]:focus-visible::after{opacity:1}</style><button data-tip="Edit patient">✎</button>
+```
+10) Modal dialog
+```html
+<dialog id="assign"><p>Assign bed?</p><button onclick="assign.close()">Close</button></dialog><button onclick="assign.showModal()">Open</button>
 ```
 
 **Try it**

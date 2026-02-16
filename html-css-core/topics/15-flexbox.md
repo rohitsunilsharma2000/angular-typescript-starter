@@ -30,50 +30,44 @@
 
 **আরো উদাহরণ (beginner → advanced)**
 1) Centering
-```css
-.center { display:flex; align-items:center; justify-content:center; }
+```html
+<div style="display:flex;align-items:center;justify-content:center;height:120px;background:#f8fafc;">Center</div>
 ```
-2) Wrap + min width
-```css
-.cards { display:flex; flex-wrap:wrap; gap:12px; }
-.cards > article { flex:1 1 200px; }
+2) Wrap cards
+```html
+<div style="display:flex;flex-wrap:wrap;gap:12px;"><article style="flex:1 1 200px;border:1px solid #cbd5e1;">ICU</article><article style="flex:1 1 200px;border:1px solid #cbd5e1;">Ward</article></div>
 ```
-3) Column layout
-```css
-.stack { display:flex; flex-direction:column; gap:8px; }
+3) Column stack
+```html
+<div style="display:flex;flex-direction:column;gap:8px;"><div>Row1</div><div>Row2</div></div>
 ```
 4) Grow vs shrink
-```css
-.grow { flex: 1 1 0; }
-.no-shrink { flex-shrink: 0; }
+```html
+<div style="display:flex;gap:8px;"><input style="flex:1 1 0;" placeholder="Search"><button style="flex-shrink:0;">Go</button></div>
 ```
-5) Align-self override
-```css
-.card:nth-child(2) { align-self: stretch; }
+5) Align-self
+```html
+<div style="display:flex;align-items:flex-start;gap:8px;"><div>Short</div><div style="align-self:stretch;background:#e2e8f0;">Stretch</div></div>
 ```
-6) Order for priority
-```css
-.cta { order: -1; } /* moves before siblings */
+6) Order
+```html
+<div style="display:flex;gap:8px;"><button style="order:-1;">Primary</button><button>Secondary</button></div>
 ```
-7) Fixed + fluid combo
-```css
-.shell { display:flex; gap:12px; }
-.shell .sidebar { flex:0 0 220px; }
-.shell .main { flex:1 1 auto; }
+7) Fixed + fluid
+```html
+<div style="display:flex;gap:12px;"><aside style="flex:0 0 220px;background:#e2e8f0;">Side</aside><main style="flex:1 1 auto;">Main</main></div>
 ```
 8) Space-between nav
-```css
-.nav { display:flex; justify-content:space-between; align-items:center; }
+```html
+<nav style="display:flex;justify-content:space-between;align-items:center;"><span>Logo</span><button>Login</button></nav>
 ```
-9) Align-content for wrapped rows
-```css
-.tiles { display:flex; flex-wrap:wrap; align-content: start; gap: 12px; height: 300px; }
+9) Align-content
+```html
+<div style="display:flex;flex-wrap:wrap;align-content:start;gap:12px;height:200px;border:1px dashed #cbd5e1;"><div style="width:80px;height:60px;background:#e0f2fe;"></div><div style="width:80px;height:60px;background:#fee2e2;"></div></div>
 ```
-10) Sticky footer with flex column
-```css
-body { min-height:100vh; display:flex; flex-direction:column; }
-main { flex:1; }
-footer { margin-top:auto; }
+10) Sticky footer
+```html
+<body style="min-height:100vh;display:flex;flex-direction:column;"><main style="flex:1">Content</main><footer style="margin-top:auto;background:#e2e8f0;padding:12px;">Footer</footer></body>
 ```
 
 **Try it**

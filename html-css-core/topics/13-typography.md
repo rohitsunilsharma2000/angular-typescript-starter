@@ -23,46 +23,45 @@ body { font-family: "Inter", system-ui, -apple-system, sans-serif; line-height: 
 - Typography tokens (size/weight/line-height) নির্ধারণ করে consistency বজায় রাখুন।
 
 **আরো উদাহরণ (beginner → advanced)**
-1) System stack fallback
-```css
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+1) System stack
+```html
+<style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}</style><p>System text</p>
 ```
-2) Responsive type with clamp
-```css
-h1 { font-size: clamp(1.6rem, 2vw + 1rem, 2.4rem); }
+2) Fluid heading
+```html
+<style>h1{font-size:clamp(1.6rem,2vw+1rem,2.4rem)}</style><h1>ICU Dashboard</h1>
 ```
-3) Small caps via transform
-```css
-.pill { text-transform: uppercase; letter-spacing: 0.08em; }
+3) Small caps
+```html
+<p style="text-transform:uppercase;letter-spacing:0.08em;">Vitals</p>
 ```
-4) Text decoration control
-```css
-a { text-decoration: none; }
-a:hover { text-decoration: underline; text-decoration-thickness: 2px; }
+4) Underline control
+```html
+<style>a{text-decoration:none}a:hover{text-decoration:underline;text-decoration-thickness:2px}</style><a href="#">Link</a>
 ```
-5) Font-feature-settings
-```css
-.nums { font-variant-numeric: tabular-nums; }
+5) Tabular numbers
+```html
+<div style="font-variant-numeric:tabular-nums;">120/80</div>
 ```
-6) Hyphenation for long words
-```css
-p { hyphens: auto; }
+6) Hyphenation
+```html
+<p style="hyphens:auto;">Pneumonoultramicroscopicsilicovolcanoconiosis</p>
 ```
 7) Text wrap balance
-```css
-h1 { text-wrap: balance; }
+```html
+<h1 style="text-wrap:balance;">Monitor patients beds and pharmacy</h1>
 ```
 8) Fluid letter-spacing
-```css
-.hero-title { letter-spacing: clamp(0.02em, 0.4vw, 0.08em); }
+```html
+<h2 style="letter-spacing:clamp(0.02em,0.4vw,0.08em);">CityCare</h2>
 ```
-9) Font weight axis for variable fonts
-```css
-.heavy { font-variation-settings: "wght" 750; }
+9) Variable font weight axis
+```html
+<p style="font-variation-settings:'wght' 750;">Heavy text</p>
 ```
-10) Text truncation
-```css
-.ellipsis { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+10) Ellipsis
+```html
+<div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;">Very long patient name that will cut</div>
 ```
 
 **Try it**

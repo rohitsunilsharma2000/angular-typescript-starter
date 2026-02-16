@@ -33,50 +33,45 @@
 - Lighthouse → Performance + A11y স্কোর শেয়ার করতে পারা স্টার্টআপ ইন্টারভিউতে শক্তি।
 
 **আরো উদাহরণ (beginner → advanced)**
-1) Beginner — defer JS
+1) Defer JS
 ```html
 <script src="/app.js" defer></script>
 ```
-2) Beginner — preload font
+2) Preload font
 ```html
 <link rel="preload" as="font" href="/fonts/Inter.var.woff2" type="font/woff2" crossorigin>
 ```
-3) Intermediate — lazy iframe
+3) Lazy iframe
 ```html
-<iframe src="beds.html" loading="lazy" title="Beds overview"></iframe>
+<iframe src="beds.html" loading="lazy" title="Beds"></iframe>
 ```
-4) Intermediate — compression hint
-```bash
-npx imagemin assets/* --out-dir=public/img
-```
-5) Advanced — inline critical CSS
+4) Imagemin hint (run)
 ```html
-<style>
-/* critical above-the-fold */
-body { margin:0; font-family:system-ui; }
-.topbar { position:sticky; top:0; }
-</style>
-<link rel="stylesheet" href="/css/main.css" media="print" onload="this.media='all'">
+<!-- Run: npx imagemin assets/* --out-dir=public/img -->
 ```
-6) Intermediate — preconnect to CDN
+5) Inline critical CSS
+```html
+<style>body{margin:0;font-family:system-ui}.topbar{position:sticky;top:0}</style><link rel="stylesheet" href="/css/main.css" media="print" onload="this.media='all'">
+```
+6) Preconnect CDN
 ```html
 <link rel="preconnect" href="https://cdn.example.com" crossorigin>
 ```
-7) Intermediate — `content-visibility` for long lists
-```css
-.patient-card { content-visibility: auto; contain-intrinsic-size: 300px; }
+7) content-visibility
+```html
+<style>.patient-card{content-visibility:auto;contain-intrinsic-size:300px}</style><div class="patient-card">Patient</div>
 ```
-8) Advanced — reduce repaint with will-change hint
-```css
-.drawer { will-change: transform; }
+8) will-change
+```html
+<div style="will-change:transform">Drawer</div>
 ```
-9) Advanced — network cache header (express)
-```js
-app.use('/assets', express.static('assets', { maxAge: '7d', etag: true }));
+9) Cache header (express)
+```html
+<!-- server: app.use('/assets', express.static('assets', { maxAge: '7d', etag: true })); -->
 ```
-10) Advanced — measure bundle via `source-map-explorer`
-```bash
-npx source-map-explorer dist/main.*.js
+10) Source-map-explorer
+```html
+<!-- Run: npx source-map-explorer dist/main.*.js -->
 ```
 
 **Try it**

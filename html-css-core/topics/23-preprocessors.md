@@ -35,56 +35,44 @@ Compiled CSS:
 
 **আরো উদাহরণ (beginner → advanced)**
 1) Variable
-```scss
-$space: 12px;
-.btn { padding: $space; }
+```html
+<!-- SCSS --> $space:12px; .btn{padding:$space;}
 ```
 2) Nested hover
-```scss
-.btn { color: white; &:hover { background: darken(#2563eb, 5%); } }
+```html
+<!-- SCSS --> .btn{color:white;&:hover{background:darken(#2563eb,5%);}}
 ```
-3) Mixin with args
-```scss
-@mixin rounded($r) { border-radius: $r; }
-.pill { @include rounded(999px); }
+3) Mixin
+```html
+<!-- SCSS --> @mixin rounded($r){border-radius:$r;} .pill{@include rounded(999px);}
 ```
 4) Partials import
-```scss
-@use 'tokens';
-@use 'buttons';
+```html
+<!-- SCSS --> @use 'tokens'; @use 'buttons';
 ```
-5) Function
-```scss
-@function rem($px) { @return $px / 16 * 1rem; }
-.title { font-size: rem(28); }
+5) Function rem
+```html
+<!-- SCSS --> @function rem($px){@return $px/16*1rem;} .title{font-size:rem(28);}
 ```
-6) Placeholder + extend
-```scss
-%card { border-radius: 12px; padding: 16px; }
-.note { @extend %card; background:#fef3c7; }
+6) Placeholder extend
+```html
+<!-- SCSS --> %card{border-radius:12px;padding:16px;} .note{@extend %card;background:#fef3c7;}
 ```
 7) Map + map-get
-```scss
-$status: (ok: #22c55e, warn: #f59e0b, danger: #ef4444);
-.badge--warn { background: map-get($status, warn); }
+```html
+<!-- SCSS --> $status:(ok:#22c55e,warn:#f59e0b,danger:#ef4444); .badge--warn{background:map-get($status,warn);}
 ```
-8) Loop generate spacers
-```scss
-@each $i in 1,2,3 { .mt-#{$i} { margin-top: $i * 4px; } }
+8) Loop spacers
+```html
+<!-- SCSS --> @each $i in 1,2,3 { .mt-#{$i}{margin-top:$i*4px;} }
 ```
 9) Conditional mixin
-```scss
-@mixin shadow($on: true) { @if $on { box-shadow: 0 8px 20px rgba(0,0,0,.08); } }
-.card { @include shadow(false); }
+```html
+<!-- SCSS --> @mixin shadow($on:true){@if $on {box-shadow:0 8px 20px rgba(0,0,0,.08);} } .card{@include shadow(false);}
 ```
-10) Forward with namespace
-```scss
-// _tokens.scss
-$radius: 12px;
-// _index.scss
-@forward 'tokens' as tok-*;
-// use
-.card { border-radius: tok-$radius; }
+10) Forward namespace
+```html
+<!-- SCSS --> @forward 'tokens' as tok-*; .card{border-radius:tok-$radius;}
 ```
 
 **Try it**

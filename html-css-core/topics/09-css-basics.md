@@ -26,51 +26,45 @@ h1 { color: #2563eb; }       /* element selector */
 - ইউনিট: `rem` root-relative; `em` parent-relative; viewport units (`vh/vw`) hero/section-এ কাজে লাগে।
 
 **আরো উদাহরণ (beginner → advanced)**
-1) Inline style (avoid for scale)
+1) Inline style
 ```html
-<p style="color: tomato;">Inline</p>
+<p style="color:tomato;">Inline</p>
 ```
 2) Internal style
 ```html
-<style>
-  .badge { background: #e0f2fe; padding: 4px 8px; }
-</style>
+<style>.badge{background:#e0f2fe;padding:4px 8px}</style><span class="badge">New</span>
 ```
-3) External with multiple files
+3) External links
 ```html
-<link rel="stylesheet" href="base.css">
-<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="base.css"><link rel="stylesheet" href="theme.css">
 ```
-4) HSL color tweak
-```css
-.alert { background: hsl(12 80% 54%); }
-.alert:hover { background: hsl(12 80% 48%); }
+4) HSL color
+```html
+<style>.alert{background:hsl(12 80% 54%)}.alert:hover{background:hsl(12 80% 48%)}</style><div class="alert">Warning</div>
 ```
-5) Viewport unit hero
-```css
-.hero { min-height: 70vh; padding: 4vw; }
+5) Viewport hero
+```html
+<div style="min-height:70vh;padding:4vw;background:#f8fafc;">Hero</div>
 ```
-6) rem-based sizing
-```css
-body { font-size: 16px; }
-button { padding: 0.75rem 1.25rem; }
+6) rem sizing
+```html
+<style>body{font-size:16px}button{padding:.75rem 1.25rem}</style><button>Click</button>
 ```
-7) calc for layout
-```css
-.sidebar { width: calc(30% - 12px); }
+7) calc width
+```html
+<div style="width:calc(30% - 12px);background:#e2e8f0;">Sidebar</div>
 ```
 8) border-box reset
-```css
-*, *::before, *::after { box-sizing: border-box; }
+```html
+<style>*,*::before,*::after{box-sizing:border-box}</style><div style="width:200px;padding:20px;border:2px solid #000;">Box</div>
 ```
 9) CSS variable starter
-```css
-:root { --brand: #0ea5e9; }
-.link { color: var(--brand); }
+```html
+<style>:root{--brand:#0ea5e9}.link{color:var(--brand)}</style><a class="link">Brand link</a>
 ```
 10) Shorthand vs longhand
-```css
-.card { margin: 16px; padding: 12px 16px 20px 16px; }
+```html
+<div style="margin:16px;padding:12px 16px 20px 16px;border:1px solid #cbd5e1;">Card</div>
 ```
 
 **Try it**

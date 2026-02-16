@@ -27,45 +27,45 @@
 - Gradients CSS-এ রাখুন—ইমেজ ডাউনলোড দরকার নেই।
 
 **আরো উদাহরণ (beginner → advanced)**
-1) Solid background
-```css
-.badge { background-color: #fef3c7; }
+1) Solid bg
+```html
+<span style="background:#fef3c7;padding:6px 10px;border-radius:6px;">Warning</span>
 ```
-2) Background image cover
-```css
-.hero { background: url('icu.jpg') center/cover no-repeat; }
+2) Cover image
+```html
+<div style="height:200px;background:url('icu.jpg') center/cover no-repeat;"></div>
 ```
 3) Repeating pattern
-```css
-.grid-bg { background-image: linear-gradient(#e2e8f0 1px, transparent 1px); background-size: 24px 24px; }
+```html
+<div style="background-image:linear-gradient(#e2e8f0 1px,transparent 1px);background-size:24px 24px;height:120px;"></div>
 ```
 4) Radial gradient
-```css
-.pill { background: radial-gradient(circle at 20% 20%, #38bdf8, #0ea5e9); }
+```html
+<div style="width:140px;height:140px;background:radial-gradient(circle at 20% 20%,#38bdf8,#0ea5e9);border-radius:12px;"></div>
 ```
-5) Text shadow subtle
-```css
-h1 { text-shadow: 0 1px 2px rgba(0,0,0,0.12); }
+5) Text shadow
+```html
+<h1 style="text-shadow:0 1px 2px rgba(0,0,0,0.12);">Beds</h1>
 ```
-6) Border radius per corner
-```css
-.card { border-radius: 16px 16px 4px 4px; }
+6) Per-corner radius
+```html
+<div style="border:1px solid #cbd5e1;border-radius:16px 16px 4px 4px;padding:12px;">Card</div>
 ```
-7) Outline ring without layout shift
-```css
-.focusable:focus-visible { outline: 3px solid #22c55e; outline-offset: 3px; }
+7) Focus outline
+```html
+<button style="outline:3px solid transparent;" onfocus="this.style.outline='3px solid #22c55e';this.style.outlineOffset='3px'">Focus me</button>
 ```
-8) Inset shadow for pressed button
-```css
-.btn:active { box-shadow: inset 0 2px 6px rgba(0,0,0,0.2); }
+8) Inset shadow
+```html
+<button style="padding:10px 14px;" onmousedown="this.style.boxShadow='inset 0 2px 6px rgba(0,0,0,0.2)'">Press</button>
 ```
-9) Background-clip text effect
-```css
-.gradient-text { background: linear-gradient(90deg,#06b6d4,#6366f1); -webkit-background-clip: text; color: transparent; }
+9) Gradient text
+```html
+<div style="background:linear-gradient(90deg,#06b6d4,#6366f1);-webkit-background-clip:text;color:transparent;">Gradient text</div>
 ```
-10) Border image slice
-```css
-.fancy { border: 12px solid transparent; border-image: url('frame.png') 30 round; }
+10) Border image
+```html
+<div style="border:12px solid transparent;border-image:url('frame.png') 30 round;padding:12px;">Framed</div>
 ```
 
 **Try it**

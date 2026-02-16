@@ -25,46 +25,45 @@
 - Debug: DevTools box model ভিউ দেখুন; layout shift ধরতে সাহায্য করে।
 
 **আরো উদাহরণ (beginner → advanced)**
-1) Default content-box width calc
-```css
-.box { width: 200px; padding: 20px; border: 2px solid #000; } /* renders >200px */
+1) Content-box width
+```html
+<div style="width:200px;padding:20px;border:2px solid #000;">Content-box</div>
 ```
-2) Border-box fix
-```css
-* { box-sizing: border-box; }
+2) Border-box reset
+```html
+<style>*{box-sizing:border-box}</style><div style="width:200px;padding:20px;border:2px solid #000;">Border-box</div>
 ```
-3) Margin collapse example
-```css
-p { margin: 16px 0; }
-.wrapper { margin: 0; } /* first child p margin collapses unless wrapper has padding/border */
+3) Margin collapse demo
+```html
+<style>p{margin:16px 0}.wrapper{margin:0}</style><div class="wrapper"><p>First</p></div>
 ```
-4) Padding for hit-area
-```css
-.btn { padding: 10px 14px; }
+4) Padding hit-area
+```html
+<button style="padding:10px 14px;">Tap</button>
 ```
 5) Outline vs border
-```css
-.input:focus { outline: 2px solid #2563eb; outline-offset: 2px; }
+```html
+<input style="padding:8px;border:1px solid #cbd5e1;" onfocus="this.style.outline='2px solid #2563eb';this.style.outlineOffset='2px'">
 ```
-6) Min/max width guard
-```css
-.card { width: 100%; max-width: 420px; }
+6) Min/max width
+```html
+<div style="width:100%;max-width:420px;border:1px solid #cbd5e1;">Card</div>
 ```
-7) Negative margin nudge
-```css
-.banner { margin: -8px -16px 0; padding: 12px 16px; }
+7) Negative margin
+```html
+<div style="margin:-8px -16px 0;padding:12px 16px;background:#fee2e2;">Banner</div>
 ```
-8) Box shadow doesn’t affect layout
-```css
-.panel { box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+8) Box shadow
+```html
+<div style="padding:16px;box-shadow:0 10px 30px rgba(0,0,0,0.1);">Panel</div>
 ```
-9) Overflow to contain children
-```css
-.avatar-stack { overflow: hidden; border-radius: 999px; }
+9) Overflow contain
+```html
+<div style="overflow:hidden;border-radius:999px;width:120px;"><img src="avatar.jpg" alt="" style="width:140px;"></div>
 ```
-10) Inline-block gap awareness
-```css
-.tag { display: inline-block; margin-right: -4px; }
+10) Inline-block gap
+```html
+<span style="display:inline-block;margin-right:-4px;">Tag A</span><span style="display:inline-block;">Tag B</span>
 ```
 
 **Try it**

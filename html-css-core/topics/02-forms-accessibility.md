@@ -49,74 +49,45 @@ form.addEventListener('submit', e => {
 - সঠিক input type মোবাইল UX ও validation সহজ করে (number keypad, email keyboard ইত্যাদি)।
 
 **আরো উদাহরণ (beginner → advanced)**
-1) Beginner — required + placeholder
+1) Required with placeholder
 ```html
-<input type="text" required placeholder="P-101" />
+<input type="text" required placeholder="P-101">
 ```
-2) Beginner — fieldset/legend গ্রুপিং
+2) Fieldset + legend
 ```html
-<fieldset>
-  <legend>Consent</legend>
-  <label><input type="radio" name="consent" value="yes" required /> Yes</label>
-  <label><input type="radio" name="consent" value="no" /> No</label>
-</fieldset>
+<fieldset><legend>Consent</legend><label><input type="radio" name="consent" value="yes" required> Yes</label><label><input type="radio" name="consent" value="no"> No</label></fieldset>
 ```
-3) Intermediate — inline error message
+3) Inline error
 ```html
-<input id="phone" pattern="\\d{10}" required />
-<p id="err" role="alert" hidden>10-digit only</p>
-<script>
-const i = phone, e = err;
-i.addEventListener('input', () => {
-  e.hidden = i.checkValidity();
-});
-</script>
+<input id="phone" pattern="\d{10}" required><p id="err" role="alert" hidden>10-digit only</p><script>phone.oninput=()=>err.hidden=phone.checkValidity();</script>
 ```
-4) Intermediate — date + min max
+4) Date min/max
 ```html
-<input type="date" min="2026-02-01" max="2026-12-31" />
+<input type="date" min="2026-02-01" max="2026-12-31">
 ```
-5) Advanced — form data to JSON (vanilla)
+5) Form to JSON
 ```html
-<form id="f"><input name="pid" /><button>Save</button></form>
-<script>
-f.addEventListener('submit', ev => {
-  ev.preventDefault();
-  const data = Object.fromEntries(new FormData(f));
-  console.log(JSON.stringify(data));
-});
-</script>
+<form id="f"><input name="pid"><button>Save</button></form><script>f.onsubmit=e=>{e.preventDefault();console.log(JSON.stringify(Object.fromEntries(new FormData(f))))};</script>
 ```
-6) Intermediate — show invalid field list
+6) List invalid fields
 ```html
-const invalid = [...form.elements].filter(el => !el.checkValidity());
-alert('Fix: ' + invalid.map(el => el.name).join(', '));
+<form id="g"><input name="email" type="email" required><button>Submit</button></form><script>g.onsubmit=e=>{e.preventDefault();const bad=[...g.elements].filter(el=>el.willValidate&&!el.checkValidity());alert('Fix: '+bad.map(b=>b.name).join(', '));};</script>
 ```
-7) Intermediate — inputmask via pattern + title
+7) Input mask hint
 ```html
-<input type="tel" pattern="\\d{3}-\\d{3}-\\d{4}" title="123-456-7890" required />
+<input type="tel" pattern="\d{3}-\d{3}-\d{4}" title="123-456-7890" required>
 ```
-8) Advanced — custom validity message
+8) Custom validity
 ```html
-const pid = document.querySelector('#pid');
-pid.addEventListener('input', () => {
-  pid.setCustomValidity(pid.value.startsWith('P-') ? '' : 'Prefix P- required');
-});
+<input id="pid"><script>pid.oninput=()=>pid.setCustomValidity(pid.value.startsWith('P-')?'':'Prefix P- required');</script>
 ```
-9) Advanced — `aria-invalid` toggle
+9) aria-invalid toggle
 ```html
-input.addEventListener('input', () => {
-  input.toggleAttribute('aria-invalid', !input.checkValidity());
-});
+<input id="room" required><script>room.oninput=()=>room.toggleAttribute('aria-invalid',!room.checkValidity());</script>
 ```
-10) Advanced — disable submit while loading
+10) Disable submit while loading
 ```html
-form.addEventListener('submit', async e => {
-  e.preventDefault();
-  submit.disabled = true; submit.textContent = 'Saving...';
-  await fakeSave();
-  submit.disabled = false; submit.textContent = 'Submit';
-});
+<form id="s"><button id="submit">Submit</button></form><script>s.onsubmit=async e=>{e.preventDefault();submit.disabled=true;submit.textContent='Saving...';await new Promise(r=>setTimeout(r,800));submit.disabled=false;submit.textContent='Submit';};</script>
 ```
 
 **Try it**
