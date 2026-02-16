@@ -2,6 +2,40 @@
 
 হাসপাতাল ম্যানেজমেন্ট অ্যাপ বড় হলে feature-first স্ট্রাকচার ছাড়া import জটলা ও circular deps বাড়ে।
 
+## Folder structure (tree)
+```txt
+src/
+|-- app/
+|   |-- core/              # cross-cutting infra (auth, env, guards)
+|   |   |-- auth.guard.ts
+|   |   `-- http-interceptors.ts
+|   |-- shared/
+|   |   |-- ui/            # dumb/presentational components
+|   |   |   |-- button.component.ts
+|   |   |   `-- card.component.ts
+|   |   `-- data-access/   # facades, state adapters, services
+|   |       |-- http-client.service.ts
+|   |       `-- state-store.ts
+|   |-- features/
+|   |   |-- patients/
+|   |   |   |-- components/
+|   |   |   |   `-- patient-list.component.ts
+|   |   |   |-- pages/
+|   |   |   |   `-- patients.page.ts
+|   |   |   |-- data-access/
+|   |   |   |   |-- patients.api.ts
+|   |   |   |   `-- patients.facade.ts
+|   |   |   `-- patients.routes.ts
+|   |   `-- billing/
+|   |       `-- billing.routes.ts
+|   `-- app.config.ts
+|-- tools/
+|   `-- check-boundary.ts
+`-- tsconfig.json
+```
+
+Note: Minimal stub versions of the files shown above now live in `src/` so you can run the guard and path-alias checks without adding extra Angular packages.
+
 ## Why this matters (real world)
 - দ্রুত অনবোর্ডিং: নতুন ডেভেলপার বুঝতে পারে patients/billing/appointments কোথায়।
 - ডেপ্লয় ঝুঁকি কম: feature আলাদা থাকলে blast radius কমে।
