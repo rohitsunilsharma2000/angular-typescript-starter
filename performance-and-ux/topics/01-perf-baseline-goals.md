@@ -50,6 +50,17 @@ Actions: lazy-load chart lib; enable OnPush on list component.
 - Beginner: Lighthouse চালিয়ে LCP/CLS নোট করে baseline-notes.md লিখুন।
 - Advanced: perfTargets ভঙ্গ হলে CI fail এমন স্ক্রিপ্ট বানান।
 
+## Hands-on (Bengali, beginner)
+1) রান করুন (mock baseline তুলনা):
+   ```bash
+   cd performance-and-ux/demos/perf-baseline-demo
+   npm install
+   npm run demo
+   npm run typecheck
+   ```
+2) আউটপুটে targets ও fake Lighthouse ফলাফল তুলনা দেখুন (✅/❌)।
+3) target কমিয়ে বা ফলাফল বাড়িয়ে regression সিমুলেট করুন।
+
 ## Common mistakes
 - Lab স্কোরকেই field ধরে নেওয়া।
 - বাজেট নথিভুক্ত না করে নতুন লাইব্রেরি যোগ করা।
