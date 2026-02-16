@@ -14,6 +14,29 @@ Purpose: actionable ladder from zero → production-ready Angular engineer. Each
 | 14–16 | Advanced | Storybook design system slice, PWA/offline or real-time demo |
 | 16–18 | Portfolio | Public repo + deployed app + ADRs + perf/a11y report |
 
+## Quick Links / Index
+- Timeline at a Glance → [link](#timeline-at-a-glance)
+- 0. Foundations (Week 0–2) → [link](#0-foundations-week-0-2)
+- 1. Angular Fundamentals (Week 2–5) → [link](#1-angular-fundamentals-week-2-5) | Sub: [HTML & CSS (Always-on)](#html--css-always-on), [Version Control & Tooling](#version-control--tooling), [TypeScript (Highly Recommended)](#typescript-highly-recommended)
+- 2. Architecture & State (Week 5–8) → [link](#2-architecture--state-week-5-8)
+- 3. Performance & UX (Week 8–10) → [link](#3-performance--ux-week-8-10)
+- 4. Testing & Quality (Week 10–12) → [link](#4-testing--quality-week-10-12)
+- 5. Build, Ops, Security (Week 12–14) → [link](#5-build-ops-security-week-12-14)
+- 6. Advanced Topics (Week 14–16) → [link](#6-advanced-topics-week-14-16)
+- 7. Portfolio & Interview Prep (Week 16–18) → [link](#7-portfolio--interview-prep-week-16-18)
+- APIs & Backend Basics → [link](#apis--backend-basics)
+- State Management (Angular flavor) → [link](#state-management-angular-flavor)
+- Testing (recap + specifics) → [link](#testing-recap--specifics)
+- Performance & Optimization (recap) → [link](#performance--optimization-recap)
+- Deployment & DevOps Basics → [link](#deployment--devops-basics)
+- Advanced Topics (To Stand Out) → [link](#advanced-topics-to-stand-out)
+- Build Projects (VERY IMPORTANT) → [link](#build-projects-very-important)
+- Become Job Ready → [link](#become-job-ready)
+- Practice Projects (progressively harder) → [link](#practice-projects-progressively-harder)
+- Habit Checklist (keep recurring) → [link](#habit-checklist-keep-recurring)
+- Suggested Weekly Cadence (lightweight) → [link](#suggested-weekly-cadence-lightweight)
+- Minimal Resource Pack → [link](#minimal-resource-pack)
+
 ## 0. Foundations (Week 0–2)
 - HTML5 semantics, forms, media; CSS layout (Flexbox/Grid), responsive units, accessibility basics (labels, landmarks, contrast).
 - Modern JavaScript: ES modules, async/await, Promise patterns, array/object helpers, fetch/AbortController.
