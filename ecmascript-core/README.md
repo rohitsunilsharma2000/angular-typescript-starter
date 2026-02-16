@@ -51,21 +51,22 @@
 - Mini project → “ER Intake & Lab Tracker”।
 
 ## Folder ম্যাপ
-- `topics/01-ecmascript-basics.md` (var/let/const, truthy/falsy)
-- `topics/02-scope-hoisting-closures.md`
-- `topics/03-objects-prototypes-classes.md`
-- `topics/04-arrays-iterables-iterators.md`
-- `topics/05-functions-promises-async-await.md`
-- `topics/06-modules-import-export.md`
-- `topics/07-error-handling-logging.md`
-- `topics/08-collection-utils-map-set.md`
-- `topics/09-modern-syntax-optional-nullish.md`
-- `topics/10-async-patterns-all-any-settled.md`
-- `topics/11-immutable-array-helpers.md`
-- `topics/12-performance-memory.md`
-- `topics/13-tooling-testing-tsconfig.md`
-- `topics/14-mini-project-guide.md`
-- `demos/hospital-es-demo/app.js` (runnable Node demo)
+- [topics/01-ecmascript-basics.md](topics/01-ecmascript-basics.md) (var/let/const, truthy/falsy)
+- [topics/02-scope-hoisting-closures.md](topics/02-scope-hoisting-closures.md)
+- [topics/03-objects-prototypes-classes.md](topics/03-objects-prototypes-classes.md)
+- [topics/04-arrays-iterables-iterators.md](topics/04-arrays-iterables-iterators.md)
+- [topics/05-functions-promises-async-await.md](topics/05-functions-promises-async-await.md)
+- [topics/06-modules-import-export.md](topics/06-modules-import-export.md)
+- [topics/07-error-handling-logging.md](topics/07-error-handling-logging.md)
+- [topics/08-collection-utils-map-set.md](topics/08-collection-utils-map-set.md)
+- [topics/09-modern-syntax-optional-nullish.md](topics/09-modern-syntax-optional-nullish.md)
+- [topics/10-async-patterns-all-any-settled.md](topics/10-async-patterns-all-any-settled.md)
+- [topics/11-immutable-array-helpers.md](topics/11-immutable-array-helpers.md)
+- [topics/12-performance-memory.md](topics/12-performance-memory.md)
+- [topics/13-tooling-testing-tsconfig.md](topics/13-tooling-testing-tsconfig.md)
+- [topics/14-mini-project-guide.md](topics/14-mini-project-guide.md)
+- [demos/hospital-es-demo/app.js](demos/hospital-es-demo/app.js) (runnable Node demo)
+- [youtube-titles.md](youtube-titles.md) (video title ideas)
 
 ## Mini project আইডিয়া (hospital workflow)
 **ER Intake & Lab Tracker**: ইনকামিং patient queue + bed allocator (Map), lab stream (async generator), vitals sort (`toSorted`), alert race (`Promise.any`), optional chaining/nullish for partial payloads. Build twice with `tsconfig.target=ES2015` এবং `ES2020+` দেখাতে কোন polyfill লাগে।
