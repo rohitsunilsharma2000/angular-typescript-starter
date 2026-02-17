@@ -1,4 +1,9 @@
-# 04) Generics `<T>`
+# 04)**Thumbnail Text:**  
+TypeScript এ Generics <T>
+
+**Video Title:**  
+TypeScript এ Generics <T> কী? সহজ উদাহরণসহ ব্যাখ্যা
+
 
 **কেন দরকার?**
 - পুনঃব্যবহারযোগ্য ফাংশন/ক্লাসে টাইপ নিরাপত্তা রাখা।
