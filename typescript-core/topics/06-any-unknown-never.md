@@ -1,5 +1,13 @@
 # 06) `any` / `unknown` / `never`
 
+
+**Thumbnail Text:**  
+any / unknown / never
+
+**Video Title:**  
+TypeScript এ any, unknown, never — পার্থক্য ও সঠিক ব্যবহার
+
+
 **any**
 - টাইপ চেক বন্ধ; দ্রুত কিন্তু বাগ-প্রবণ।
 
