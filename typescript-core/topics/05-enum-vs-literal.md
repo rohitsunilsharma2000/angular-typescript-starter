@@ -1,5 +1,13 @@
 # 05) `enum` বনাম string literal union
 
+**Thumbnail Text:**  
+Enum বনাম String Literal Union
+
+**Video Title:**  
+TypeScript এ Enum বনাম String Literal Union — কোনটা কখন ব্যবহার করবেন?
+``
+
+
 **নিয়ম**
 - ছোট নির্দিষ্ট ভ্যালু? → string literal union (`'ICU' | 'GENERAL'`).
 - runtime-এ iterate/lookup দরকার? → `enum` সুবিধাজনক (object হিসাবে থাকে)।
