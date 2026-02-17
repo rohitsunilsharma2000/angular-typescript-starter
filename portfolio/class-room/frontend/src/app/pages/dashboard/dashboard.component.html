@@ -1,0 +1,199 @@
+<div class="max-w-7xl mx-auto p-4">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-semibold">{{auth.session?.role}} Dashboard</h2>
+      <p class="text-sm text-slate-600">Role based dashboard</p>
+    </div>
+    <button class="px-3 py-2 rounded-xl border hover:bg-slate-100 text-sm" (click)="logout()">Logout</button>
+  </div>
+
+  <div *ngIf="toast" class="mt-3 p-3 rounded-xl border bg-white text-sm">{{toast}}</div>
+
+  <div class="mt-4 flex gap-2 flex-wrap">
+    <button *ngIf="auth.session?.role==='PRINCIPAL'" (click)="tab='users'" class="px-3 py-2 rounded-xl border hover:bg-slate-100 text-sm">Users</button>
+    <button *ngIf="auth.session?.role==='PRINCIPAL'" (click)="tab='classrooms'" class="px-3 py-2 rounded-xl border hover:bg-slate-100 text-sm">Classrooms</button>
+    <button *ngIf="auth.session?.role==='PRINCIPAL'" (click)="tab='assign'" class="px-3 py-2 rounded-xl border hover:bg-slate-100 text-sm">Assignments</button>
+    <button (click)="tab='timetable'" class="px-3 py-2 rounded-xl border hover:bg-slate-100 text-sm">Timetable</button>
+    <button *ngIf="auth.session?.role!=='PRINCIPAL'" (click)="tab='classmates'" class="px-3 py-2 rounded-xl border hover:bg-slate-100 text-sm">Classmates</button>
+  </div>
+
+  <div *ngIf="tab==='users' && auth.session?.role==='PRINCIPAL'" class="mt-4 bg-white border rounded-2xl p-5">
+    <h3 class="text-lg font-semibold">Users</h3>
+
+    <div class="mt-3 grid md:grid-cols-4 gap-2">
+      <select class="px-3 py-2 rounded-lg border" [(ngModel)]="newUser.role">
+        <option value="TEACHER">TEACHER</option>
+        <option value="STUDENT">STUDENT</option>
+      </select>
+      <input class="px-3 py-2 rounded-lg border" placeholder="Name" [(ngModel)]="newUser.name">
+      <input class="px-3 py-2 rounded-lg border" placeholder="Email" [(ngModel)]="newUser.email">
+      <input class="px-3 py-2 rounded-lg border" placeholder="Password" [(ngModel)]="newUser.password">
+    </div>
+    <button class="mt-3 px-4 py-2 rounded-xl bg-slate-900 text-white" (click)="createUser()">Create</button>
+
+    <div class="mt-4 rounded-xl border overflow-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50">
+          <tr class="text-left text-slate-600">
+            <th class="px-3 py-2">Role</th><th class="px-3 py-2">Name</th><th class="px-3 py-2">Email</th>
+            <th class="px-3 py-2">Classroom</th><th class="px-3 py-2">Teacher</th><th class="px-3 py-2">Action</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y">
+          <tr *ngFor="let u of users">
+            <td class="px-3 py-2">{{u.role}}</td>
+            <td class="px-3 py-2 font-medium">{{u.name}}</td>
+            <td class="px-3 py-2">{{u.email}}</td>
+            <td class="px-3 py-2">{{u.classroomId || '-'}}</td>
+            <td class="px-3 py-2">{{u.teacherId || '-'}}</td>
+            <td class="px-3 py-2">
+              <button class="px-2 py-1 rounded-lg border hover:bg-slate-100 text-xs" (click)="deleteUser(u.id)" [disabled]="u.role==='PRINCIPAL'">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div *ngIf="tab==='classrooms' && auth.session?.role==='PRINCIPAL'" class="mt-4 bg-white border rounded-2xl p-5">
+    <h3 class="text-lg font-semibold">Classrooms</h3>
+
+    <div class="mt-3 grid md:grid-cols-3 gap-2">
+      <input class="px-3 py-2 rounded-lg border" placeholder="Classroom name" [(ngModel)]="newClassroom.name">
+      <input class="px-3 py-2 rounded-lg border md:col-span-2" placeholder="dayWindows" [(ngModel)]="newClassroom.dayWindows">
+    </div>
+    <button class="mt-3 px-4 py-2 rounded-xl bg-slate-900 text-white" (click)="createClassroom()">Create</button>
+
+    <div class="mt-4 grid md:grid-cols-2 gap-3">
+      <div *ngFor="let c of classrooms" class="p-4 rounded-2xl border">
+        <div class="flex items-start justify-between">
+          <div>
+            <div class="font-semibold">{{c.name}}</div>
+            <div class="text-xs text-slate-600 mt-1">Teacher: {{c.teacherId || '-'}}</div>
+            <div class="text-xs text-slate-500 mt-2">Windows: {{c.dayWindows}}</div>
+          </div>
+          <button class="px-2 py-1 rounded-lg border hover:bg-slate-100 text-xs" (click)="deleteClassroom(c.id)">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="tab==='assign' && auth.session?.role==='PRINCIPAL'" class="mt-4 bg-white border rounded-2xl p-5">
+    <h3 class="text-lg font-semibold">Assignments</h3>
+
+    <div class="mt-3 grid md:grid-cols-3 gap-2 items-end">
+      <div>
+        <label class="text-xs text-slate-600">Teacher</label>
+        <select class="w-full px-3 py-2 rounded-lg border" [(ngModel)]="assignTeacher.teacherId">
+          <option *ngFor="let u of teachers" [value]="u.id">{{u.name}}</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs text-slate-600">Classroom</label>
+        <select class="w-full px-3 py-2 rounded-lg border" [(ngModel)]="assignTeacher.classroomId">
+          <option *ngFor="let c of classrooms" [value]="c.id">{{c.name}}</option>
+        </select>
+      </div>
+      <button class="px-4 py-2 rounded-xl bg-slate-900 text-white" (click)="assignTeacherToClassroom()">Assign</button>
+    </div>
+
+    <div class="mt-6 grid md:grid-cols-3 gap-2 items-end">
+      <div>
+        <label class="text-xs text-slate-600">Student</label>
+        <select class="w-full px-3 py-2 rounded-lg border" [(ngModel)]="assignStudent.studentId">
+          <option *ngFor="let u of students" [value]="u.id">{{u.name}}</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs text-slate-600">Teacher</label>
+        <select class="w-full px-3 py-2 rounded-lg border" [(ngModel)]="assignStudent.teacherId">
+          <option *ngFor="let u of teachers" [value]="u.id">{{u.name}}</option>
+        </select>
+      </div>
+      <button class="px-4 py-2 rounded-xl bg-slate-900 text-white" (click)="assignStudentToTeacher()">Assign</button>
+    </div>
+  </div>
+
+  <div *ngIf="tab==='timetable'" class="mt-4 bg-white border rounded-2xl p-5">
+    <div class="flex items-start justify-between gap-3 flex-col md:flex-row">
+      <div>
+        <h3 class="text-lg font-semibold">Timetable</h3>
+        <p class="text-sm text-slate-600">Overlap + window validation lives in backend</p>
+      </div>
+
+      <div *ngIf="auth.session?.role==='PRINCIPAL'" class="w-full md:w-72">
+        <label class="text-xs text-slate-600">Classroom</label>
+        <select class="w-full px-3 py-2 rounded-lg border" [(ngModel)]="selectedClassroomId" (change)="loadPeriods(selectedClassroomId)">
+          <option *ngFor="let c of classrooms" [value]="c.id">{{c.name}}</option>
+        </select>
+      </div>
+    </div>
+
+    <div *ngIf="auth.session?.role!=='STUDENT'" class="mt-4 grid md:grid-cols-6 gap-2 items-end">
+      <div class="md:col-span-2">
+        <label class="text-xs text-slate-600">Subject</label>
+        <input class="w-full px-3 py-2 rounded-lg border" [(ngModel)]="newPeriod.subject">
+      </div>
+      <div>
+        <label class="text-xs text-slate-600">Day</label>
+        <input class="w-full px-3 py-2 rounded-lg border" [(ngModel)]="newPeriod.day" placeholder="Mon">
+      </div>
+      <div>
+        <label class="text-xs text-slate-600">Start</label>
+        <input class="w-full px-3 py-2 rounded-lg border" [(ngModel)]="newPeriod.startTime" placeholder="12:00">
+      </div>
+      <div>
+        <label class="text-xs text-slate-600">End</label>
+        <input class="w-full px-3 py-2 rounded-lg border" [(ngModel)]="newPeriod.endTime" placeholder="13:00">
+      </div>
+      <button class="px-4 py-2 rounded-xl bg-slate-900 text-white" (click)="addPeriod()">Add</button>
+    </div>
+
+    <div class="mt-4 rounded-xl border overflow-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50">
+          <tr class="text-left text-slate-600">
+            <th class="px-3 py-2">Day</th><th class="px-3 py-2">Subject</th><th class="px-3 py-2">Time</th>
+            <th class="px-3 py-2" *ngIf="auth.session?.role!=='STUDENT'">Action</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y">
+          <tr *ngFor="let p of periods">
+            <td class="px-3 py-2">{{p.day}}</td>
+            <td class="px-3 py-2 font-medium">{{p.subject}}</td>
+            <td class="px-3 py-2">{{p.startTime}} - {{p.endTime}}</td>
+            <td class="px-3 py-2" *ngIf="auth.session?.role!=='STUDENT'">
+              <button class="px-2 py-1 rounded-lg border hover:bg-slate-100 text-xs" (click)="deletePeriod(p.id)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div *ngIf="tab==='classmates' && auth.session?.role!=='PRINCIPAL'" class="mt-4 bg-white border rounded-2xl p-5">
+    <h3 class="text-lg font-semibold">Classmates</h3>
+    <p class="text-sm text-slate-600">Pulled from backend /timetable/classmates</p>
+
+    <button class="mt-3 px-4 py-2 rounded-xl border hover:bg-slate-100 text-sm" (click)="loadClassmatesAndInferPeriods()">
+      Refresh
+    </button>
+
+    <div class="mt-4 rounded-xl border overflow-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50">
+          <tr class="text-left text-slate-600">
+            <th class="px-3 py-2">Name</th><th class="px-3 py-2">Email</th><th class="px-3 py-2">Teacher</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y">
+          <tr *ngFor="let s of classmates">
+            <td class="px-3 py-2 font-medium">{{s.name}}</td>
+            <td class="px-3 py-2">{{s.email}}</td>
+            <td class="px-3 py-2">{{s.teacherId || '-'}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
