@@ -1,4 +1,7 @@
-# 04)**Thumbnail Text:**  
+# 04) **Generics <T>**
+
+
+**Thumbnail Text:**  
 TypeScript এ Generics <T>
 
 **Video Title:**  
