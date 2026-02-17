@@ -2328,3 +2328,97 @@ Bug report করার সময় এই format follow করো:
 
 ---
  
+
+---
+
+# ✅ UI Tester Checklist (বাংলা)
+
+এই অংশটা UI tester এর জন্য — step-by-step কীভাবে app test করবে:
+
+## 1) App run করো
+
+### Backend
+
+```bash
+cd portfolio/class-room/backend
+mvn spring-boot:run
+```
+
+### Frontend
+
+```bash
+cd portfolio/class-room/frontend
+npm install
+npm start
+```
+
+Open করো: `http://localhost:4200`
+
+---
+
+## 2) Test Accounts (Quick Login)
+
+* Principal: `principal@classroom.com` / `Admin`
+* Teacher: `t1@classroom.com` / `t1`
+* Student: `s1@classroom.com` / `s1`
+
+---
+
+## 3) Mandatory UI Test Cases
+
+1. **Principal login**
+
+   * Dashboard open হবে
+   * Tabs দেখাবে: Users, Classrooms, Assignments, Timetable
+
+2. **Users create/delete**
+
+   * নতুন Teacher/Student create করা যায় কিনা
+   * List এ show করে কিনা
+
+3. **Classroom create/delete**
+
+   * Classroom create হয় কিনা
+   * dayWindows invalid দিলে backend error toast আসে কিনা
+
+4. **Assignment flow**
+
+   * Teacher → Classroom assign হয় কিনা
+   * Student → Teacher assign হলে student classroom auto update হয় কিনা
+
+5. **Timetable add (valid)**
+
+   * Valid time range দিলে period add হয় কিনা
+
+6. **Timetable add (invalid overlap)**
+
+   * Existing period এর সাথে overlap দিলে error message আসে কিনা
+
+7. **Teacher role restriction**
+
+   * Teacher principal-only tabs পায় না
+   * নিজের classroom timetable/classmates দেখতে পারে
+
+8. **Student role restriction**
+
+   * Student timetable/classmates দেখতে পারে
+   * Student timetable add/delete করতে পারে না
+
+9. **Logout + Guard**
+
+   * Logout এর পর `/dashboard` এ গেলে `/login` এ redirect হয় কিনা
+
+---
+
+## 4) Bug Report Format (Tester friendly)
+
+Bug report করার সময় এই format follow করো:
+
+* **Title:** সংক্ষিপ্ত issue নাম
+* **Role:** Principal/Teacher/Student
+* **Steps to Reproduce:** 1,2,3...
+* **Expected Result:** কী হওয়ার কথা ছিল
+* **Actual Result:** আসলে কী হয়েছে
+* **Screenshot/Video:** থাকলে attach করো
+
+---
