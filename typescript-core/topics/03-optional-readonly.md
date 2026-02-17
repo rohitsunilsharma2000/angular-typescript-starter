@@ -1,4 +1,4 @@
-# 03) `optional ?` ও `readonly`
+# 03) **TypeScript Optional (?) ও Readonly সহজ ভাষায়**
 
 **optional**
 - property থাকতে বা না-ও থাকতে পারে; handle করতে guard/ডিফল্ট দরকার।
