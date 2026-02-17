@@ -1,5 +1,12 @@
 # 03) **TypeScript Optional (?) ও Readonly সহজ ভাষায়**
 
+**Thumbnail Text:**  
+TypeScript এ Optional (?) ও Readonly
+
+**Video Title:**  
+TypeScript এ Optional (?) ও Readonly সহজ ভাষায় ব্যাখ্যা
+
+
 **optional**
 - property থাকতে বা না-ও থাকতে পারে; handle করতে guard/ডিফল্ট দরকার।
 
