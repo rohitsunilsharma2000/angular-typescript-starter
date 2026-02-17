@@ -1,5 +1,11 @@
 # 07) `null` / `undefined` + strict mode
 
+**Thumbnail Text:**  
+null / undefined + Strict Mode
+
+**Video Title:**  
+TypeScript এ null, undefined ও Strict Mode — পার্থক্য ও সঠিক ব্যবহার
+
 **strictNullChecks**
 - চালু থাকলে `string` এ `null` assign করা যায় না; union দরকার (`string | null`).
 
