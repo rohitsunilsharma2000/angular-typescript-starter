@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: blinkit-mega
+  datasource:
+    url: jdbc:h2:mem:blinkit;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+  flyway:
+    enabled: true
+  h2:
+    console:
+      enabled: true
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+app:
+  jwt:
+    access-expiry-minutes: 30
+    refresh-expiry-days: 7
+    secret: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef

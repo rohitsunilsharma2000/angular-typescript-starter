@@ -1,0 +1,28 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: blinkit-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: blinkit
+      POSTGRES_USER: blinkit
+      POSTGRES_PASSWORD: blinkit
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: blinkit-backend
+    depends_on:
+      - postgres
+    environment:
+      SPRING_PROFILES_ACTIVE: postgres
+    ports:
+      - '8080:8081'
+
+volumes:
+  pgdata:
