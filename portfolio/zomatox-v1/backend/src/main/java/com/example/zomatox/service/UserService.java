@@ -1,7 +1,9 @@
 package com.example.zomatox.service;
 
+import com.example.zomatox.entity.Address;
 import com.example.zomatox.entity.User;
 import com.example.zomatox.exception.ApiException;
+import com.example.zomatox.repository.AddressRepository;
 import com.example.zomatox.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,6 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
   private final UserRepository userRepository;
+  private final AddressRepository addressRepository;
 
   public User getUserOrThrow(Long id) {
     return userRepository.findById(id).orElseThrow(() ->
@@ -21,5 +24,9 @@ public class UserService {
 
   public List<User> listUsers() {
     return userRepository.findAll();
+  }
+
+  public List<Address> listAddresses(User user) {
+    return addressRepository.findByUser(user);
   }
 }

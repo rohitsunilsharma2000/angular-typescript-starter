@@ -1,5 +1,6 @@
 package com.example.zomatox.entity;
 
+import com.example.zomatox.entity.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,4 +16,8 @@ public class User {
 
   @Column(nullable = false, unique = true)
   private String email;
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private UserRole role;
 }

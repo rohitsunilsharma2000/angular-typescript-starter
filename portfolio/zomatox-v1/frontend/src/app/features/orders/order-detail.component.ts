@@ -28,6 +28,13 @@ import { Order } from '../../core/models';
       <div class="text-sm text-slate-600">₹{{it.price}} × {{it.qty}} = ₹{{it.lineTotal}}</div>
     </div>
 
+    <h3 class="mt-4 font-semibold">Timeline</h3>
+    <div *ngFor="let ev of events()" class="py-2 border-b last:border-b-0 text-sm">
+      <div class="font-medium">{{ev.status}}</div>
+      <div class="text-slate-600">{{ev.message}}</div>
+      <div class="text-xs text-slate-500">{{ev.createdAt}}</div>
+    </div>
+
     <div class="mt-4 flex gap-2">
       <button class="bg-black text-white rounded px-4 py-2" (click)="confirm('SUCCESS')">Mock Pay SUCCESS</button>
       <button class="border rounded px-4 py-2" (click)="confirm('FAIL')">Mock Pay FAIL</button>
@@ -42,6 +49,7 @@ export class OrderDetailComponent {
   private route = inject(ActivatedRoute);
 
   order = signal<Order | null>(null);
+  events = signal<any[]>([]);
   msg = signal<string>('');
 
   private id = Number(this.route.snapshot.paramMap.get('id'));
@@ -52,6 +60,7 @@ export class OrderDetailComponent {
 
   reload() {
     this.api.order(this.id).subscribe(o => this.order.set(o));
+    this.api.orderEvents(this.id).subscribe(evs => this.events.set(evs));
   }
 
   confirm(result: 'SUCCESS' | 'FAIL') {
@@ -61,7 +70,7 @@ export class OrderDetailComponent {
         this.msg.set('Payment updated: ' + result);
         this.reload();
       },
-      error: (e) => this.msg.set(e?.error?.message ?? 'Failed'),
+      error: e => this.msg.set(e?.error?.message ?? 'Failed'),
     });
   }
 }

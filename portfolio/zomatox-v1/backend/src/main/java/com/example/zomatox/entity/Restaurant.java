@@ -26,4 +26,8 @@ public class Restaurant {
   private int deliveryTimeMin;
 
   private String imageUrl;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "owner_user_id")
+  private User owner;
 }

@@ -36,4 +36,11 @@ public class Order {
 
   @Column(nullable = false)
   private Instant createdAt;
+
+  @Column(nullable = false)
+  private Instant updatedAt;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "delivery_partner_user_id")
+  private User deliveryPartner;
 }

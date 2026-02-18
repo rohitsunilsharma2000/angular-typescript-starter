@@ -25,7 +25,9 @@ public class OrderService {
   private final OrderRepository orderRepository;
   private final OrderItemRepository orderItemRepository;
   private final PaymentRepository paymentRepository;
+  private final OrderEventRepository orderEventRepository;
   private final CartService cartService;
+  private final OrderStateMachine orderStateMachine;
 
   public OrderResponse createOrder(User user, Long addressId) {
     Address addr = addressRepository.findById(addressId).orElseThrow(() ->
@@ -43,7 +45,6 @@ public class OrderService {
       throw new ApiException(HttpStatus.BAD_REQUEST, "Cart is empty");
     }
 
-    // Stock check
     for (CartItem ci : cartItems) {
       MenuItem mi = ci.getMenuItem();
       if (!mi.isAvailable()) {
@@ -57,8 +58,9 @@ public class OrderService {
 
     Restaurant restaurant = cartItems.get(0).getMenuItem().getRestaurant();
     long itemTotal = cartItems.stream().mapToLong(ci -> ci.getMenuItem().getPrice() * ci.getQty()).sum();
-    long deliveryFee = calcDeliveryFee(itemTotal, restaurant);
+    long deliveryFee = calcDeliveryFee(itemTotal);
     long payable = itemTotal + deliveryFee;
+    Instant now = Instant.now();
 
     Order order = Order.builder()
       .user(user)
@@ -67,15 +69,14 @@ public class OrderService {
       .itemTotal(itemTotal)
       .deliveryFee(deliveryFee)
       .payableTotal(payable)
-      .createdAt(Instant.now())
+      .createdAt(now)
+      .updatedAt(now)
       .build();
 
     order = orderRepository.save(order);
 
     for (CartItem ci : cartItems) {
       MenuItem mi = ci.getMenuItem();
-
-      // Deduct stock on order creation (simple v1 approach)
       mi.setStockQty(mi.getStockQty() - ci.getQty());
 
       OrderItem oi = OrderItem.builder()
@@ -92,40 +93,70 @@ public class OrderService {
       .order(order)
       .status(PaymentStatus.INITIATED)
       .method("MOCK")
-      .createdAt(Instant.now())
+      .createdAt(now)
       .build();
     paymentRepository.save(payment);
 
+    appendEvent(order, order.getStatus(), "Order created. Awaiting payment", now);
+
     cartService.clearCart(user);
 
-    return getOrderResponse(order, user);
+    return toResponse(order);
   }
 
-  private long calcDeliveryFee(long itemTotal, Restaurant r) {
-    // super simple v1 rule:
-    // free delivery above 500, else 40
-    return itemTotal >= 500 ? 0 : 40;
+  public Order getOrderOrThrow(Long id) {
+    return orderRepository.findById(id).orElseThrow(() ->
+      new ApiException(HttpStatus.NOT_FOUND, "Order not found: " + id));
+  }
+
+  public void requireCanAccess(User user, Order order) {
+    boolean isCustomer = order.getUser().getId().equals(user.getId());
+    boolean isOwner = order.getRestaurant().getOwner() != null
+      && order.getRestaurant().getOwner().getId().equals(user.getId());
+    boolean isDelivery = order.getDeliveryPartner() != null
+      && order.getDeliveryPartner().getId().equals(user.getId());
+
+    if (!(isCustomer || isOwner || isDelivery)) {
+      throw new ApiException(HttpStatus.FORBIDDEN, "Order does not belong to this user context");
+    }
+  }
+
+  public Order setStatusWithEvent(Order order, OrderStatus next, String message, Instant when) {
+    orderStateMachine.requireTransitionAllowed(order.getStatus(), next);
+    order.setStatus(next);
+    order.setUpdatedAt(when);
+    Order saved = orderRepository.save(order);
+    appendEvent(saved, next, message, when);
+    return saved;
   }
 
   public List<OrderResponse> listOrders(User user) {
-    return orderRepository.findByUserOrderByIdDesc(user).stream()
-      .map(o -> getOrderResponse(o, user))
-      .toList();
+    return orderRepository.findByUserOrderByIdDesc(user).stream().map(this::toResponse).toList();
   }
 
   public OrderResponse getOrder(User user, Long orderId) {
-    Order o = orderRepository.findById(orderId).orElseThrow(() ->
-      new ApiException(HttpStatus.NOT_FOUND, "Order not found: " + orderId));
-    if (!o.getUser().getId().equals(user.getId())) {
-      throw new ApiException(HttpStatus.FORBIDDEN, "Order does not belong to user");
-    }
-    return getOrderResponse(o, user);
+    Order o = getOrderOrThrow(orderId);
+    requireCanAccess(user, o);
+    return toResponse(o);
   }
 
-  private OrderResponse getOrderResponse(Order o, User user) {
+  public OrderResponse toResponse(Order o) {
     List<OrderItemResponse> items = orderItemRepository.findByOrder(o).stream()
       .map(oi -> new OrderItemResponse(oi.getMenuItemNameSnapshot(), oi.getPriceSnapshot(), oi.getQty(), oi.getLineTotal()))
       .toList();
     return OrderResponse.of(o, items);
+  }
+
+  private void appendEvent(Order order, OrderStatus status, String message, Instant when) {
+    orderEventRepository.save(OrderEvent.builder()
+      .order(order)
+      .status(status.name())
+      .message(message)
+      .createdAt(when)
+      .build());
+  }
+
+  private long calcDeliveryFee(long itemTotal) {
+    return itemTotal >= 500 ? 0 : 40;
   }
 }

@@ -15,16 +15,20 @@ import { CartStore } from './core/cart.store';
         <a routerLink="/restaurants" class="font-bold text-lg">ZomatoX</a>
 
         <nav class="flex gap-3 text-sm">
-          <a routerLink="/restaurants" class="hover:underline">Restaurants</a>
-          <a routerLink="/cart" class="hover:underline">Cart</a>
-          <a routerLink="/orders" class="hover:underline">Orders</a>
+         <a routerLink="/restaurants" class="hover:underline">Customer</a>
+          <a routerLink="/owner/orders" class="hover:underline">Owner</a>
+           <a routerLink="/delivery/jobs" class="hover:underline">Delivery</a>
+             <a routerLink="/cart" class="hover:underline">Cart</a>
+            <a routerLink="/orders" class="hover:underline">Orders</a>
         </nav>
 
         <div class="ml-auto flex items-center gap-3">
           <select class="border rounded px-2 py-1 text-sm"
-                  [value]="userId()"
+                  [value]="selectedKey()"
                   (change)="switchUser($any($event.target).value)">
-            <option *ngFor="let u of users" [value]="u.id">{{u.label}}</option>
+           <option *ngFor="let u of users" [value]="u.id + ':' + u.role">
+              {{u.label}} • {{u.role}}
+            </option>
           </select>
 
           <div class="text-sm bg-slate-100 rounded px-2 py-1">
@@ -45,8 +49,7 @@ export class AppComponent {
   private cartStore = inject(CartStore);
 
   users = this.uc.users;
-  userId = computed(() => this.uc.userId);
-
+  selectedKey = computed(() => `${this.uc.userId}:${this.uc.role}`);
   cartCount = computed(() => this.cartStore.cart()?.items?.reduce((a, x) => a + x.qty, 0) ?? 0);
 
   constructor() {
@@ -54,7 +57,11 @@ export class AppComponent {
   }
 
   switchUser(v: string) {
-    this.uc.userId = Number(v);
+    const [id, role] = v.split(':');
+    const user = this.users.find(u => u.id === Number(id) && u.role === role);
+    if (user) {
+      this.uc.setUser(user);
+    }
     this.cartStore.load();
   }
 }

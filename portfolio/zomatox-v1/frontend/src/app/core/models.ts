@@ -46,3 +46,12 @@ export type Order = {
   createdAt: string;
   items: OrderItem[];
 };
+
+export type Address = {
+  id: number;
+  userId: number;
+  line1: string;
+  city: string;
+  pincode: string;
+  phone: string;
+};

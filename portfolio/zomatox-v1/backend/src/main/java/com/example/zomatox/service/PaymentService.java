@@ -6,7 +6,6 @@ import com.example.zomatox.entity.Payment;
 import com.example.zomatox.entity.enums.OrderStatus;
 import com.example.zomatox.entity.enums.PaymentStatus;
 import com.example.zomatox.exception.ApiException;
-import com.example.zomatox.repository.OrderRepository;
 import com.example.zomatox.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,33 +13,36 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+
 @Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class PaymentService {
-  private final OrderRepository orderRepository;
   private final PaymentRepository paymentRepository;
+  private final OrderService orderService;
 
   public PaymentResponse confirm(Long orderId, String result) {
-    Order order = orderRepository.findById(orderId).orElseThrow(() ->
-      new ApiException(HttpStatus.NOT_FOUND, "Order not found: " + orderId));
+    Order order = orderService.getOrderOrThrow(orderId);
 
     Payment payment = paymentRepository.findByOrder(order).orElseThrow(() ->
       new ApiException(HttpStatus.NOT_FOUND, "Payment not found for order: " + orderId));
 
+    Instant now = Instant.now();
+
     if ("SUCCESS".equalsIgnoreCase(result)) {
       payment.setStatus(PaymentStatus.SUCCESS);
-      order.setStatus(OrderStatus.PAID);
+      paymentRepository.save(payment);
+      orderService.setStatusWithEvent(order, OrderStatus.PAID, "Payment success", now);
+      orderService.setStatusWithEvent(order, OrderStatus.CONFIRMED, "Order auto-confirmed", now);
     } else if ("FAIL".equalsIgnoreCase(result)) {
       payment.setStatus(PaymentStatus.FAIL);
-      order.setStatus(OrderStatus.PAYMENT_FAILED);
+      paymentRepository.save(payment);
+      orderService.setStatusWithEvent(order, OrderStatus.PAYMENT_FAILED, "Payment failed", now);
     } else {
       throw new ApiException(HttpStatus.BAD_REQUEST, "result must be SUCCESS or FAIL");
     }
-
-    paymentRepository.save(payment);
-    orderRepository.save(order);
 
     return PaymentResponse.from(payment);
   }
