@@ -1,6 +1,7 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/blinkit
+    driver-class-name: org.postgresql.Driver
     username: blinkit
     password: blinkit
   jpa:
