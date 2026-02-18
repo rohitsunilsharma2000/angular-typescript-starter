@@ -1,0 +1,7 @@
+import { Component } from '@angular/core';
+
+@Component({
+  standalone: true,
+  template: '<div class="p-4 bg-white rounded-xl border">Ucheckout.page</div>'
+})
+export class Ucheckout.page {}
