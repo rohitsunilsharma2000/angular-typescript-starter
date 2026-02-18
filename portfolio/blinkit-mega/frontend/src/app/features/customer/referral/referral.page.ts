@@ -2,6 +2,6 @@ import { Component } from '@angular/core';
 
 @Component({
   standalone: true,
-  template: '<div class="p-4 bg-white rounded-xl border">Ureferral.page</div>'
+  template: '<section class="rounded-xl border bg-white p-4">Referral page wiring is pending backend API binding.</section>'
 })
-export class Ureferral.page {}
+export class ReferralPageComponent {}

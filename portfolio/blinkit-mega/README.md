@@ -66,6 +66,7 @@ git tag -n
 
 Run:
 ```bash
+# docker compose up -d
 docker-compose up -d
 cd backend
 mvn spring-boot:run -Dspring-boot.run.profiles=postgres
@@ -153,6 +154,9 @@ curl -X POST http://localhost:8080/api/warehouse/orders/1/packed \
 curl -X POST http://localhost:8080/api/rider/orders/1/status \
   -H "Authorization: Bearer <RIDER_ACCESS>" -H 'Content-Type: application/json' \
   -d '{"eventType":"OUT_FOR_DELIVERY","message":"Reached sector 5"}'
+
+# get seeded ID map + POST payload templates
+curl http://localhost:8080/api/dev/seed-map
 ```
 
 ## Test Plan

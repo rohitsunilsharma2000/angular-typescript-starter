@@ -11,16 +11,19 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
   @Bean
   SecurityFilterChain filterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
-    http.csrf(csrf -> csrf.disable())
+    http.cors(Customizer.withDefaults())
+        .csrf(csrf -> csrf.disable())
         .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/actuator/**", "/swagger-ui/**", "/v3/api-docs/**", "/api/auth/**").permitAll()
+            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+            .requestMatchers("/actuator/**", "/swagger-ui/**", "/v3/api-docs/**", "/api/auth/**", "/api/dev/**").permitAll()
             .anyRequest().authenticated())
         .httpBasic(Customizer.withDefaults())
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

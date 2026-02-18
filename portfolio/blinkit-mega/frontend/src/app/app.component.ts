@@ -16,7 +16,7 @@ import { RouterLink, RouterOutlet } from '@angular/router';
       </nav>
     </header>
     <main class="max-w-6xl mx-auto px-4 py-6">
-      <router-outlet />
+      <router-outlet></router-outlet>
     </main>
   `
 })

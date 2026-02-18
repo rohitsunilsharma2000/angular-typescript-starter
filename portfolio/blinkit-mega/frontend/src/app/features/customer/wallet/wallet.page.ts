@@ -2,6 +2,6 @@ import { Component } from '@angular/core';
 
 @Component({
   standalone: true,
-  template: '<div class="p-4 bg-white rounded-xl border">Uwallet.page</div>'
+  template: '<section class="rounded-xl border bg-white p-4">Wallet page wiring is pending backend API binding.</section>'
 })
-export class Uwallet.page {}
+export class WalletPageComponent {}
