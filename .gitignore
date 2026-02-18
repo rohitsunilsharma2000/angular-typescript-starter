@@ -1,0 +1,105 @@
+############################
+# OS / Editor
+############################
+.DS_Store
+Thumbs.db
+desktop.ini
+
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+*.swp
+*.swo
+
+############################
+# Logs
+############################
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+############################
+# Angular / Node
+############################
+node_modules/
+dist/
+dist-*/
+out/
+.angular/
+.cache/
+coverage/
+tmp/
+temp/
+*.tsbuildinfo
+
+# Env files (keep example if you want)
+.env
+.env.*
+!.env.example
+
+############################
+# Angular build artifacts
+############################
+*.ngfactory.ts
+*.ngstyle.ts
+*.ngsummary.json
+
+############################
+# Java / Spring
+############################
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+############################
+# Java IDE / Tooling
+############################
+.classpath
+.project
+.settings/
+.factorypath
+
+############################
+# IntelliJ / Output
+############################
+out/
+*.class
+
+############################
+# Spring Boot / Runtime
+############################
+*.pid
+*.hprof
+
+############################
+# Secrets / Keystores
+############################
+*.jks
+*.p12
+*.pfx
+*.pem
+*.key
+
+############################
+# Optional: local DB / docker volumes
+############################
+data/
+db-data/
