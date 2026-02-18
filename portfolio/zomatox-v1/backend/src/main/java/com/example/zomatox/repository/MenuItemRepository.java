@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface MenuItemRepository extends JpaRepository<MenuItem, Long> {
   List<MenuItem> findByRestaurantOrderByIdAsc(Restaurant restaurant);
+  List<MenuItem> findByRestaurantAndAvailableTrueOrderByIdAsc(Restaurant restaurant);
 }

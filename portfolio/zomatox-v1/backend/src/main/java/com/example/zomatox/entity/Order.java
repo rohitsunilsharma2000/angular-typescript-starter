@@ -34,6 +34,16 @@ public class Order {
   @Column(nullable = false)
   private long payableTotal;
 
+  @Column(name = "discount_amount", nullable = false)
+  @Builder.Default
+  private long discountAmount = 0;
+
+  @Column(name = "applied_coupon_code")
+  private String appliedCouponCode;
+
+  @Column(name = "pricing_snapshot_json")
+  private String pricingJsonSnapshot;
+
   @Column(nullable = false)
   private Instant createdAt;
 

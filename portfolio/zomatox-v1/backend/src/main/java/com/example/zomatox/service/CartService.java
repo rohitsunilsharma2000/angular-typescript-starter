@@ -3,6 +3,7 @@ package com.example.zomatox.service;
 import com.example.zomatox.dto.cart.CartLineResponse;
 import com.example.zomatox.dto.cart.CartResponse;
 import com.example.zomatox.entity.*;
+import com.example.zomatox.entity.enums.RestaurantApprovalStatus;
 import com.example.zomatox.exception.ApiException;
 import com.example.zomatox.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -53,11 +54,15 @@ public class CartService {
     MenuItem menuItem = menuItemRepository.findById(menuItemId).orElseThrow(() ->
       new ApiException(HttpStatus.NOT_FOUND, "Menu item not found: " + menuItemId));
 
-    if (!menuItem.isAvailable()) {
+    Restaurant restaurant = menuItem.getRestaurant();
+    if (restaurant.isBlocked() || restaurant.getApprovalStatus() != RestaurantApprovalStatus.APPROVED) {
+      throw new ApiException(HttpStatus.BAD_REQUEST, "Restaurant is blocked or not approved");
+    }
+
+    if (!menuItem.isAvailable() || menuItem.isBlocked()) {
       throw new ApiException(HttpStatus.BAD_REQUEST, "Item not available: " + menuItem.getName());
     }
 
-    // Enforce single restaurant cart for v1 (common zomato behavior)
     List<CartItem> current = cartItemRepository.findByCart(cart);
     if (!current.isEmpty()) {
       Long currentRestId = current.get(0).getMenuItem().getRestaurant().getId();

@@ -1,5 +1,11 @@
 # ZomatoX v1 (MVP)
 
+## v3-pro Upgrade Testing
+
+All 4-role testing (customer/owner/delivery/admin):
+- `docs/ZOMATOX_V3_PRO_ALL4_TESTING.md`
+- `docs/ZX_V3_TEST_MATRIX.md`
+
 ## Backend Build Troubleshooting (JDK/Lombok)
 
 Root cause: Maven is picking JDK 25 on your machine, and Lombok + javac internals are crashing (`TypeTag::UNKNOWN`).

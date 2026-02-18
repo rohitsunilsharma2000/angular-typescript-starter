@@ -1,5 +1,6 @@
 package com.example.zomatox.entity;
 
+import com.example.zomatox.entity.enums.ReviewStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,6 +30,11 @@ public class Review {
 
   @Column
   private String comment;
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  @Builder.Default
+  private ReviewStatus status = ReviewStatus.VISIBLE;
 
   @Column(nullable = false)
   private Instant createdAt;

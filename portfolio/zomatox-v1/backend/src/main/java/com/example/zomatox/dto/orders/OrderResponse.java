@@ -14,7 +14,9 @@ public class OrderResponse {
   String status;
   long itemTotal;
   long deliveryFee;
+  long discountAmount;
   long payableTotal;
+  String appliedCouponCode;
   Instant createdAt;
   List<OrderItemResponse> items;
 
@@ -22,7 +24,7 @@ public class OrderResponse {
     return new OrderResponse(
       o.getId(), o.getUser().getId(), o.getRestaurant().getId(),
       o.getStatus().name(),
-      o.getItemTotal(), o.getDeliveryFee(), o.getPayableTotal(),
+      o.getItemTotal(), o.getDeliveryFee(), o.getDiscountAmount(), o.getPayableTotal(), o.getAppliedCouponCode(),
       o.getCreatedAt(),
       items
     );

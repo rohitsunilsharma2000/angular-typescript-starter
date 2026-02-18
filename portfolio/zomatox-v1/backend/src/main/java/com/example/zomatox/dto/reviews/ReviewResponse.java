@@ -13,6 +13,7 @@ public class ReviewResponse {
   Long userId;
   int rating;
   String comment;
+  String status;
   Instant createdAt;
 
   public static ReviewResponse from(Review r) {
@@ -23,6 +24,7 @@ public class ReviewResponse {
       r.getUser().getId(),
       r.getRating(),
       r.getComment(),
+      r.getStatus().name(),
       r.getCreatedAt()
     );
   }

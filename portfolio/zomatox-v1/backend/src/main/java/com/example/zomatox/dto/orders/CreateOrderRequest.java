@@ -7,4 +7,6 @@ import lombok.Data;
 public class CreateOrderRequest {
   @NotNull
   private Long addressId;
+
+  private String couponCode;
 }

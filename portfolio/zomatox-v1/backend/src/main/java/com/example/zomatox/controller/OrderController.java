@@ -23,7 +23,7 @@ public class OrderController {
   public OrderResponse create(@RequestHeader(value = "X-User-Id", required = false) String userId,
                               @Valid @RequestBody CreateOrderRequest req) {
     User u = RequestContext.requireUser(userService, userId);
-    return orderService.createOrder(u, req.getAddressId());
+    return orderService.createOrder(u, req.getAddressId(), req.getCouponCode());
   }
 
   @GetMapping

@@ -1,15 +1,16 @@
 package com.example.zomatox.seed;
 
 import com.example.zomatox.entity.*;
-import com.example.zomatox.entity.enums.OrderStatus;
-import com.example.zomatox.entity.enums.PaymentStatus;
-import com.example.zomatox.entity.enums.UserRole;
+import com.example.zomatox.entity.enums.*;
 import com.example.zomatox.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
@@ -24,33 +25,40 @@ public class DataSeeder implements CommandLineRunner {
   private final OrderItemRepository orderItemRepo;
   private final PaymentRepository paymentRepo;
   private final OrderEventRepository orderEventRepo;
+  private final CouponRepository couponRepo;
+  private final PasswordEncoder passwordEncoder;
 
   @Override
   public void run(String... args) {
-    if (userRepo.count() > 0) return;
+    User customer = ensureUser("Customer One", "customer@zomatox.local", "customer123", UserRole.CUSTOMER);
+    User owner = ensureUser("Owner One", "owner@zomatox.local", "owner123", UserRole.OWNER);
+    User delivery = ensureUser("Delivery One", "delivery@zomatox.local", "delivery123", UserRole.DELIVERY_PARTNER);
+    User admin = ensureUser("Admin One", "admin@zomatox.local", "admin123", UserRole.ADMIN);
 
-    User customer = userRepo.save(User.builder().name("Customer One").email("customer@zomatox.local").role(UserRole.CUSTOMER).build());
-    User owner = userRepo.save(User.builder().name("Owner One").email("owner@zomatox.local").role(UserRole.OWNER).build());
-    User delivery = userRepo.save(User.builder().name("Delivery One").email("delivery@zomatox.local").role(UserRole.DELIVERY_PARTNER).build());
-    User admin = userRepo.save(User.builder().name("Admin One").email("admin@zomatox.local").role(UserRole.ADMIN).build());
+    ensureAddress(customer, "Salt Lake, Sector V", "Kolkata", "700091", "9999999999");
+    ensureAddress(customer, "Indiranagar", "Bengaluru", "560038", "8888888888");
+    ensureAddress(owner, "Park Street", "Kolkata", "700016", "9090909090");
+    ensureAddress(delivery, "BTM Layout", "Bengaluru", "560076", "9393939393");
+    ensureAddress(admin, "New Town Action Area I", "Kolkata", "700156", "9494949494");
 
-    addressRepo.save(Address.builder().user(customer).line1("Salt Lake, Sector V").city("Kolkata").pincode("700091").phone("9999999999").build());
-    addressRepo.save(Address.builder().user(customer).line1("Indiranagar").city("Bengaluru").pincode("560038").phone("8888888888").build());
-    addressRepo.save(Address.builder().user(customer).line1("DLF Cyber City").city("Gurugram").pincode("122002").phone("9898989898").build());
-    addressRepo.save(Address.builder().user(owner).line1("Park Street").city("Kolkata").pincode("700016").phone("9090909090").build());
-    addressRepo.save(Address.builder().user(owner).line1("HSR Layout").city("Bengaluru").pincode("560102").phone("9191919191").build());
-    addressRepo.save(Address.builder().user(delivery).line1("Lake Town").city("Kolkata").pincode("700089").phone("9292929292").build());
-    addressRepo.save(Address.builder().user(delivery).line1("BTM Layout").city("Bengaluru").pincode("560076").phone("9393939393").build());
-    addressRepo.save(Address.builder().user(admin).line1("New Town Action Area I").city("Kolkata").pincode("700156").phone("9494949494").build());
+    if (restaurantRepo.count() > 0) {
+      Restaurant approved = restaurantRepo.findAll().stream()
+        .filter(r -> r.getApprovalStatus() == RestaurantApprovalStatus.APPROVED)
+        .min(Comparator.comparing(Restaurant::getId))
+        .orElse(null);
+      ensureCoupons(approved);
+      return;
+    }
 
     List<String> cities = List.of("Kolkata", "Bengaluru");
     List<String> cuisines = List.of("Bengali", "North Indian", "Chinese", "Biryani", "South Indian");
 
     Random rnd = new Random(7);
-    Restaurant first = null;
+    Restaurant firstApproved = null;
 
     for (int i = 1; i <= 10; i++) {
       String city = cities.get(i <= 5 ? 0 : 1);
+      RestaurantApprovalStatus approval = i <= 6 ? RestaurantApprovalStatus.APPROVED : RestaurantApprovalStatus.PENDING_APPROVAL;
       Restaurant r = restaurantRepo.save(Restaurant.builder()
         .name("Restaurant " + i)
         .city(city)
@@ -58,10 +66,12 @@ public class DataSeeder implements CommandLineRunner {
         .ratingAvg(3.5 + rnd.nextDouble() * 1.5)
         .deliveryTimeMin(25 + rnd.nextInt(25))
         .imageUrl("https://picsum.photos/seed/rest" + i + "/640/360")
-        .owner(i <= 3 ? owner : null)
+        .owner(i <= 8 ? owner : null)
+        .approvalStatus(approval)
+        .isBlocked(false)
         .build());
 
-      if (first == null) first = r;
+      if (firstApproved == null && r.getApprovalStatus() == RestaurantApprovalStatus.APPROVED) firstApproved = r;
 
       for (int j = 1; j <= 10; j++) {
         boolean veg = rnd.nextBoolean();
@@ -72,18 +82,69 @@ public class DataSeeder implements CommandLineRunner {
           .price(80 + rnd.nextInt(220))
           .isVeg(veg)
           .available(true)
+          .isBlocked(false)
           .stockQty(stock)
           .build());
       }
     }
 
-    if (first != null) {
-      MenuItem sample = menuRepo.findByRestaurantOrderByIdAsc(first).stream().findFirst().orElse(null);
+    if (firstApproved != null) {
+      MenuItem sample = menuRepo.findByRestaurantOrderByIdAsc(firstApproved).stream().findFirst().orElse(null);
       if (sample != null) {
-        seedOrder(customer, first, sample, OrderStatus.CONFIRMED, null, "Order auto-confirmed after payment");
-        seedOrder(customer, first, sample, OrderStatus.READY_FOR_PICKUP, null, "Order ready for pickup");
-        seedOrder(customer, first, sample, OrderStatus.OUT_FOR_DELIVERY, delivery, "Out for delivery");
+        seedOrder(customer, firstApproved, sample, OrderStatus.CONFIRMED, null, "Order auto-confirmed after payment");
+        seedOrder(customer, firstApproved, sample, OrderStatus.READY_FOR_PICKUP, null, "Order ready for pickup");
+        seedOrder(customer, firstApproved, sample, OrderStatus.OUT_FOR_DELIVERY, delivery, "Out for delivery");
       }
+    }
+
+    ensureCoupons(firstApproved);
+  }
+
+  private User ensureUser(String name, String email, String rawPassword, UserRole role) {
+    User user = userRepo.findByEmailIgnoreCase(email).orElse(
+      User.builder().name(name).email(email).build()
+    );
+    user.setName(name);
+    user.setRole(role);
+    user.setActive(true);
+    user.setPasswordHash(passwordEncoder.encode(rawPassword));
+    return userRepo.save(user);
+  }
+
+  private void ensureAddress(User user, String line1, String city, String pincode, String phone) {
+    boolean exists = addressRepo.findByUser(user).stream().anyMatch(a -> a.getLine1().equalsIgnoreCase(line1));
+    if (!exists) {
+      addressRepo.save(Address.builder().user(user).line1(line1).city(city).pincode(pincode).phone(phone).build());
+    }
+  }
+
+  private void ensureCoupons(Restaurant approvedRestaurant) {
+    Coupon welcome = couponRepo.findByCodeIgnoreCase("WELCOME20").orElseGet(Coupon::new);
+    welcome.setCode("WELCOME20");
+    welcome.setType(CouponType.PERCENT);
+    welcome.setValue(20);
+    welcome.setMinOrder(200);
+    welcome.setMaxCap(100L);
+    welcome.setValidFrom(Instant.now().minus(1, ChronoUnit.DAYS));
+    welcome.setValidTo(Instant.now().plus(30, ChronoUnit.DAYS));
+    welcome.setActive(true);
+    welcome.setRestaurant(null);
+    welcome.setUsageLimitPerUser(3);
+    couponRepo.save(welcome);
+
+    if (approvedRestaurant != null) {
+      Coupon resto50 = couponRepo.findByCodeIgnoreCase("RESTO50").orElseGet(Coupon::new);
+      resto50.setCode("RESTO50");
+      resto50.setType(CouponType.FLAT);
+      resto50.setValue(50);
+      resto50.setMinOrder(300);
+      resto50.setMaxCap(50L);
+      resto50.setValidFrom(Instant.now().minus(1, ChronoUnit.DAYS));
+      resto50.setValidTo(Instant.now().plus(30, ChronoUnit.DAYS));
+      resto50.setActive(true);
+      resto50.setRestaurant(approvedRestaurant);
+      resto50.setUsageLimitPerUser(2);
+      couponRepo.save(resto50);
     }
   }
 
@@ -96,6 +157,7 @@ public class DataSeeder implements CommandLineRunner {
       .status(status)
       .itemTotal(sampleItem.getPrice())
       .deliveryFee(40)
+      .discountAmount(0)
       .payableTotal(sampleItem.getPrice() + 40)
       .createdAt(now)
       .updatedAt(now)

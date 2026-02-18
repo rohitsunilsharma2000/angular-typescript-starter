@@ -6,6 +6,8 @@ export type Restaurant = {
   ratingAvg: number;
   deliveryTimeMin: number;
   imageUrl?: string;
+  approvalStatus?: string;
+  isBlocked?: boolean;
 };
 
 export type MenuItem = {
@@ -16,6 +18,7 @@ export type MenuItem = {
   isVeg: boolean;
   available: boolean;
   stockQty: number;
+  isBlocked?: boolean;
 };
 
 export type CartLine = {
@@ -42,7 +45,9 @@ export type Order = {
   status: string;
   itemTotal: number;
   deliveryFee: number;
+  discountAmount: number;
   payableTotal: number;
+  appliedCouponCode?: string;
   createdAt: string;
   items: OrderItem[];
 };

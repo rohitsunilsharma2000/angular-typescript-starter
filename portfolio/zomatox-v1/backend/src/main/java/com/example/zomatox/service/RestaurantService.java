@@ -2,6 +2,7 @@ package com.example.zomatox.service;
 
 import com.example.zomatox.entity.MenuItem;
 import com.example.zomatox.entity.Restaurant;
+import com.example.zomatox.entity.enums.RestaurantApprovalStatus;
 import com.example.zomatox.exception.ApiException;
 import com.example.zomatox.repository.MenuItemRepository;
 import com.example.zomatox.repository.RestaurantRepository;
@@ -33,14 +34,19 @@ public class RestaurantService {
       base = restaurantRepository.findByCityContainingIgnoreCase(citySafe, pageable);
     }
 
-    if (cuisine == null || cuisine.isBlank()) return base;
-
-    // simple in-memory filter for v1
     List<Restaurant> filtered = base.getContent().stream()
+      .filter(r -> r.getApprovalStatus() == RestaurantApprovalStatus.APPROVED && !r.isBlocked())
+      .toList();
+
+    if (cuisine == null || cuisine.isBlank()) {
+      return new PageImpl<>(filtered, pageable, filtered.size());
+    }
+
+    List<Restaurant> cuisineFiltered = filtered.stream()
       .filter(r -> r.getCuisineType().equalsIgnoreCase(cuisine))
       .toList();
 
-    return new PageImpl<>(filtered, pageable, filtered.size());
+    return new PageImpl<>(cuisineFiltered, pageable, cuisineFiltered.size());
   }
 
   private Sort sortSpec(String sort) {
@@ -54,6 +60,8 @@ public class RestaurantService {
   }
 
   public List<MenuItem> getMenu(Restaurant r) {
-    return menuItemRepository.findByRestaurantOrderByIdAsc(r);
+    return menuItemRepository.findByRestaurantAndAvailableTrueOrderByIdAsc(r).stream()
+      .filter(mi -> !mi.isBlocked())
+      .toList();
   }
 }
