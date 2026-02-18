@@ -12,6 +12,7 @@ public class MenuItemResponse {
   boolean isVeg;
   boolean available;
   int stockQty;
+  boolean isBlocked;
 
   public static MenuItemResponse from(MenuItem m) {
     return new MenuItemResponse(
@@ -21,7 +22,8 @@ public class MenuItemResponse {
       m.getPrice(),
       m.isVeg(),
       m.isAvailable(),
-      m.getStockQty()
+      m.getStockQty(),
+      m.isBlocked()
     );
   }
 }

@@ -18,7 +18,7 @@ public class MenuItem {
   private String name;
 
   @Column(nullable = false)
-  private long price; // paise-like integer (e.g., INR * 100) OR just INR units; keep consistent
+  private long price;
 
   @Column(nullable = false)
   private boolean isVeg;
@@ -28,4 +28,8 @@ public class MenuItem {
 
   @Column(nullable = false)
   private int stockQty;
+
+  @Column(name = "is_blocked", nullable = false)
+  @Builder.Default
+  private boolean isBlocked = false;
 }

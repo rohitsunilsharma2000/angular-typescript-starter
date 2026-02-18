@@ -18,6 +18,7 @@ import { MenuItem, Restaurant } from '../../core/models';
       <div class="text-xl font-bold">{{restaurant()!.name}}</div>
       <div class="text-sm text-slate-600">{{restaurant()!.city}} • {{restaurant()!.cuisineType}}</div>
       <div class="mt-1 text-sm">⭐ {{restaurant()!.ratingAvg.toFixed(1)}} • {{restaurant()!.deliveryTimeMin}} min</div>
+      <button class="mt-2 border rounded px-2 py-1 text-sm" (click)="favorite()">Add to Favorites</button>
     </div>
   </div>
 
@@ -87,6 +88,7 @@ export class RestaurantDetailComponent {
     this.api.restaurant(id).subscribe(r => {
       this.restaurant.set(r);
       this.loadReviews();
+      this.api.addRecent(r.id).subscribe();
     });
     this.api.menu(id).subscribe(ms => {
       this.menu.set(ms);
@@ -118,5 +120,11 @@ export class RestaurantDetailComponent {
       },
       error: (e) => this.reviewError.set(e?.error?.message ?? 'Failed to post review'),
     });
+  }
+
+  favorite() {
+    const id = this.restaurant()?.id;
+    if (!id) return;
+    this.api.addFavorite(id).subscribe();
   }
 }

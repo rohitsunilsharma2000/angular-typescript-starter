@@ -12,11 +12,14 @@ public class RestaurantResponse {
   double ratingAvg;
   int deliveryTimeMin;
   String imageUrl;
+  String approvalStatus;
+  boolean isBlocked;
 
   public static RestaurantResponse from(Restaurant r) {
     return new RestaurantResponse(
       r.getId(), r.getName(), r.getCity(), r.getCuisineType(),
-      r.getRatingAvg(), r.getDeliveryTimeMin(), r.getImageUrl()
+      r.getRatingAvg(), r.getDeliveryTimeMin(), r.getImageUrl(),
+      r.getApprovalStatus().name(), r.isBlocked()
     );
   }
 }

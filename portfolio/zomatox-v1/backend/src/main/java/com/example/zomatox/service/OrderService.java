@@ -1,10 +1,12 @@
 package com.example.zomatox.service;
 
+import com.example.zomatox.dto.checkout.PricingPreviewResponse;
 import com.example.zomatox.dto.orders.OrderItemResponse;
 import com.example.zomatox.dto.orders.OrderResponse;
 import com.example.zomatox.entity.*;
 import com.example.zomatox.entity.enums.OrderStatus;
 import com.example.zomatox.entity.enums.PaymentStatus;
+import com.example.zomatox.entity.enums.RestaurantApprovalStatus;
 import com.example.zomatox.exception.ApiException;
 import com.example.zomatox.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -28,8 +30,13 @@ public class OrderService {
   private final OrderEventRepository orderEventRepository;
   private final CartService cartService;
   private final OrderStateMachine orderStateMachine;
+  private final CouponService couponService;
 
   public OrderResponse createOrder(User user, Long addressId) {
+    return createOrder(user, addressId, null);
+  }
+
+  public OrderResponse createOrder(User user, Long addressId, String couponCode) {
     Address addr = addressRepository.findById(addressId).orElseThrow(() ->
       new ApiException(HttpStatus.NOT_FOUND, "Address not found: " + addressId));
 
@@ -47,7 +54,7 @@ public class OrderService {
 
     for (CartItem ci : cartItems) {
       MenuItem mi = ci.getMenuItem();
-      if (!mi.isAvailable()) {
+      if (!mi.isAvailable() || mi.isBlocked()) {
         throw new ApiException(HttpStatus.BAD_REQUEST, "Item not available: " + mi.getName());
       }
       if (mi.getStockQty() < ci.getQty()) {
@@ -57,9 +64,29 @@ public class OrderService {
     }
 
     Restaurant restaurant = cartItems.get(0).getMenuItem().getRestaurant();
+    if (restaurant.isBlocked() || restaurant.getApprovalStatus() != RestaurantApprovalStatus.APPROVED) {
+      throw new ApiException(HttpStatus.BAD_REQUEST, "Restaurant is blocked or not approved");
+    }
+
     long itemTotal = cartItems.stream().mapToLong(ci -> ci.getMenuItem().getPrice() * ci.getQty()).sum();
     long deliveryFee = calcDeliveryFee(itemTotal);
-    long payable = itemTotal + deliveryFee;
+    long discount = 0;
+    String appliedCoupon = null;
+    String pricingSnapshot = null;
+    Coupon coupon = null;
+
+    if (couponCode != null && !couponCode.isBlank()) {
+      coupon = couponService.findAndValidateCoupon(user, couponCode, restaurant, itemTotal);
+      discount = couponService.calculateDiscount(coupon, itemTotal);
+      appliedCoupon = coupon.getCode();
+      PricingPreviewResponse preview = new PricingPreviewResponse(itemTotal, 0, 5, deliveryFee, discount,
+        Math.max(0, itemTotal + 5 + deliveryFee - discount), appliedCoupon);
+      pricingSnapshot = "{\"itemTotal\":" + preview.getItemTotal() + ",\"platformFee\":" + preview.getPlatformFee() +
+        ",\"deliveryFee\":" + preview.getDeliveryFee() + ",\"discount\":" + preview.getDiscount() +
+        ",\"payableTotal\":" + preview.getPayableTotal() + "}";
+    }
+
+    long payable = Math.max(0, itemTotal + deliveryFee + 5 - discount);
     Instant now = Instant.now();
 
     Order order = Order.builder()
@@ -68,7 +95,10 @@ public class OrderService {
       .status(OrderStatus.PAYMENT_PENDING)
       .itemTotal(itemTotal)
       .deliveryFee(deliveryFee)
+      .discountAmount(discount)
       .payableTotal(payable)
+      .appliedCouponCode(appliedCoupon)
+      .pricingJsonSnapshot(pricingSnapshot)
       .createdAt(now)
       .updatedAt(now)
       .build();
@@ -97,6 +127,10 @@ public class OrderService {
       .build();
     paymentRepository.save(payment);
 
+    if (coupon != null) {
+      couponService.markRedeemed(coupon, user, order);
+    }
+
     appendEvent(order, order.getStatus(), "Order created. Awaiting payment", now);
 
     cartService.clearCart(user);
@@ -116,7 +150,7 @@ public class OrderService {
     boolean isDelivery = order.getDeliveryPartner() != null
       && order.getDeliveryPartner().getId().equals(user.getId());
 
-    if (!(isCustomer || isOwner || isDelivery)) {
+    if (!(isCustomer || isOwner || isDelivery || user.getRole().name().equals("ADMIN"))) {
       throw new ApiException(HttpStatus.FORBIDDEN, "Order does not belong to this user context");
     }
   }

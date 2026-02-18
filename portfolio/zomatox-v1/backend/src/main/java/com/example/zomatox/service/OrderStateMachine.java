@@ -14,6 +14,7 @@ public class OrderStateMachine {
 
     if (from == OrderStatus.PAYMENT_PENDING && to == OrderStatus.PAID) return;
     if (from == OrderStatus.PAID && to == OrderStatus.CONFIRMED) return;
+
     if (from == OrderStatus.CONFIRMED && to == OrderStatus.PREPARING) return;
     if (from == OrderStatus.PREPARING && to == OrderStatus.READY_FOR_PICKUP) return;
 

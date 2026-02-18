@@ -2,6 +2,8 @@ server:
   port: 8080
 
 spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:zomatox}
     username: ${DB_USER:zomatox}
@@ -20,8 +22,19 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
 
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
+
+app:
+  security:
+    jwt:
+      issuer: zomatox
+      access-ttl-minutes: 15
+      refresh-ttl-days: 30
+      secret: ${JWT_SECRET:change-this-jwt-secret-change-this-jwt-secret-123456}

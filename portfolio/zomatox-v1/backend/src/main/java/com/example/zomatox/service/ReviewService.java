@@ -5,6 +5,7 @@ import com.example.zomatox.entity.Restaurant;
 import com.example.zomatox.entity.Review;
 import com.example.zomatox.entity.User;
 import com.example.zomatox.entity.enums.OrderStatus;
+import com.example.zomatox.entity.enums.ReviewStatus;
 import com.example.zomatox.exception.ApiException;
 import com.example.zomatox.repository.RestaurantRepository;
 import com.example.zomatox.repository.ReviewRepository;
@@ -28,7 +29,7 @@ public class ReviewService {
   public Page<Review> reviewsByRestaurant(Long restaurantId, int page, int size) {
     Restaurant restaurant = restaurantRepository.findById(restaurantId).orElseThrow(() ->
       new ApiException(HttpStatus.NOT_FOUND, "Restaurant not found: " + restaurantId));
-    return reviewRepository.findByRestaurantOrderByIdDesc(restaurant, PageRequest.of(page, size));
+    return reviewRepository.findByRestaurantAndStatusOrderByIdDesc(restaurant, ReviewStatus.VISIBLE, PageRequest.of(page, size));
   }
 
   public Review createReview(User user, Long restaurantId, Long orderId, int rating, String comment) {
@@ -56,6 +57,7 @@ public class ReviewService {
       .user(user)
       .rating(rating)
       .comment(comment)
+      .status(ReviewStatus.VISIBLE)
       .createdAt(Instant.now())
       .build());
 
