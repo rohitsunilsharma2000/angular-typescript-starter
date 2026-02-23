@@ -1,276 +1,277 @@
 ## Interview Theory Questions (Beginner → Intermediate → Advanced)
 
----
-
-## 01) Type বনাম Interface
-
-### Beginner
-
-* `type` আর `interface` কীভাবে আলাদা?
-* কোনটা object shape define করতে বেশি used?
-* `interface` কেন “contract” হিসেবে বলা হয়?
-* `type` দিয়ে কী কী define করা যায় (object ছাড়াও)?
-
-### Intermediate
-
-* `extends` কীভাবে কাজ করে (`interface extends interface`, `type` intersection)?
-* Declaration merging কী? এটা কেবল `interface` এ কেন হয়?
-* `implements` keyword কাদের সাথে কাজ করে?
-* `type` alias re-open করা যায় না—এর practical implication কী?
-
-### Advanced
-
-* Public library typings এ `interface` বনাম `type` choose করার criteria কী?
-* Structural typing এ `type/interface` choice কি runtime behavior change করে?
-* `interface` merging করলে compatibility/maintenance risk কী?
-* Complex union/intersection heavy codebase এ `type` কেন বেশি convenient?
+Below are quick, easy-English answers for each common theory question. Keep them short when speaking; expand only if the interviewer probes.
 
 ---
 
-## 02) Union `|` এবং Intersection `&`
+## 01) Type vs Interface
 
 ### Beginner
-
-* Union type মানে কী? Intersection type মানে কী?
-* `A | B` হলে variable এ কী guarantee থাকে?
-* `A & B` হলে variable এ কী guarantee থাকে?
+- Q: How are `type` and `interface` different?  
+  A: Both describe shapes. `interface` is mainly for objects/classes; `type` can also alias unions, primitives, etc.
+- Q: Which is used more for object shapes?  
+  A: Either works; teams pick one style. Interfaces are traditional for objects.
+- Q: Why call an interface a “contract”?  
+  A: It lists required members that any implementing object/class must provide.
+- Q: What can `type` define besides objects?  
+  A: Unions, intersections, primitives, function signatures, mapped types.
 
 ### Intermediate
-
-* Narrowing কী এবং কেন দরকার?
-* Discriminated union কী? কেন production code এ জনপ্রিয়?
-* Union এ common property access কখন safe/unsafe?
-* Intersection এ property conflict হলে কী হয়?
+- Q: How does `extends` work?  
+  A: Interfaces extend interfaces; types build intersections (`A & B`) to combine shapes.
+- Q: What is declaration merging? Why only interfaces?  
+  A: Multiple `interface Foo` statements merge members. Types cannot be reopened, so they don’t merge.
+- Q: Who can use `implements`?  
+  A: Classes can `implements` interfaces (or type aliases that are object-like).
+- Q: What’s the practical effect of not reopening a type alias?  
+  A: The shape is fixed; you must create a new alias or intersection instead of adding fields later.
 
 ### Advanced
+- Q: How to choose type vs interface in library typings?  
+  A: Use interfaces for public object contracts that may need augmentation; use types for unions/utility-heavy shapes.
+- Q: Does the choice change runtime behavior?  
+  A: No—both vanish at runtime; only type-checking differs.
+- Q: Risk of interface merging?  
+  A: Accidental member collisions or unintended widening when consumers augment.
+- Q: Why are types handy in complex union/intersection code?  
+  A: Type aliases compose unions, mapped/conditional types more naturally than interfaces.
 
-* Union distribution concept (যেমন conditional type এ) কীভাবে চিন্তা করবে?
-* Exhaustiveness checking ধারণা কী (theory level)?
-* “Impossible states” prevent করার জন্য union কীভাবে সাহায্য করে?
-* Complex domain state machine design এ union-এর ভূমিকা কী?
+---
+
+## 02) Union `|` and Intersection `&`
+
+### Beginner
+- Q: What are union and intersection types?  
+  A: Union `A | B` means value can be A or B. Intersection `A & B` means it must satisfy both.
+- Q: What does `A | B` guarantee?  
+  A: Only the fields common to A and B are safe without narrowing.
+- Q: What does `A & B` guarantee?  
+  A: All fields from A and B are present.
+
+### Intermediate
+- Q: What is narrowing?  
+  A: Checking runtime clues (typeof, `in`, discriminant) to shrink a union to a specific member.
+- Q: What is a discriminated union?  
+  A: A union where each member has a literal tag (e.g., `type`) so switch/case can narrow safely.
+- Q: When is common property access safe/unsafe in unions?  
+  A: Safe if the property exists on every member; unsafe otherwise until narrowed.
+- Q: What happens if intersection members conflict?  
+  A: Conflicting property types produce `never`/error; compatible types are intersected.
+
+### Advanced
+- Q: What is union distribution in conditional types?  
+  A: Conditional types run per union member, then reunite the results.
+- Q: Exhaustiveness checking idea?  
+  A: Handle every union case (often with a `never` fall-through) so the compiler flags missing cases.
+- Q: How do unions prevent impossible states?  
+  A: They model exact allowed variants, making invalid combinations unrepresentable.
+- Q: Role of unions in state machines?  
+  A: Each state is a union member with its required data, enabling safe transitions and checks.
 
 ---
 
 ## 03) Optional `?`, `readonly`
 
 ### Beginner
-
-* `prop?: T` মানে কী?
-* Optional property আর `T | undefined`—এরা conceptually আলাদা কেন?
-* `readonly` কেন দরকার?
+- Q: What does `prop?: T` mean?  
+  A: The property may be missing or `undefined`.
+- Q: Why is `prop?: T` different from `prop: T | undefined`?  
+  A: Optional means the key may be absent; `T | undefined` still requires the key.
+- Q: Why use `readonly`?  
+  A: To prevent reassignment after creation, protecting invariants.
 
 ### Intermediate
-
-* `readonly` কি shallow নাকি deep? কেন?
-* `ReadonlyArray<T>` আর `readonly T[]`—concept difference কী?
-* Optional chaining `?.` কবে ব্যবহার করা উচিত?
+- Q: Is `readonly` shallow or deep?  
+  A: Built-in `readonly` is shallow; nested objects stay mutable unless also marked readonly.
+- Q: Difference between `ReadonlyArray<T>` and `readonly T[]`?  
+  A: They’re equivalent in meaning; `ReadonlyArray` is the generic form.
+- Q: When to use optional chaining `?.`?  
+  A: When a link in the property chain might be null/undefined and you want `undefined` instead of a crash.
 
 ### Advanced
-
-* `readonly` compile-time only নাকি runtime enforced? implication কী?
-* API contract এ optional fields overuse করলে কী সমস্যা হয়?
-* Immutability pattern (theory): কেন predictability বাড়ায়?
-* “Defensive copying” concept কী, আর `readonly` এর সাথে সম্পর্ক কী?
+- Q: Is `readonly` compile-time only?  
+  A: Yes; it enforces at compile time, not runtime. Cloning can bypass it.
+- Q: Problems from overusing optional fields?  
+  A: Harder validation, more undefined checks, looser contracts.
+- Q: How does immutability help?  
+  A: Predictable state, safer sharing, easier reasoning.
+- Q: What is defensive copying?  
+  A: Making copies before storing/returning to avoid external mutations; complements readonly.
 
 ---
 
 ## 04) Generics
 
 ### Beginner
-
-* Generics কেন দরকার?
-* Generic type parameter `T` আসলে কী represent করে?
-* Generics ছাড়া কী সমস্যা হয় (duplication / any)?
+- Q: Why generics?  
+  A: Reuse logic while keeping type safety for different input/output types.
+- Q: What does type parameter `T` represent?  
+  A: A placeholder for a concrete type chosen by the caller or inferred.
+- Q: What happens without generics?  
+  A: You duplicate code or fall back to `any`, losing safety.
 
 ### Intermediate
-
-* Generic constraints `T extends X` কেন দরকার?
-* Inference কী? compiler কীভাবে `T` infer করে?
-* `keyof` conceptually কী?
+- Q: Why use `T extends X`?  
+  A: To constrain callers so `T` meets required shape/behavior.
+- Q: What is inference?  
+  A: The compiler deduces `T` from arguments/results instead of requiring you to write it.
+- Q: Concept of `keyof`?  
+  A: Produces the union of property names of a type.
 
 ### Advanced
-
-* Generic code এ “type safety বনাম flexibility” tradeoff কী?
-* API design এ generic result wrapper (Result<T,E>) কেন ভালো?
-* Variance intuition (covariance/contravariance) theory level এ কী বোঝায়?
-* Overload বনাম generic signature—কখন কোনটা conceptually better?
+- Q: Tradeoff of type safety vs flexibility?  
+  A: Tighter constraints catch bugs but can reduce ease of use; looser ones may admit invalid states.
+- Q: Why use a generic Result<T,E>?  
+  A: Standardizes success/error payloads and avoids exceptions for flow control.
+- Q: Variance intuition?  
+  A: How subtyping behaves for inputs/outputs; functions are usually contravariant in params, covariant in returns.
+- Q: Overload vs generic signature—when?  
+  A: Use generics for one flexible rule; use overloads when distinct call shapes return different types.
 
 ---
 
-## 05) Enum বনাম String Literal Union
+## 05) Enum vs String Literal Union
 
 ### Beginner
-
-* `enum` কী? string literal union কী?
-* Literal union কেন বেশি lightweight?
+- Q: What are enums and string literal unions?  
+  A: Enums emit runtime objects; literal unions are type-only sets of strings.
+- Q: Why are literal unions lightweight?  
+  A: They vanish at compile time and add no runtime code.
 
 ### Intermediate
-
-* `enum` runtime এ কীভাবে exist করে? (JS output ধারণা)
-* refactor safety / autocomplete—কোনটা কোথায় strong?
-* `const enum` ধারণা কী?
+- Q: How do enums exist at runtime?  
+  A: They compile to objects (unless `const enum`) with forward/reverse mappings.
+- Q: Autocomplete/refactor safety differences?  
+  A: Both give IntelliSense; enums add a namespaced object, unions rely on string literals.
+- Q: What is `const enum`?  
+  A: An enum erased to inlined values (no runtime object) but requiring isolatedModules care.
 
 ### Advanced
-
-* Tree-shaking/bundle size perspective এ enum কেন issue হতে পারে?
-* Cross-package/shared contract এ enum বনাম literal union—maintainability tradeoff কী?
-* Server-client boundary এ enum পাঠালে কী ঝুঁকি?
-* Migration strategy: enum → literal union করলে কী কী বিবেচনা করবে?
+- Q: Tree-shaking/bundle impact?  
+  A: Regular enums keep emitted objects, which may bloat bundles; unions do not.
+- Q: Shared contracts across packages—tradeoffs?  
+  A: Enums provide a single runtime source; unions avoid version conflicts but need manual alignment.
+- Q: Risk sending enums over the wire?  
+  A: Numeric enums can mismatch; strings are clearer. Version drift can break clients.
+- Q: Migrating enum → union considerations?  
+  A: Update runtime uses, adjust imports, ensure constants replace enum members.
 
 ---
 
 ## 06) `any`, `unknown`, `never`
 
 ### Beginner
-
-* `any` কেন dangerous?
-* `unknown` কেন safer?
-* `never` মানে কী?
+- Q: Why is `any` dangerous?  
+  A: It disables type checking, letting runtime bugs slip in.
+- Q: Why is `unknown` safer?  
+  A: You must narrow/validate before use, so unsafe operations are blocked.
+- Q: What does `never` mean?  
+  A: A value that never occurs (functions that throw/loop, unreachable code).
 
 ### Intermediate
-
-* Type guard conceptually কী?
-* `unknown` value ব্যবহার করতে হলে কী করতে হয় (narrowing/validation)?
-* `never` কখন naturally arise করে?
+- Q: What is a type guard?  
+  A: A runtime check that tells the compiler a narrower type (e.g., `typeof x === "string"`).
+- Q: How to use `unknown` values?  
+  A: Narrow with guards or runtime validation first.
+- Q: When does `never` appear naturally?  
+  A: In exhaustive switches’ default branches or functions that throw/loop forever.
 
 ### Advanced
-
-* Exhaustive checking এ `never` এর role কী?
-* “Soundness” ধারণায় `any` কীভাবে hole তৈরি করে?
-* Runtime validation না থাকলে `unknown`-এর benefit কতটা?
-* Error handling modeling: throw বনাম Result union—conceptually পার্থক্য কী?
+- Q: Role of `never` in exhaustiveness?  
+  A: Assigning to `never` in the default case forces the compiler to ensure all union members were handled.
+- Q: How does `any` harm soundness?  
+  A: It allows assigning anything to anything, hiding type errors and spreading unsafety.
+- Q: Benefit of `unknown` without runtime validation?  
+  A: Limited; you still need checks. It mainly stops accidental unsafe use.
+- Q: Throw vs Result union for errors?  
+  A: Throws use exceptions for flow; Result unions keep control flow explicit and type-checked.
 
 ---
 
 ## 07) `null/undefined` + strict mode
 
 ### Beginner
-
-* `null` আর `undefined` পার্থক্য কী?
-* `strictNullChecks` চালু হলে কী বদলায়?
+- Q: Difference between `null` and `undefined`?  
+  A: `undefined` = not provided; `null` = explicitly empty.
+- Q: What changes with `strictNullChecks`?  
+  A: You must handle `null`/`undefined` explicitly; they aren’t assignable to other types.
 
 ### Intermediate
-
-* `??` (nullish coalescing) আর `||`—conceptual difference কী?
-* Optional chaining `?.` কেন safe?
-* Non-null assertion `!` conceptually কী করে?
+- Q: `??` vs `||`?  
+  A: `??` only falls back on null/undefined; `||` also treats falsy values like 0/"" as false.
+- Q: Why is optional chaining safe?  
+  A: It stops property access when a link is nullish, returning `undefined` instead of throwing.
+- Q: What does non-null assertion `!` do?  
+  A: Tells the compiler you’re sure a value isn’t nullish (no runtime check).
 
 ### Advanced
-
-* `!` overuse করলে bug risk কেন বাড়ে?
-* “Fail fast” vs “silent fallback”—null handling philosophy কী?
-* Strict mode codebase এ API design কেমন হওয়া উচিত?
-* Nullable types modeling pattern (theory) কী?
+- Q: Why is overusing `!` risky?  
+  A: You silence compiler warnings and can crash at runtime.
+- Q: Null-handling philosophies?  
+  A: Fail fast (throw early) vs silent fallback (default values); pick one consistently.
+- Q: API design in strict mode?  
+  A: Model nullability explicitly, avoid optional where not needed, document defaults.
+- Q: Nullable modeling patterns?  
+  A: Use unions with null, Maybe/Option types, or Result types to represent absence.
 
 ---
 
-## 08) Classes + Access Modifiers + Getter/Setter
+## 08) Classes, Access Modifiers, Getter/Setter
 
 ### Beginner
-
-* Class কী, object থেকে কী আলাদা?
-* `public/private/protected` মানে কী?
-* Encapsulation বলতে কী বোঝায়?
+- Q: What is a class vs an object?  
+  A: Class is a blueprint; objects are instances created from it.
+- Q: Meaning of public/private/protected?  
+  A: `public` accessible everywhere; `private` only inside the class; `protected` inside class and subclasses.
+- Q: What is encapsulation?  
+  A: Hiding internal state and exposing a safe API.
 
 ### Intermediate
-
-* Inheritance vs composition—conceptually কোনটা কবে?
-* Getter/setter কেন দরকার?
-* `readonly` field বনাম private field—পার্থক্য কী?
+- Q: Inheritance vs composition?  
+  A: Inheritance reuses via “is-a”; composition reuses via “has-a”. Prefer composition when possible.
+- Q: Why getters/setters?  
+  A: To control reads/writes, validate, or compute values lazily.
+- Q: `readonly` field vs private field?  
+  A: `readonly` stops reassignment; `private` controls visibility. They solve different problems.
 
 ### Advanced
-
-* Abstraction + encapsulation মিলিয়ে domain modeling কেন ভালো হয়?
-* Class invariant concept কী (যেমন qty কখনো negative হবে না)?
-* `protected` misuse করলে design smell কেন হয়?
-* DTO বনাম Domain model (class) আলাদা রাখার theory benefit কী?
+- Q: Why combine abstraction and encapsulation?  
+  A: To model domains cleanly, keep invariants, and reduce coupling.
+- Q: What is a class invariant?  
+  A: A rule that must always hold for an instance (e.g., quantity >= 0).
+- Q: Why is misuse of `protected` a smell?  
+  A: It can leak internals to subclasses, making refactors risky.
+- Q: DTO vs Domain model separation benefit?  
+  A: DTOs are simple data carriers; domain models enforce rules. Separation keeps concerns clear.
 
 ---
 
 ## 09) async/await + Promise basics
 
 ### Beginner
-
-* Promise কী? async function কী return করে?
-* `await` কি করে?
-* Promise resolve/reject মানে কী?
-
-### Intermediate
-
-* Sequential await vs parallel (Promise.all) conceptually পার্থক্য কী?
-* Error handling: try/catch কিভাবে relate করে reject-এর সাথে?
-* Promise chain (`then/catch`) বনাম async/await—concept difference কী?
-
-### Advanced
-
-* `Promise.all` বনাম `Promise.allSettled`—conceptual difference + use case?
-* Concurrency limit concept কী? (সব parallel দিলে risk)
-* Cancellation concept (AbortController idea) theory level এ কী?
-* Async boundary তে typed error modeling কেন কঠিন?
-
----
-
-## 10) Pharmacy scenario: inventory + literal unions (এটা তুমি non-HMS হিসেবে ধরতে পারো “Warehouse/Store Inventory”)
-
-### Beginner
-
-* Inventory item model করতে literal unions কেন useful?
-* Status union (`"in_stock" | "out_of_stock"`) benefit কী?
+- Q: What is a Promise? What do async functions return?  
+  A: Promise represents a future value; async functions always return a Promise.
+- Q: What does `await` do?  
+  A: Pauses inside async function until the Promise settles, then gives the resolved value or throws on reject.
+- Q: What do resolve/reject mean?  
+  A: Resolve = success value; reject = failure reason.
 
 ### Intermediate
-
-* Guard/validation conceptually কীভাবে prevent করে invalid state?
-* “Business rule as type” ধারণা কী?
-
-### Advanced
-
-* State transition modeling (finite states) theory কী?
-* Compile-time constraints দিয়ে runtime bug কমানোর idea explain করো
-* Domain-driven modeling এ enums/literal unions এর role
-* Invariants + guard + exhaustive switch—why strong pattern?
-
----
-
-## 11) Lab scenario: report workflow + exhaustive checks (non-HMS: “Content Moderation workflow”/“Order pipeline” ভাবতে পারো)
-
-### Beginner
-
-* Workflow status modeling কেন দরকার?
-* “Exhaustive handling” ধারণা কী?
-
-### Intermediate
-
-* Discriminated union দিয়ে workflow states model করলে লাভ কী?
-* Unhandled case থাকলে কী ঝুঁকি?
+- Q: Sequential await vs parallel (Promise.all)?  
+  A: Sequential waits one-by-one; parallel starts together and waits for all—faster when tasks are independent.
+- Q: Why wrap async code in try/catch?  
+  A: Awaited rejections throw; try/catch handles them like sync errors.
+- Q: What is Promise chaining?  
+  A: Returning a Promise in `.then` links operations so results flow to the next step.
 
 ### Advanced
-
-* “Illegal state unrepresentable” principle কী?
-* Refactor safety: নতুন status যোগ হলে compiler কীভাবে help করে?
-* Domain events বনাম state—conceptual difference কী?
-* Switch + never guard pattern-এর philosophy কী?
-
----
-
-## 12) Tailwind UI স্নিপেট (Theory: UI consistency + utility CSS)
-
-### Beginner
-
-* Tailwind (utility-first CSS) ধারণা কী?
-* Component library ছাড়াও Tailwind কেন use করা হয়?
-
-### Intermediate
-
-* Design consistency (spacing, typography scale) Tailwind এ কীভাবে achieve হয়?
-* Responsive classes (sm/md/lg) ধারণা কী?
-* Reusability: class duplication সমস্যা কীভাবে manage করা যায়?
-
-### Advanced
-
-* Utility-first বনাম semantic CSS—tradeoff কী?
-* Tailwind config (theme extend) কেন important?
-* Large codebase এ UI tokens / design system conceptually কিভাবে map হয় Tailwind এ?
-* Maintainability: “class soup” risk কমানোর strategy (theory) কী?
+- Q: What is backpressure/concurrency control?  
+  A: Limiting simultaneous async work to avoid overload (e.g., queues, semaphore, mapLimit).
+- Q: Why use cancellation patterns?  
+  A: To stop unnecessary work when results are no longer needed.
+- Q: How to avoid swallowed errors?  
+  A: Always return/await Promises or handle rejections; use allSettled/logging.
+- Q: What is idempotent request dedupe?  
+  A: Reusing the same in-flight Promise for identical requests to prevent duplicate work.
 
 ---
- 
