@@ -18,21 +18,32 @@ const runDemo = <T>(label: string, fn: () => T | Promise<T>) => {
 ## 01) type vs interface
 
 ### <a id="q01-01"></a>Q01-01 User Shape (interface + type)
-*View:* runDemo("q01-01", () => "q01-01 sample")
+*Solution:* runDemo("q01-01", () => {
+  const user: User = { id: "u1", name: "Alice" };
+  const alias: UserAlias = { id: "u2", name: "Bob", email: "b@example.com" };
+  return [user, alias];
+})
 ```ts
 interface User { readonly id: string; name: string; email?: string }
 type UserAlias = { readonly id: string; name: string; email?: string };
 ```
 
 ### <a id="q01-02"></a>Q01-02 Admin Extends User
-*View:* runDemo("q01-02", () => "q01-02 sample")
+*Solution:* runDemo("q01-02", () => {
+  const admin: AdminUser = { id: "1", name: "Root", permissions: ["read", "write"] };
+  const needsUserContract = (u: User) => u.name; // shows AdminUser satisfies User contract
+  return `${needsUserContract(admin)} can ${admin.permissions.join(", ")}`;
+})
 ```ts
 interface AdminUser extends User { permissions: string[] }
 const admin: AdminUser = { id: "1", name: "Root", permissions: ["read","write"] };
 ```
 
 ### <a id="q01-03"></a>Q01-03 Declaration Merging Demo
-*View:* runDemo("q01-03", () => "q01-03 sample")
+*Solution:* runDemo("q01-03", () => {
+  const cfg: AppConfig = { apiBaseUrl: "/api", timeoutMs: 5000 };
+  return `${cfg.apiBaseUrl} @ ${cfg.timeoutMs}ms`;
+})
 ```ts
 interface AppConfig { apiBaseUrl: string }
 interface AppConfig { timeoutMs: number }
@@ -40,7 +51,13 @@ const cfg: AppConfig = { apiBaseUrl: "/api", timeoutMs: 5000 };
 ```
 
 ### <a id="q01-04"></a>Q01-04 Type Alias Union Model
-*View:* runDemo("q01-04", () => "q01-04 sample")
+*Solution:* runDemo("q01-04", () => {
+  const accounts: Account[] = [
+    { kind: "personal", pan: "ABCDE1234F" },
+    { kind: "business", gst: "22AAAAA0000A1Z5" }
+  ];
+  return accounts.map(a => a.kind);
+})
 ```ts
 type Account = PersonalAccount | BusinessAccount;
 type PersonalAccount = { kind: "personal"; pan: string };
@@ -48,7 +65,9 @@ type BusinessAccount = { kind: "business"; gst: string };
 ```
 
 ### <a id="q01-05"></a>Q01-05 Excess Property Check
-*View:* runDemo("q01-05", () => "q01-05 sample")
+*Solution:* runDemo("q01-05", () => {
+  return createUser({ id: "u1", name: "A" });
+})
 ```ts
 function createUser(u: User) { return u; }
 createUser({ id: "u1", name: "A" }); // ok
@@ -56,14 +75,20 @@ createUser({ id: "u1", name: "A" }); // ok
 ```
 
 ### <a id="q01-06"></a>Q01-06 Function Type via Interface
-*View:* runDemo("q01-06", () => "q01-06 sample")
+*Solution:* runDemo("q01-06", () => {
+  return [isEmail("a@b.com"), isEmail("bad-email")];
+})
 ```ts
 interface Validator { (value: string): boolean }
 const isEmail: Validator = v => /.+@.+\..+/.test(v);
 ```
 
 ### <a id="q01-07"></a>Q01-07 Hybrid Function + Property
-*View:* runDemo("q01-07", () => "q01-07 sample")
+*Solution:* runDemo("q01-07", () => {
+  logger("hello");
+  logger.level = "info";
+  return logger.level;
+})
 ```ts
 interface LoggerFn { (msg: string): void; level: "debug"|"info"|"error" }
 const logger = ((msg: string) => console.log(msg)) as LoggerFn;
@@ -71,21 +96,31 @@ logger.level = "debug";
 ```
 
 ### <a id="q01-08"></a>Q01-08 Pick User Preview
-*View:* runDemo("q01-08", () => "q01-08 sample")
+*Solution:* runDemo("q01-08", () => {
+  const u: User = { id: "u9", name: "Preview User" };
+  return toPreview(u);
+})
 ```ts
 type UserPreview = Pick<User, "id" | "name">;
 const toPreview = (u: User): UserPreview => ({ id: u.id, name: u.name });
 ```
 
 ### <a id="q01-09"></a>Q01-09 Omit Sensitive Fields
-*View:* runDemo("q01-09", () => "q01-09 sample")
+*Solution:* runDemo("q01-09", () => {
+  const u: User = { id: "u1", name: "Mask Me", email: "mask@example.com" };
+  return toPublic(u);
+})
 ```ts
 type PublicUser = Omit<User, "email"> & { displayName: string };
 const toPublic = (u: User): PublicUser => ({ id: u.id, name: u.name, displayName: u.name });
 ```
 
 ### <a id="q01-10"></a>Q01-10 Readonly Enforcement
-*View:* runDemo("q01-10", () => "q01-10 sample")
+*Solution:* runDemo("q01-10", () => {
+  const u: User = { id: "1", name: "A" };
+  const updated = { ...u, id: "x" };
+  return updated.id;
+})
 ```ts
 const u: User = { id: "1", name: "A" };
 // u.id = "x"; // TS error
@@ -93,7 +128,10 @@ const updated = { ...u, id: "x" }; // new object if really needed
 ```
 
 ### <a id="q01-11"></a>Q01-11 Interface vs Type for Extensibility
-*View:* runDemo("q01-11", () => "q01-11 sample")
+*Solution:* runDemo("q01-11", () => {
+  const circle = new Circle(2);
+  return circle.area().toFixed(2);
+})
 ```ts
 interface Shape { area(): number }
 type Shape2 = { area(): number };
@@ -102,14 +140,20 @@ class Circle implements Shape { constructor(private r: number) {} area() { retur
 ```
 
 ### <a id="q01-12"></a>Q01-12 Index Signature Flags
-*View:* runDemo("q01-12", () => "q01-12 sample")
+*Solution:* runDemo("q01-12", () => {
+  const flags: FeatureFlags = { beta: true };
+  return isEnabled(flags, "beta");
+})
 ```ts
 type FeatureFlags = Record<string, boolean>;
 const isEnabled = (flags: FeatureFlags, key: string) => flags[key] ?? false;
 ```
 
 ### <a id="q01-13"></a>Q01-13 Generic ApiResponse
-*View:* runDemo("q01-13", () => "q01-13 sample")
+*Solution:* runDemo("q01-13", () => {
+  const res: ApiResponse<number> = { ok: true, data: 42 };
+  return getOrThrow(res);
+})
 ```ts
 interface ApiResponse<T> { ok: boolean; data?: T; error?: string }
 function getOrThrow<T>(r: ApiResponse<T>): T {
@@ -119,28 +163,41 @@ function getOrThrow<T>(r: ApiResponse<T>): T {
 ```
 
 ### <a id="q01-14"></a>Q01-14 Namespace-like Types
-*View:* runDemo("q01-14", () => "q01-14 sample")
+*Solution:* runDemo("q01-14", () => {
+  const product: Product = { id: "p1", price: 10 };
+  return product.price;
+})
 ```ts
 type Models = { User: User; Product: { id: string; price: number } };
 type Product = Models["Product"];
 ```
 
 ### <a id="q01-15"></a>Q01-15 Result<T,E> Union
-*View:* runDemo("q01-15", () => "q01-15 sample")
+*Solution:* runDemo("q01-15", () => {
+  const ok: Result<string, Error> = { ok: true, data: "done" };
+  return unwrap(ok);
+})
 ```ts
 type Result<T, E> = { ok: true; data: T } | { ok: false; error: E };
 const unwrap = <T, E>(r: Result<T, E>): T => r.ok ? r.data : (() => { throw r.error; })();
 ```
 
 ### <a id="q01-16"></a>Q01-16 Exact Type Helper (simple)
-*View:* runDemo("q01-16", () => "q01-16 sample")
+*Solution:* runDemo("q01-16", () => {
+  const exact = acceptsExact<{ a: number; b: string }, { a: number; b: string }>({ a: 1, b: "x" });
+  return exact;
+})
 ```ts
 type Exact<T, Shape> = T & Record<Exclude<keyof T, keyof Shape>, never>;
 function acceptsExact<T, S>(value: Exact<T, S>) { return value; }
 ```
 
 ### <a id="q01-17"></a>Q01-17 DeepReadonly Utility
-*View:* runDemo("q01-17", () => "q01-17 sample")
+*Solution:* runDemo("q01-17", () => {
+  const original = { nested: { value: 1 } };
+  const frozen: DeepReadonly<typeof original> = original;
+  return frozen.nested.value;
+})
 ```ts
 type DeepReadonly<T> = T extends (...args: any) => any
   ? T
@@ -152,13 +209,19 @@ type DeepReadonly<T> = T extends (...args: any) => any
 ```
 
 ### <a id="q01-18"></a>Q01-18 Simplify Utility
-*View:* runDemo("q01-18", () => "q01-18 sample")
+*Solution:* runDemo("q01-18", () => {
+  type Complex = { a: string } & { b: number };
+  const simple: Simplify<Complex> = { a: "A", b: 2 };
+  return simple;
+})
 ```ts
 type Simplify<T> = { [K in keyof T]: T[K] } & {};
 ```
 
 ### <a id="q01-19"></a>Q01-19 Fluent Builder (typed)
-*View:* runDemo("q01-19", () => "q01-19 sample")
+*Solution:* runDemo("q01-19", () => {
+  return new Builder({} as const).set("name", "A").set("age", 1).build();
+})
 ```ts
 class Builder<T extends object> {
   constructor(private acc: T) {}
@@ -169,7 +232,9 @@ const userBuilder = new Builder({} as const).set("name", "A").set("age", 1).buil
 ```
 
 ### <a id="q01-20"></a>Q01-20 Typed Routes Contract
-*View:* runDemo("q01-20", () => "q01-20 sample")
+*Solution:* runDemo("q01-20", () => {
+  return callApi("/login", { email: "a@b.com", password: "pw" });
+})
 ```ts
 type Routes = {
   "/login": { req: { email: string; password: string }; res: { token: string } };
@@ -184,21 +249,31 @@ function callApi<Path extends keyof Routes>(path: Path, req: Routes[Path]["req"]
 ## 02) union and intersection
 
 ### <a id="q02-01"></a>Q02-01 Payment Union
-*View:* runDemo("q02-01", () => "q02-01 sample")
+*Solution:* runDemo("q02-01", () => {
+  const payments: Payment[] = ["card", "upi", "cod"];
+  return payments.map(p => `${p} -> online? ${isOnline(p)}`);
+})
 ```ts
 type Payment = "card" | "upi" | "cod";
 const isOnline = (p: Payment) => p !== "cod";
 ```
 
 ### <a id="q02-02"></a>Q02-02 LoginResult Union Objects
-*View:* runDemo("q02-02", () => "q02-02 sample")
+*Solution:* runDemo("q02-02", () => {
+  const success: LoginResult = { ok: true, token: "token-123" };
+  const failure: LoginResult = { ok: false, message: "invalid" };
+  return [printLogin(success), printLogin(failure)];
+})
 ```ts
 type LoginResult = { ok: true; token: string } | { ok: false; message: string };
 function printLogin(r: LoginResult) { return r.ok ? r.token : r.message; }
 ```
 
 ### <a id="q02-03"></a>Q02-03 Intersection Profile
-*View:* runDemo("q02-03", () => "q02-03 sample")
+*Solution:* runDemo("q02-03", () => {
+  const user: UserProfile = { id: "u1", name: "Ada", city: "London", country: "UK" };
+  return `${user.name} in ${user.city}, ${user.country}`;
+})
 ```ts
 type BasicUser = { id: string; name: string };
 type Address = { city: string; country: string };
@@ -206,20 +281,28 @@ type UserProfile = BasicUser & Address;
 ```
 
 ### <a id="q02-04"></a>Q02-04 Narrowing with "in"
-*View:* runDemo("q02-04", () => "q02-04 sample")
+*Solution:* runDemo("q02-04", () => {
+  const withToken: Session = { token: "abc", user: "u1" };
+  const withoutToken: Session = { message: "unauthorized" };
+  return [getToken(withToken), getToken(withoutToken)];
+})
 ```ts
 type Session = { token: string; user: string } | { message: string };
 function getToken(x: Session) { if ("token" in x) return x.token; return undefined; }
 ```
 
 ### <a id="q02-05"></a>Q02-05 typeof Narrowing
-*View:* runDemo("q02-05", () => "q02-05 sample")
+*Solution:* runDemo("q02-05", () => {
+  return [normalize(2), normalize("hi")];
+})
 ```ts
 function normalize(v: string | number) { return typeof v === "number" ? v * 2 : v.toUpperCase(); }
 ```
 
 ### <a id="q02-06"></a>Q02-06 Filter Union Array Safely
-*View:* runDemo("q02-06", () => "q02-06 sample")
+*Solution:* runDemo("q02-06", () => {
+  return onlyNumbers([1, "two", 3, "four"]);
+})
 ```ts
 function onlyNumbers(values: Array<number | string>): number[] {
   return values.filter((v): v is number => typeof v === "number");
@@ -227,14 +310,23 @@ function onlyNumbers(values: Array<number | string>): number[] {
 ```
 
 ### <a id="q02-07"></a>Q02-07 Free vs Paid Video
-*View:* runDemo("q02-07", () => "q02-07 sample")
+*Solution:* runDemo("q02-07", () => {
+  return [getPriceOrZero({ kind: "free" }), getPriceOrZero({ kind: "paid", price: 199 })];
+})
 ```ts
 type Video = { kind: "free" } | { kind: "paid"; price: number };
 const getPriceOrZero = (v: Video) => v.kind === "paid" ? Math.max(0, v.price) : 0;
 ```
 
 ### <a id="q02-08"></a>Q02-08 Event Union Handler
-*View:* runDemo("q02-08", () => "q02-08 sample")
+*Solution:* runDemo("q02-08", () => {
+  const events: Event[] = [
+    { type: "page_view", path: "/" },
+    { type: "add_to_cart", sku: "sku1", qty: 2 },
+    { type: "purchase", orderId: "o1", total: 99 },
+  ];
+  return events.map(handleEvent);
+})
 ```ts
 type Event =
   | { type: "page_view"; path: string }
@@ -250,7 +342,13 @@ function handleEvent(e: Event) {
 ```
 
 ### <a id="q02-09"></a>Q02-09 Error Union to Message
-*View:* runDemo("q02-09", () => "q02-09 sample")
+*Solution:* runDemo("q02-09", () => {
+  return [
+    toUserMessage({ kind: "network", status: 500 }),
+    toUserMessage({ kind: "validation", field: "email" }),
+    toUserMessage({ kind: "auth" })
+  ];
+})
 ```ts
 type NetworkError = { kind: "network"; status: number };
 type ValidationError = { kind: "validation"; field: string };
@@ -265,13 +363,25 @@ function toUserMessage(e: NetworkError | ValidationError | AuthError) {
 ```
 
 ### <a id="q02-10"></a>Q02-10 Exhaustive Check with never
-*View:* runDemo("q02-10", () => "q02-10 sample")
+*Solution:* runDemo("q02-10", () => {
+  const demo = (val: "a" | "b") => {
+    switch (val) {
+      case "a": return "A";
+      case "b": return "B";
+      default: return assertNever(val);
+    }
+  };
+  return [demo("a"), demo("b")];
+})
 ```ts
 function assertNever(x: never): never { throw new Error(`Unexpected value ${x}`); }
 ```
 
 ### <a id="q02-11"></a>Q02-11 Intersection of Capabilities
-*View:* runDemo("q02-11", () => "q02-11 sample")
+*Solution:* runDemo("q02-11", () => {
+  resource.track();
+  return resource.toJSON();
+})
 ```ts
 type Trackable = { track(): void };
 type Serializable = { toJSON(): string };
@@ -282,7 +392,9 @@ const resource: Trackable & Serializable = {
 ```
 
 ### <a id="q02-12"></a>Q02-12 Union Parameter vs Overload
-*View:* runDemo("q02-12", () => "q02-12 sample")
+*Solution:* runDemo("q02-12", () => {
+  return [formatDate("2022-01-01"), formatDate(new Date("2022-02-02"))];
+})
 ```ts
 function formatDate(input: string | Date) {
   const d = typeof input === "string" ? new Date(input) : input;
@@ -292,7 +404,12 @@ function formatDate(input: string | Date) {
 ```
 
 ### <a id="q02-13"></a>Q02-13 Type Predicate Guard
-*View:* runDemo("q02-13", () => "q02-13 sample")
+*Solution:* runDemo("q02-13", () => {
+  return [
+    isPaidVideo({ kind: "paid", price: 10 }),
+    isPaidVideo({ kind: "free" })
+  ];
+})
 ```ts
 function isPaidVideo(v: { kind: string; price?: number }): v is { kind: "paid"; price: number } {
   return v.kind === "paid" && typeof v.price === "number";
@@ -300,7 +417,13 @@ function isPaidVideo(v: { kind: string; price?: number }): v is { kind: "paid"; 
 ```
 
 ### <a id="q02-14"></a>Q02-14 Compose Search Filters (intersection)
-*View:* runDemo("q02-14", () => "q02-14 sample")
+*Solution:* runDemo("q02-14", () => {
+  const items = [
+    { price: 10, category: "books", rating: 4.5 },
+    { price: 30, category: "electronics", rating: 4.8 }
+  ];
+  return applyFilters(items, { maxPrice: 20 });
+})
 ```ts
 type ByPrice = { maxPrice?: number };
 type ByCategory = { category?: string };
@@ -316,19 +439,29 @@ function applyFilters(items: Product[], f: Filter) {
 ```
 
 ### <a id="q02-15"></a>Q02-15 UnionToIntersection Utility
-*View:* runDemo("q02-15", () => "q02-15 sample")
+*Solution:* runDemo("q02-15", () => {
+  type Mixed = { a: string } | { b: number };
+  const both: UnionToIntersection<Mixed> = { a: "hi", b: 2 };
+  return both;
+})
 ```ts
 type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
 ```
 
 ### <a id="q02-16"></a>Q02-16 Simplify Intersection Output
-*View:* runDemo("q02-16", () => "q02-16 sample")
+*Solution:* runDemo("q02-16", () => {
+  type Original = { a: string } & { b: number };
+  const value: Simplify<Original> = { a: "x", b: 1 };
+  return value;
+})
 ```ts
 type Simplify<T> = { [K in keyof T]: T[K] } & {};
 ```
 
 ### <a id="q02-17"></a>Q02-17 Order State Machine
-*View:* runDemo("q02-17", () => "q02-17 sample")
+*Solution:* runDemo("q02-17", () => {
+  return [transition("created", "paid"), transition("paid", "packed"), transition("packed", "shipped")];
+})
 ```ts
 type Status = "created"|"paid"|"packed"|"shipped"|"delivered"|"cancelled";
 const transitions: Record<Status, Status[]> = {
@@ -343,7 +476,9 @@ const transition = (s: Status, next: Status) => transitions[s].includes(next) ? 
 ```
 
 ### <a id="q02-18"></a>Q02-18 ParseResult Union
-*View:* runDemo("q02-18", () => "q02-18 sample")
+*Solution:* runDemo("q02-18", () => {
+  return [parseNumber("42"), parseNumber("oops")];
+})
 ```ts
 type ParseResult = { ok: true; data: number } | { ok: false; error: string };
 function parseNumber(input: string): ParseResult {
@@ -353,7 +488,11 @@ function parseNumber(input: string): ParseResult {
 ```
 
 ### <a id="q02-19"></a>Q02-19 Handler Map from Union
-*View:* runDemo("q02-19", () => "q02-19 sample")
+*Solution:* runDemo("q02-19", () => {
+  handlers.login({ userId: "u1" });
+  handlers.purchase({ total: 99 });
+  return "handled";
+})
 ```ts
 type EventMap = { login: { userId: string }; logout: { userId: string }; purchase: { total: number } };
 type EventKey = keyof EventMap;
@@ -365,7 +504,9 @@ const handlers: { [K in EventKey]: (payload: EventMap[K]) => void } = {
 ```
 
 ### <a id="q02-20"></a>Q02-20 Next Step Depends on Previous (simplified)
-*View:* runDemo("q02-20", () => "q02-20 sample")
+*Solution:* runDemo("q02-20", () => {
+  return new Onboarding({}).signup({ email: "a@example.com" }).verifyEmail();
+})
 ```ts
 class Onboarding<S> {
   constructor(private state: S) {}
@@ -377,7 +518,9 @@ class Onboarding<S> {
 ## 03) optional and readonly
 
 ### <a id="q03-01"></a>Q03-01 Optional Profile Display
-*View:* runDemo("q03-01", () => "q03-01 sample")
+*Solution:* runDemo("q03-01", () => {
+  return renderProfile({ name: "Alice", bio: "Hi!" });
+})
 ```ts
 type Profile = { name: string; bio?: string; avatarUrl?: string };
 const renderProfile = (p: Profile) => ({
@@ -388,7 +531,10 @@ const renderProfile = (p: Profile) => ({
 ```
 
 ### <a id="q03-02"></a>Q03-02 Readonly SKU Update
-*View:* runDemo("q03-02", () => "q03-02 sample")
+*Solution:* runDemo("q03-02", () => {
+  const p: Product = { sku: "SKU1", name: "Pen", price: 10 };
+  return updateProduct(p, { price: 12 });
+})
 ```ts
 type Product = { readonly sku: string; name: string; price: number };
 function updateProduct(p: Product, patch: Partial<Product>): Product {
@@ -398,37 +544,41 @@ function updateProduct(p: Product, patch: Partial<Product>): Product {
 ```
 
 ### <a id="q03-03"></a>Q03-03 Optional Discount Apply
-*View:* runDemo("q03-03", () => "q03-03 sample")
+*Solution:* runDemo("q03-03", () => applyDiscount(100, 10))
 ```ts
 const applyDiscount = (price: number, discount?: number) => price - price * (discount ?? 0) / 100;
 ```
 
 ### <a id="q03-04"></a>Q03-04 Readonly Array Add
-*View:* runDemo("q03-04", () => "q03-04 sample")
+*Solution:* runDemo("q03-04", () => addValue([1, 2] as const, 3))
 ```ts
 const addValue = (arr: readonly number[], v: number): number[] => [...arr, v];
 ```
 
 ### <a id="q03-05"></a>Q03-05 Optional Chaining Nested
-*View:* runDemo("q03-05", () => "q03-05 sample")
+*Solution:* runDemo("q03-05", () => getCity({ address: { city: "Delhi" } }))
 ```ts
 const getCity = (user: { address?: { city?: string } }) => user.address?.city ?? "Unknown";
 ```
 
 ### <a id="q03-06"></a>Q03-06 Partial Update Merge
-*View:* runDemo("q03-06", () => "q03-06 sample")
+*Solution:* runDemo("q03-06", () => merge({ a: 1, b: 2 }, { b: 3 }))
 ```ts
 function merge<T>(base: T, patch: Partial<T>): T { return { ...base, ...patch }; }
 ```
 
 ### <a id="q03-07"></a>Q03-07 Optional Param Currency
-*View:* runDemo("q03-07", () => "q03-07 sample")
+*Solution:* runDemo("q03-07", () => formatMoney(99))
 ```ts
 const formatMoney = (amount: number, currency = "INR") => `${currency} ${amount}`;
 ```
 
 ### <a id="q03-08"></a>Q03-08 Readonly vs Object.freeze Demo
-*View:* runDemo("q03-08", () => "q03-08 sample")
+*Solution:* runDemo("q03-08", () => {
+  const compileReadonly: Readonly<Product> = { sku: "1", name: "A", price: 10 };
+  const runtimeFrozen = Object.freeze({ sku: "1", name: "A", price: 10 });
+  return { compile: compileReadonly.price, runtime: runtimeFrozen.price };
+})
 ```ts
 const compileReadonly: Readonly<Product> = { sku: "1", name: "A", price: 10 };
 const runtimeFrozen = Object.freeze({ sku: "1", name: "A", price: 10 });
@@ -437,7 +587,10 @@ const runtimeFrozen = Object.freeze({ sku: "1", name: "A", price: 10 });
 ```
 
 ### <a id="q03-09"></a>Q03-09 Immutable Cart Qty Update
-*View:* runDemo("q03-09", () => "q03-09 sample")
+*Solution:* runDemo("q03-09", () => {
+  const cart: readonly CartItem[] = [{ sku: "p1", qty: 1 }];
+  return updateQty(cart, "p1", 2);
+})
 ```ts
 type CartItem = { sku: string; qty: number };
 const updateQty = (cart: readonly CartItem[], sku: string, qty: number): CartItem[] =>
@@ -445,7 +598,11 @@ const updateQty = (cart: readonly CartItem[], sku: string, qty: number): CartIte
 ```
 
 ### <a id="q03-10"></a>Q03-10 DeepReadonly vs Readonly
-*View:* runDemo("q03-10", () => "q03-10 sample")
+*Solution:* runDemo("q03-10", () => {
+  const shallow: Shallow = { nested: { n: 1 } };
+  const deep: Deep = { nested: { n: 1 } };
+  return [shallow.nested.n, deep.nested.n];
+})
 ```ts
 type DeepReadonly<T> = T extends (...a: any) => any ? T :
   T extends object ? { readonly [K in keyof T]: DeepReadonly<T[K]> } : T;
@@ -454,39 +611,48 @@ type Deep = DeepReadonly<{ nested: { n: number } }>;
 ```
 
 ### <a id="q03-11"></a>Q03-11 exactOptionalPropertyTypes scenario
-*View:* runDemo("q03-11", () => "q03-11 sample")
+*Solution:* runDemo("q03-11", () => {
+  const value: { a?: string } = {};
+  return "a" in value;
+})
 ```ts
 // With exactOptionalPropertyTypes: {a?: string} means property may be missing; setting {a: undefined} is different.
 ```
 
 ### <a id="q03-12"></a>Q03-12 Patch Unknown Key Reject (type-level)
-*View:* runDemo("q03-12", () => "q03-12 sample")
+*Solution:* runDemo("q03-12", () => updateUser({ id: "1", name: "A" }, { name: "B" }))
 ```ts
 type ExactKeys<T, K extends keyof T> = { [P in K]: T[P] } & Record<Exclude<keyof any, K>, never>;
 function updateUser(u: User, patch: Partial<User>) { return { ...u, ...patch }; }
 ```
 
 ### <a id="q03-13"></a>Q03-13 ReadonlyMap read
-*View:* runDemo("q03-13", () => "q03-13 sample")
+*Solution:* runDemo("q03-13", () => getRate("INR"))
 ```ts
 const rates: ReadonlyMap<string, number> = new Map([["USD", 1], ["INR", 83]]);
 const getRate = (code: string) => rates.get(code) ?? 0;
 ```
 
 ### <a id="q03-14"></a>Q03-14 mergeDefaults<T>
-*View:* runDemo("q03-14", () => "q03-14 sample")
+*Solution:* runDemo("q03-14", () => mergeDefaults({ theme: "light", page: 1 }, { page: 2 }))
 ```ts
 const mergeDefaults = <T>(defaults: T, overrides?: Partial<T>): T => ({ ...defaults, ...(overrides ?? {}) });
 ```
 
 ### <a id="q03-15"></a>Q03-15 DeepPartial Utility
-*View:* runDemo("q03-15", () => "q03-15 sample")
+*Solution:* runDemo("q03-15", () => {
+  const patch: DeepPartial<{ user: { name: string; age: number } }> = { user: { age: 30 } };
+  return patch;
+})
 ```ts
 type DeepPartial<T> = T extends object ? { [K in keyof T]?: DeepPartial<T[K]> } : T;
 ```
 
 ### <a id="q03-16"></a>Q03-16 Immutable Tree Update
-*View:* runDemo("q03-16", () => "q03-16 sample")
+*Solution:* runDemo("q03-16", () => {
+  const tree: Node = { id: "root", label: "Root", children: [{ id: "c1", label: "Child" }] };
+  return updateLabel(tree, "c1", "Renamed");
+})
 ```ts
 type Node = { id: string; label: string; children?: Node[] };
 const updateLabel = (node: Node, id: string, label: string): Node => ({
@@ -496,7 +662,10 @@ const updateLabel = (node: Node, id: string, label: string): Node => ({
 ```
 
 ### <a id="q03-17"></a>Q03-17 Readonly State Reducer
-*View:* runDemo("q03-17", () => "q03-17 sample")
+*Solution:* runDemo("q03-17", () => {
+  const state: readonly Todo[] = [];
+  return reducer(state, { type: "add", text: "Learn TS" });
+})
 ```ts
 type Todo = { id: string; text: string; done: boolean };
 type Action = { type: "add"; text: string } | { type: "toggle"; id: string } | { type: "remove"; id: string };
@@ -511,7 +680,7 @@ const reducer = (state: readonly Todo[], action: Action): readonly Todo[] => {
 ```
 
 ### <a id="q03-18"></a>Q03-18 Branded ID
-*View:* runDemo("q03-18", () => "q03-18 sample")
+*Solution:* runDemo("q03-18", () => makeUserId("user-1"))
 ```ts
 type UserId = string & { __brand: "UserId" };
 const makeUserId = (s: string): UserId => {
@@ -521,13 +690,13 @@ const makeUserId = (s: string): UserId => {
 ```
 
 ### <a id="q03-19"></a>Q03-19 Readonly constructor param
-*View:* runDemo("q03-19", () => "q03-19 sample")
+*Solution:* runDemo("q03-19", () => new Book("b1", "TS Book"))
 ```ts
 class Book { constructor(public readonly id: string, public title: string) {} }
 ```
 
 ### <a id="q03-20"></a>Q03-20 Persistent List Update
-*View:* runDemo("q03-20", () => "q03-20 sample")
+*Solution:* runDemo("q03-20", () => removeById([{ id: "1" }, { id: "2" }], "1"))
 ```ts
 const removeById = (list: readonly { id: string }[], id: string) => list.filter(x => x.id !== id);
 ```
@@ -535,44 +704,48 @@ const removeById = (list: readonly { id: string }[], id: string) => list.filter(
 ## 04) generics
 
 ### <a id="q04-01"></a>Q04-01 identity<T>
-*View:* runDemo("q04-01", () => "q04-01 sample")
+*Solution:* runDemo("q04-01", () => identity("TS"))
 ```ts
 const identity = <T>(x: T): T => x;
 ```
 
 ### <a id="q04-02"></a>Q04-02 first<T>
-*View:* runDemo("q04-02", () => "q04-02 sample")
+*Solution:* runDemo("q04-02", () => first([10, 20]))
 ```ts
 const first = <T>(arr: T[]): T | undefined => arr[0];
 ```
 
 ### <a id="q04-03"></a>Q04-03 wrap<T>
-*View:* runDemo("q04-03", () => "q04-03 sample")
+*Solution:* runDemo("q04-03", () => wrap({ id: 1 }))
 ```ts
 const wrap = <T>(value: T) => ({ value });
 ```
 
 ### <a id="q04-04"></a>Q04-04 pair<T,U>
-*View:* runDemo("q04-04", () => "q04-04 sample")
+*Solution:* runDemo("q04-04", () => pair("a", 1))
 ```ts
 const pair = <T, U>(a: T, b: U): [T, U] => [a, b];
 ```
 
 ### <a id="q04-05"></a>Q04-05 mapArray<T,R>
-*View:* runDemo("q04-05", () => "q04-05 sample")
+*Solution:* runDemo("q04-05", () => mapArray([1, 2, 3], n => n * 2))
 ```ts
 const mapArray = <T, R>(arr: T[], fn: (v: T) => R): R[] => arr.map(fn);
 ```
 
 ### <a id="q04-06"></a>Q04-06 ApiResponse<T>
-*View:* runDemo("q04-06", () => "q04-06 sample")
+*Solution:* runDemo("q04-06", () => mapResponse({ ok: true, data: 2 }, d => d * 2))
 ```ts
 type ApiResponse<T> = { ok: true; data: T } | { ok: false; error: string };
 const mapResponse = <T, R>(r: ApiResponse<T>, fn: (t: T) => R): ApiResponse<R> => r.ok ? { ok: true, data: fn(r.data) } : r;
 ```
 
 ### <a id="q04-07"></a>Q04-07 Box<T> class
-*View:* runDemo("q04-07", () => "q04-07 sample")
+*Solution:* runDemo("q04-07", () => {
+  const box = new Box(1);
+  box.set(2);
+  return box.get();
+})
 ```ts
 class Box<T> {
   constructor(private value: T) {}
@@ -582,20 +755,20 @@ class Box<T> {
 ```
 
 ### <a id="q04-08"></a>Q04-08 Constraint T extends {id:string}
-*View:* runDemo("q04-08", () => "q04-08 sample")
+*Solution:* runDemo("q04-08", () => indexById([{ id: "a" }, { id: "b" }]))
 ```ts
 const indexById = <T extends { id: string }>(list: T[]): Record<string, T> =>
   list.reduce((acc, item) => ({ ...acc, [item.id]: item }), {} as Record<string, T>);
 ```
 
 ### <a id="q04-09"></a>Q04-09 pluck<T,K>
-*View:* runDemo("q04-09", () => "q04-09 sample")
+*Solution:* runDemo("q04-09", () => pluck({ name: "Ada", age: 30 }, "name"))
 ```ts
 const pluck = <T, K extends keyof T>(obj: T, key: K): T[K] => obj[key];
 ```
 
 ### <a id="q04-10"></a>Q04-10 sortByKey<T,K>
-*View:* runDemo("q04-10", () => "q04-10 sample")
+*Solution:* runDemo("q04-10", () => sortByKey([{ n: 2 }, { n: 1 }], "n"))
 ```ts
 function sortByKey<T, K extends keyof T>(arr: T[], key: K): T[] {
   return [...arr].sort((a, b) => {
@@ -607,13 +780,19 @@ function sortByKey<T, K extends keyof T>(arr: T[], key: K): T[] {
 ```
 
 ### <a id="q04-11"></a>Q04-11 Generic default type
-*View:* runDemo("q04-11", () => "q04-11 sample")
+*Solution:* runDemo("q04-11", () => {
+  const r: Result<number> = { ok: true, data: 1 };
+  return r.data;
+})
 ```ts
 type Result<T = string, E = Error> = { ok: true; data: T } | { ok: false; error: E };
 ```
 
 ### <a id="q04-12"></a>Q04-12 parseJson<T>
-*View:* runDemo("q04-12", () => "q04-12 sample")
+*Solution:* runDemo("q04-12", () => {
+  const guard = (u: unknown): u is { a: number } => typeof (u as any)?.a === "number";
+  return parseJson('{\"a\":1}', guard);
+})
 ```ts
 function parseJson<T>(s: string, guard: (u: unknown) => u is T): Result<T, string> {
   try {
@@ -626,13 +805,13 @@ function parseJson<T>(s: string, guard: (u: unknown) => u is T): Result<T, strin
 ```
 
 ### <a id="q04-13"></a>Q04-13 freeze<T>
-*View:* runDemo("q04-13", () => "q04-13 sample")
+*Solution:* runDemo("q04-13", () => freeze({ a: 1 }).a)
 ```ts
 const freeze = <T>(obj: T): Readonly<T> => Object.freeze(obj);
 ```
 
 ### <a id="q04-14"></a>Q04-14 timeout<T>
-*View:* runDemo("q04-14", () => "q04-14 sample")
+*Solution:* runDemo("q04-14", () => timeout(Promise.resolve("ok"), 10))
 ```ts
 function timeout<T>(p: Promise<T>, ms: number): Promise<T> {
   return Promise.race([
@@ -643,19 +822,32 @@ function timeout<T>(p: Promise<T>, ms: number): Promise<T> {
 ```
 
 ### <a id="q04-15"></a>Q04-15 PromiseReturn<T>
-*View:* runDemo("q04-15", () => "q04-15 sample")
+*Solution:* runDemo("q04-15", () => {
+  const value: PromiseReturn<Promise<number>> = 1;
+  return value;
+})
 ```ts
 type PromiseReturn<T> = T extends Promise<infer U> ? U : T;
 ```
 
 ### <a id="q04-16"></a>Q04-16 FuncReturn<T>
-*View:* runDemo("q04-16", () => "q04-16 sample")
+*Solution:* runDemo("q04-16", () => {
+  const fn = () => 42;
+  const val: FuncReturn<typeof fn> = 42;
+  return val;
+})
 ```ts
 type FuncReturn<T> = T extends (...a: any[]) => infer R ? R : never;
 ```
 
 ### <a id="q04-17"></a>Q04-17 Typed Event Emitter
-*View:* runDemo("q04-17", () => "q04-17 sample")
+*Solution:* runDemo("q04-17", () => {
+  const emitter = new Emitter<EventMap>();
+  let last = "";
+  emitter.on("login", p => last = p.userId);
+  emitter.emit("login", { userId: "u1" });
+  return last;
+})
 ```ts
 type EventMap = { login: { userId: string }; logout: void };
 class Emitter<Events extends Record<string, any>> {
@@ -670,7 +862,7 @@ class Emitter<Events extends Record<string, any>> {
 ```
 
 ### <a id="q04-18"></a>Q04-18 Fluent Builder Accumulating Keys
-*View:* runDemo("q04-18", () => "q04-18 sample")
+*Solution:* runDemo("q04-18", () => new AccBuilder({} as const).set("name", "A").set("age", 1).build())
 ```ts
 class AccBuilder<T extends object> {
   constructor(private acc: T) {}
@@ -680,14 +872,18 @@ class AccBuilder<T extends object> {
 ```
 
 ### <a id="q04-19"></a>Q04-19 Primitive Schema to Type
-*View:* runDemo("q04-19", () => "q04-19 sample")
+*Solution:* runDemo("q04-19", () => {
+  type StrSchema = { kind: "string" };
+  const value: SchemaToType<StrSchema> = "ok";
+  return value;
+})
 ```ts
 type Schema = { kind: "string" } | { kind: "number" };
 type SchemaToType<S extends Schema> = S extends { kind: "string" } ? string : number;
 ```
 
 ### <a id="q04-20"></a>Q04-20 decode<T>
-*View:* runDemo("q04-20", () => "q04-20 sample")
+*Solution:* runDemo("q04-20", () => decode("hi", (v): v is string => typeof v === "string"))
 ```ts
 function decode<T>(value: unknown, guard: (v: unknown) => v is T): T {
   if (guard(value)) return value;
@@ -698,45 +894,48 @@ function decode<T>(value: unknown, guard: (v: unknown) => v is T): T {
 ## 05) enum vs string literal union
 
 ### <a id="q05-01"></a>Q05-01 Status union
-*View:* runDemo("q05-01", () => "q05-01 sample")
+*Solution:* runDemo("q05-01", () => canEdit("draft"))
 ```ts
 type Status = "draft" | "published";
 const canEdit = (s: Status) => s === "draft";
 ```
 
 ### <a id="q05-02"></a>Q05-02 Same as enum
-*View:* runDemo("q05-02", () => "q05-02 sample")
+*Solution:* runDemo("q05-02", () => StatusEnum.Draft)
 ```ts
 enum StatusEnum { Draft = "draft", Published = "published" }
 ```
 
 ### <a id="q05-03"></a>Q05-03 Switch label
-*View:* runDemo("q05-03", () => "q05-03 sample")
+*Solution:* runDemo("q05-03", () => label("draft"))
 ```ts
 const label = (s: Status) => ({ draft: "Draft", published: "Published" }[s]);
 ```
 
 ### <a id="q05-04"></a>Q05-04 Record label map
-*View:* runDemo("q05-04", () => "q05-04 sample")
+*Solution:* runDemo("q05-04", () => labelMap.published)
 ```ts
 const labelMap: Record<Status, string> = { draft: "Draft", published: "Published" };
 ```
 
 ### <a id="q05-05"></a>Q05-05 Prevent invalid string
-*View:* runDemo("q05-05", () => "q05-05 sample")
+*Solution:* runDemo("q05-05", () => {
+  const status: Status = "draft";
+  return status;
+})
 ```ts
 const status: Status = "draft"; // "drafft" would be a TS error
 ```
 
 ### <a id="q05-06"></a>Q05-06 const object + as const
-*View:* runDemo("q05-06", () => "q05-06 sample")
+*Solution:* runDemo("q05-06", () => STATUS.published)
 ```ts
 const STATUS = { draft: "draft", published: "published" } as const;
 type StatusFromConst = typeof STATUS[keyof typeof STATUS];
 ```
 
 ### <a id="q05-07"></a>Q05-07 parseStatus
-*View:* runDemo("q05-07", () => "q05-07 sample")
+*Solution:* runDemo("q05-07", () => parseStatus("draft"))
 ```ts
 function parseStatus(input: unknown): Status {
   if (input === "draft" || input === "published") return input;
@@ -745,39 +944,47 @@ function parseStatus(input: unknown): Status {
 ```
 
 ### <a id="q05-08"></a>Q05-08 Exhaustive transitions
-*View:* runDemo("q05-08", () => "q05-08 sample")
+*Solution:* runDemo("q05-08", () => next("draft"))
 ```ts
 const next = (s: Status) => s === "draft" ? "published" : (() => { throw new Error("Cannot revert"); })();
 ```
 
 ### <a id="q05-09"></a>Q05-09 Enum compile footprint explanation
-*View:* runDemo("q05-09", () => "q05-09 sample")
+*Solution:* runDemo("q05-09", () => "unions erase; enums emit objects")
 ```ts
 // String enums emit an object at runtime; unions erase to strings.
 ```
 
 ### <a id="q05-10"></a>Q05-10 Reverse mapping demo
-*View:* runDemo("q05-10", () => "q05-10 sample")
+*Solution:* runDemo("q05-10", () => {
+  enum Numeric { A, B }
+  const nameOfA = Numeric[0]; // "A"
+  return nameOfA;
+})
 ```ts
 enum Numeric { A, B }
 const nameOfA = Numeric[0]; // "A"
 ```
 
 ### <a id="q05-11"></a>Q05-11 Tree-shaking discussion
-*View:* runDemo("q05-11", () => "q05-11 sample")
+*Solution:* runDemo("q05-11", () => "literal unions tree-shake; enums emit objects unless const enum")
 ```ts
 // Literal unions are tree-shakeable; enums keep emitted object unless const enum.
 ```
 
 ### <a id="q05-12"></a>Q05-12 Serialize/deserialize
-*View:* runDemo("q05-12", () => "q05-12 sample")
+*Solution:* runDemo("q05-12", () => parseStatus("draft"))
 ```ts
 localStorage.setItem("status", "draft");
 const statusFromStorage = parseStatus(localStorage.getItem("status"));
 ```
 
 ### <a id="q05-13"></a>Q05-13 assertDefined utility
-*View:* runDemo("q05-13", () => "q05-13 sample")
+*Solution:* runDemo("q05-13", () => {
+  let value: string | undefined = "ok";
+  assertDefined(value);
+  return value;
+})
 ```ts
 function assertDefined<T>(value: T): asserts value is NonNullable<T> {
   if (value === null || value === undefined) throw new Error("Missing value");
@@ -785,19 +992,26 @@ function assertDefined<T>(value: T): asserts value is NonNullable<T> {
 ```
 
 ### <a id="q05-14"></a>Q05-14 NonNullable usage
-*View:* runDemo("q05-14", () => "q05-14 sample")
+*Solution:* runDemo("q05-14", () => {
+  const val: NN = "hello";
+  return val;
+})
 ```ts
 type NN = NonNullable<string | null | undefined>; // string
 ```
 
 ### <a id="q05-15"></a>Q05-15 Optional keys mapping
-*View:* runDemo("q05-15", () => "q05-15 sample")
+*Solution:* runDemo("q05-15", () => {
+  type Keys = OptionalKeys<{ a?: string; b: number }>;
+  const key: Keys = "a";
+  return key;
+})
 ```ts
 type OptionalKeys<T> = { [K in keyof T]-?: undefined extends T[K] ? K : never }[keyof T];
 ```
 
 ### <a id="q05-16"></a>Q05-16 Strict config schema runtime
-*View:* runDemo("q05-16", () => "q05-16 sample")
+*Solution:* runDemo("q05-16", () => loadConfig({ api: "/api", token: "t" }))
 ```ts
 function loadConfig(raw: unknown): { api: string; token: string } {
   if (
@@ -810,7 +1024,7 @@ function loadConfig(raw: unknown): { api: string; token: string } {
 ```
 
 ### <a id="q05-17"></a>Q05-17 Builder ensures required fields before build
-*View:* runDemo("q05-17", () => "q05-17 sample")
+*Solution:* runDemo("q05-17", () => new ConfigBuilder({}).setApi("a").setToken("t").build())
 ```ts
 class ConfigBuilder<S extends { api?: string; token?: string }> {
   constructor(private value: S) {}
@@ -821,21 +1035,21 @@ class ConfigBuilder<S extends { api?: string; token?: string }> {
 ```
 
 ### <a id="q05-18"></a>Q05-18 Template literal type events
-*View:* runDemo("q05-18", () => "q05-18 sample")
+*Solution:* runDemo("q05-18", () => onEvent("user:created"))
 ```ts
 type EventName = `user:${"created" | "deleted"}`;
 const onEvent = (name: EventName) => name;
 ```
 
 ### <a id="q05-19"></a>Q05-19 i18n labels mapping
-*View:* runDemo("q05-19", () => "q05-19 sample")
+*Solution:* runDemo("q05-19", () => labels.draft.en)
 ```ts
 type StatusLabel = Record<Status, { en: string; bn: string }>;
 const labels: StatusLabel = { draft: { en: "Draft", bn: "খসড়া" }, published: { en: "Published", bn: "প্রকাশিত" } };
 ```
 
 ### <a id="q05-20"></a>Q05-20 Endpoint by status
-*View:* runDemo("q05-20", () => "q05-20 sample")
+*Solution:* runDemo("q05-20", () => endpoint("draft"))
 ```ts
 const endpoint = (status: Status) => {
   switch (status) {
@@ -849,7 +1063,7 @@ const endpoint = (status: Status) => {
 ## 06) any unknown never
 
 ### <a id="q06-01"></a>Q06-01 unknown to string
-*View:* runDemo("q06-01", () => "q06-01 sample")
+*Solution:* runDemo("q06-01", () => normalizeName(" Alice "))
 ```ts
 function normalizeName(x: unknown): string {
   if (typeof x === "string") {
@@ -862,7 +1076,7 @@ function normalizeName(x: unknown): string {
 ```
 
 ### <a id="q06-02"></a>Q06-02 Replace any with unknown
-*View:* runDemo("q06-02", () => "q06-02 sample")
+*Solution:* runDemo("q06-02", () => { logValue("hi"); return "done"; })
 ```ts
 function logValue(v: unknown) {
   if (typeof v === "string") console.log(v.toUpperCase());
@@ -871,7 +1085,7 @@ function logValue(v: unknown) {
 ```
 
 ### <a id="q06-03"></a>Q06-03 safeJsonParse returns unknown
-*View:* runDemo("q06-03", () => "q06-03 sample")
+*Solution:* runDemo("q06-03", () => safeJsonParse("{\"a\":1}"))
 ```ts
 const safeJsonParse = (s: string): unknown | null => {
   try { return JSON.parse(s); } catch { return null; }
@@ -879,25 +1093,38 @@ const safeJsonParse = (s: string): unknown | null => {
 ```
 
 ### <a id="q06-04"></a>Q06-04 isNumberArray guard
-*View:* runDemo("q06-04", () => "q06-04 sample")
+*Solution:* runDemo("q06-04", () => isNumberArray([1, 2, 3]))
 ```ts
 const isNumberArray = (u: unknown): u is number[] => Array.isArray(u) && u.every(n => typeof n === "number");
 ```
 
 ### <a id="q06-05"></a>Q06-05 fail(msg): never
-*View:* runDemo("q06-05", () => "q06-05 sample")
+*Solution:* runDemo("q06-05", () => {
+  try { fail("boom"); } catch (e) { return (e as Error).message; }
+})
 ```ts
 function fail(msg: string): never { throw new Error(msg); }
 ```
 
 ### <a id="q06-06"></a>Q06-06 assertNever helper
-*View:* runDemo("q06-06", () => "q06-06 sample")
+*Solution:* runDemo("q06-06", () => {
+  const f = (x: "a" | "b") => {
+    switch (x) { case "a": return "A"; case "b": return "B"; default: return assertNever(x); }
+  };
+  return [f("a"), f("b")];
+})
 ```ts
 function assertNever(x: never): never { throw new Error(`Unexpected: ${x}`); }
 ```
 
 ### <a id="q06-07"></a>Q06-07 catch error safely
-*View:* runDemo("q06-07", () => "q06-07 sample")
+*Solution:* runDemo("q06-07", () => {
+  try { throw new Error("boom"); }
+  catch (e: unknown) {
+    if (e instanceof Error) return e.message;
+    else return String(e);
+  }
+})
 ```ts
 try { /* ... */ }
 catch (e: unknown) {
@@ -907,7 +1134,7 @@ catch (e: unknown) {
 ```
 
 ### <a id="q06-08"></a>Q06-08 validate User shape at runtime
-*View:* runDemo("q06-08", () => "q06-08 sample")
+*Solution:* runDemo("q06-08", () => isUser({ id: "1", name: "Test" }))
 ```ts
 type UserShape = { id: string; name: string };
 const isUser = (u: unknown): u is UserShape =>
@@ -915,7 +1142,7 @@ const isUser = (u: unknown): u is UserShape =>
 ```
 
 ### <a id="q06-09"></a>Q06-09 decode API response unknown -> User
-*View:* runDemo("q06-09", () => "q06-09 sample")
+*Solution:* runDemo("q06-09", () => decodeUser({ id: "1", name: "Test" }))
 ```ts
 const decodeUser = (u: unknown): UserShape => {
   if (isUser(u)) return u;
@@ -924,7 +1151,7 @@ const decodeUser = (u: unknown): UserShape => {
 ```
 
 ### <a id="q06-10"></a>Q06-10 Error union mapping
-*View:* runDemo("q06-10", () => "q06-10 sample")
+*Solution:* runDemo("q06-10", () => toStatus({ kind: "auth" }))
 ```ts
 type AuthError = { kind: "auth" };
 type NotFoundError = { kind: "not_found" };
@@ -933,7 +1160,7 @@ const toStatus = (e: AppError) => ({ auth: 401, not_found: 404, unknown: 500 }[e
 ```
 
 ### <a id="q06-11"></a>Q06-11 Remove unsafe casting
-*View:* runDemo("q06-11", () => "q06-11 sample")
+*Solution:* runDemo("q06-11", () => safeProcess({ id: "1", name: "SAFE" }))
 ```ts
 function safeProcess(u: unknown) {
   if (!isUser(u)) throw new Error("Not a user");
@@ -942,13 +1169,16 @@ function safeProcess(u: unknown) {
 ```
 
 ### <a id="q06-12"></a>Q06-12 Conditional returns never on invalid
-*View:* runDemo("q06-12", () => "q06-12 sample")
+*Solution:* runDemo("q06-12", () => {
+  const val: NonString<number> = 5;
+  return val;
+})
 ```ts
 type NonString<T> = T extends string ? never : T;
 ```
 
 ### <a id="q06-13"></a>Q06-13 Parse query params unknown
-*View:* runDemo("q06-13", () => "q06-13 sample")
+*Solution:* runDemo("q06-13", () => parseLimit("10"))
 ```ts
 const parseLimit = (x: unknown): number => {
   const n = typeof x === "string" ? Number(x) : typeof x === "number" ? x : NaN;
@@ -958,7 +1188,7 @@ const parseLimit = (x: unknown): number => {
 ```
 
 ### <a id="q06-14"></a>Q06-14 Narrow unknown event payload by topic
-*View:* runDemo("q06-14", () => "q06-14 sample")
+*Solution:* runDemo("q06-14", () => validatePayload("user.created", { id: "1", name: "A" }))
 ```ts
 type Topics = "user.created" | "order.placed";
 function validatePayload(topic: Topics, payload: unknown) {
@@ -969,7 +1199,7 @@ function validatePayload(topic: Topics, payload: unknown) {
 ```
 
 ### <a id="q06-15"></a>Q06-15 Mini validator combinators
-*View:* runDemo("q06-15", () => "q06-15 sample")
+*Solution:* runDemo("q06-15", () => hasKey("foo")({ foo: 1 }))
 ```ts
 const isString = (u: unknown): u is string => typeof u === "string";
 const isNumber = (u: unknown): u is number => typeof u === "number" && !Number.isNaN(u);
@@ -978,7 +1208,7 @@ const hasKey = <K extends string>(k: K) => (u: unknown): u is Record<K, unknown>
 ```
 
 ### <a id="q06-16"></a>Q06-16 Result-based errors instead of throw
-*View:* runDemo("q06-16", () => "q06-16 sample")
+*Solution:* runDemo("q06-16", () => parseNumberSafe("3.14"))
 ```ts
 type Result<T, E = string> = { ok: true; data: T } | { ok: false; error: E };
 const parseNumberSafe = (s: string): Result<number> => {
@@ -988,7 +1218,11 @@ const parseNumberSafe = (s: string): Result<number> => {
 ```
 
 ### <a id="q06-17"></a>Q06-17 assertDefined
-*View:* runDemo("q06-17", () => "q06-17 sample")
+*Solution:* runDemo("q06-17", () => {
+  let v: string | undefined = "x";
+  assertDefined(v);
+  return v;
+})
 ```ts
 function assertDefined<T>(value: T): asserts value is NonNullable<T> {
   if (value === null || value === undefined) throw new Error("Value required");
@@ -996,7 +1230,7 @@ function assertDefined<T>(value: T): asserts value is NonNullable<T> {
 ```
 
 ### <a id="q06-18"></a>Q06-18 Safe deep get
-*View:* runDemo("q06-18", () => "q06-18 sample")
+*Solution:* runDemo("q06-18", () => get({ a: { b: 2 } }, ["a", "b"]))
 ```ts
 const get = (u: unknown, path: string[]): unknown => {
   let curr: any = u;
@@ -1009,7 +1243,7 @@ const get = (u: unknown, path: string[]): unknown => {
 ```
 
 ### <a id="q06-19"></a>Q06-19 Unknown payload registry typed
-*View:* runDemo("q06-19", () => "q06-19 sample")
+*Solution:* runDemo("q06-19", () => parseTopic("order.placed", { orderId: "o1" }))
 ```ts
 type Registry = { "user.created": UserShape; "order.placed": { orderId: string } };
 function parseTopic<T extends keyof Registry>(topic: T, payload: unknown): Registry[T] {
@@ -1020,7 +1254,7 @@ function parseTopic<T extends keyof Registry>(topic: T, payload: unknown): Regis
 ```
 
 ### <a id="q06-20"></a>Q06-20 Never unreachable branch demonstration
-*View:* runDemo("q06-20", () => "q06-20 sample")
+*Solution:* runDemo("q06-20", () => handle("a"))
 ```ts
 type Mode = "a" | "b";
 function handle(mode: Mode) {
@@ -1035,20 +1269,24 @@ function handle(mode: Mode) {
 ## 07) null undefined strict mode
 
 ### <a id="q07-01"></a>Q07-01 Nullable username display
-*View:* runDemo("q07-01", () => "q07-01 sample")
+*Solution:* runDemo("q07-01", () => displayName(null))
 ```ts
 const displayName = (name: string | null) => name ?? "Guest";
 ```
 
 ### <a id="q07-02"></a>Q07-02 Optional param vs string|undefined
-*View:* runDemo("q07-02", () => "q07-02 sample")
+*Solution:* runDemo("q07-02", () => [greetOptional(), greetUnion(undefined)])
 ```ts
 function greetOptional(name?: string) { return name ?? "Guest"; }
 function greetUnion(name: string | undefined) { return name ?? "Guest"; }
 ```
 
 ### <a id="q07-03"></a>Q07-03 strictNullChecks demo
-*View:* runDemo("q07-03", () => "q07-03 sample")
+*Solution:* runDemo("q07-03", () => {
+  let s: string = "hi";
+  let maybe: string | null = null;
+  return [s, maybe];
+})
 ```ts
 let s: string; // must assign before use when strictNullChecks on
 s = "hi"; // s = null; // TS error
@@ -1056,34 +1294,37 @@ let maybe: string | null = null; // allowed
 ```
 
 ### <a id="q07-04"></a>Q07-04 Non-null assertion risk
-*View:* runDemo("q07-04", () => "q07-04 sample")
+*Solution:* runDemo("q07-04", () => {
+  const user: { name?: string } | undefined = undefined;
+  return user?.name ?? "Unknown";
+})
 ```ts
 const user: { name?: string } | undefined = undefined;
 const safe = user?.name ?? "Unknown"; // avoid user!.name
 ```
 
 ### <a id="q07-05"></a>Q07-05 Optional chaining safe access
-*View:* runDemo("q07-05", () => "q07-05 sample")
+*Solution:* runDemo("q07-05", () => timeout())
 ```ts
 const timeout = (config?: { api?: { timeoutMs?: number } }) => config?.api?.timeoutMs ?? 3000;
 ```
 
 ### <a id="q07-06"></a>Q07-06 ?? vs ||
-*View:* runDemo("q07-06", () => "q07-06 sample")
+*Solution:* runDemo("q07-06", () => [0 ?? 10, 0 || 10])
 ```ts
 0 ?? 10; // 0
 0 || 10; // 10
 ```
 
 ### <a id="q07-07"></a>Q07-07 Default param
-*View:* runDemo("q07-07", () => "q07-07 sample")
+*Solution:* runDemo("q07-07", () => [f(), g(undefined)])
 ```ts
 function f(x = 10) { return x; }
 function g(x?: number) { return x ?? 10; }
 ```
 
 ### <a id="q07-08"></a>Q07-08 parse optional to number
-*View:* runDemo("q07-08", () => "q07-08 sample")
+*Solution:* runDemo("q07-08", () => parsePage(undefined))
 ```ts
 const parsePage = (x: string | undefined): number => {
   const n = x ? Number(x) : 1;
@@ -1092,32 +1333,35 @@ const parsePage = (x: string | undefined): number => {
 ```
 
 ### <a id="q07-09"></a>Q07-09 Filter undefined with predicate
-*View:* runDemo("q07-09", () => "q07-09 sample")
+*Solution:* runDemo("q07-09", () => compact(["a", undefined, "b"]))
 ```ts
 const compact = (vals: Array<string | undefined>): string[] => vals.filter((v): v is string => v !== undefined);
 ```
 
 ### <a id="q07-10"></a>Q07-10 Maybe<T> helper
-*View:* runDemo("q07-10", () => "q07-10 sample")
+*Solution:* runDemo("q07-10", () => unwrapMaybe(undefined, "fallback"))
 ```ts
 type Maybe<T> = T | null | undefined;
 const unwrapMaybe = <T>(v: Maybe<T>, fallback: T) => v ?? fallback;
 ```
 
 ### <a id="q07-11"></a>Q07-11 Form value normalize
-*View:* runDemo("q07-11", () => "q07-11 sample")
+*Solution:* runDemo("q07-11", () => normalizeInput(null))
 ```ts
 const normalizeInput = (v: string | null) => v ?? "";
 ```
 
 ### <a id="q07-12"></a>Q07-12 Date format safe
-*View:* runDemo("q07-12", () => "q07-12 sample")
+*Solution:* runDemo("q07-12", () => formatDate(null))
 ```ts
 const formatDate = (d: Date | null) => d ? d.toISOString() : "N/A";
 ```
 
 ### <a id="q07-13"></a>Q07-13 Config required env vars
-*View:* runDemo("q07-13", () => "q07-13 sample")
+*Solution:* runDemo("q07-13", () => {
+  process.env.TEST_ENV = "set";
+  return getEnv("TEST_ENV");
+})
 ```ts
 const getEnv = (name: string) => {
   const val = process.env[name];
@@ -1127,7 +1371,7 @@ const getEnv = (name: string) => {
 ```
 
 ### <a id="q07-14"></a>Q07-14 Strict function types (variance)
-*View:* runDemo("q07-14", () => "q07-14 sample")
+*Solution:* runDemo("q07-14", () => "strictFunctionTypes disallows wider input assignment")
 ```ts
 let a: (x: string) => void;
 let b: (x: string | number) => void;
@@ -1135,7 +1379,10 @@ let b: (x: string | number) => void;
 ```
 
 ### <a id="q07-15"></a>Q07-15 exactOptionalPropertyTypes behavior
-*View:* runDemo("q07-15", () => "q07-15 sample")
+*Solution:* runDemo("q07-15", () => {
+  const foo1: Foo = {};
+  return foo1;
+})
 ```ts
 type Foo = { a?: string };
 const foo1: Foo = {};      // ok
@@ -1143,25 +1390,36 @@ const foo1: Foo = {};      // ok
 ```
 
 ### <a id="q07-16"></a>Q07-16 assertDefined utility
-*View:* runDemo("q07-16", () => "q07-16 sample")
+*Solution:* runDemo("q07-16", () => {
+  let v: string | null = "ok";
+  assertDefined(v);
+  return v;
+})
 ```ts
 function assertDefined<T>(v: T): asserts v is NonNullable<T> { if (v == null) throw new Error("required"); }
 ```
 
 ### <a id="q07-17"></a>Q07-17 NonNullable usage
-*View:* runDemo("q07-17", () => "q07-17 sample")
+*Solution:* runDemo("q07-17", () => {
+  const val: NN = "value";
+  return val;
+})
 ```ts
 type NN = NonNullable<string | null | undefined>; // string
 ```
 
 ### <a id="q07-18"></a>Q07-18 Optional keys mapping
-*View:* runDemo("q07-18", () => "q07-18 sample")
+*Solution:* runDemo("q07-18", () => {
+  type Keys = OptionalKeys<{ a?: string; b: number }>;
+  const key: Keys = "a";
+  return key;
+})
 ```ts
 type OptionalKeys<T> = { [K in keyof T]-?: undefined extends T[K] ? K : never }[keyof T];
 ```
 
 ### <a id="q07-19"></a>Q07-19 Strict config schema runtime
-*View:* runDemo("q07-19", () => "q07-19 sample")
+*Solution:* runDemo("q07-19", () => loadConfigStrict({ apiBaseUrl: "/api", token: "t" }))
 ```ts
 const loadConfigStrict = (u: unknown): { apiBaseUrl: string; token: string } => {
   if (typeof u === "object" && u !== null && typeof (u as any).apiBaseUrl === "string" && typeof (u as any).token === "string") return u as any;
@@ -1170,7 +1428,7 @@ const loadConfigStrict = (u: unknown): { apiBaseUrl: string; token: string } => 
 ```
 
 ### <a id="q07-20"></a>Q07-20 Builder ensures required fields before build
-*View:* runDemo("q07-20", () => "q07-20 sample")
+*Solution:* runDemo("q07-20", () => new ApiConfigBuilder({}).setUrl("https://api").build())
 ```ts
 class ApiConfigBuilder<S extends { url?: string }> {
   constructor(private value: S) {}
@@ -1182,7 +1440,12 @@ class ApiConfigBuilder<S extends { url?: string }> {
 ## 08) classes access modifiers getter setter
 
 ### <a id="q08-01"></a>Q08-01 BankAccount encapsulation
-*View:* runDemo("q08-01", () => "q08-01 sample")
+*Solution:* runDemo("q08-01", () => {
+  const acct = new BankAccount("acct-1");
+  acct.deposit(100);
+  acct.withdraw(40);
+  return acct.getBalance();
+})
 ```ts
 class BankAccount {
   private balance = 0;
@@ -1194,13 +1457,13 @@ class BankAccount {
 ```
 
 ### <a id="q08-02"></a>Q08-02 readonly accountId
-*View:* runDemo("q08-02", () => "q08-02 sample")
+*Solution:* runDemo("q08-02", () => new Account("1", "Alice").id)
 ```ts
 class Account { constructor(public readonly id: string, public owner: string) {} }
 ```
 
 ### <a id="q08-03"></a>Q08-03 Getter masked id
-*View:* runDemo("q08-03", () => "q08-03 sample")
+*Solution:* runDemo("q08-03", () => new MaskedId("1234567890").masked)
 ```ts
 class MaskedId {
   constructor(private id: string) {}
@@ -1209,7 +1472,11 @@ class MaskedId {
 ```
 
 ### <a id="q08-04"></a>Q08-04 Setter pin validation
-*View:* runDemo("q08-04", () => "q08-04 sample")
+*Solution:* runDemo("q08-04", () => {
+  const p = new PinHolder();
+  p.pin = "1234";
+  return p.pin;
+})
 ```ts
 class PinHolder {
   private _pin = "0000";
@@ -1219,21 +1486,21 @@ class PinHolder {
 ```
 
 ### <a id="q08-05"></a>Q08-05 public/private access demo
-*View:* runDemo("q08-05", () => "q08-05 sample")
+*Solution:* runDemo("q08-05", () => "private members block external access")
 ```ts
 class Demo { private secret = 42; }
 // new Demo().secret; // TS error
 ```
 
 ### <a id="q08-06"></a>Q08-06 Simple inheritance
-*View:* runDemo("q08-06", () => "q08-06 sample")
+*Solution:* runDemo("q08-06", () => new Car().honk())
 ```ts
 class Vehicle { move() { return "moving"; } }
 class Car extends Vehicle { honk() { return "beep"; } }
 ```
 
 ### <a id="q08-07"></a>Q08-07 protected usage
-*View:* runDemo("q08-07", () => "q08-07 sample")
+*Solution:* runDemo("q08-07", () => { new Child().action(); return "logged"; })
 ```ts
 class Base {
   protected log(msg: string) { console.log(msg); }
@@ -1242,7 +1509,10 @@ class Child extends Base { action() { this.log("child"); } }
 ```
 
 ### <a id="q08-08"></a>Q08-08 static counter
-*View:* runDemo("q08-08", () => "q08-08 sample")
+*Solution:* runDemo("q08-08", () => {
+  const s1 = new Session(); const s2 = new Session(); s1.close();
+  return Session.count;
+})
 ```ts
 class Session {
   static count = 0;
@@ -1252,21 +1522,25 @@ class Session {
 ```
 
 ### <a id="q08-09"></a>Q08-09 abstract gateway
-*View:* runDemo("q08-09", () => "q08-09 sample")
+*Solution:* runDemo("q08-09", () => new MockGateway().pay(10))
 ```ts
 abstract class PaymentGateway { abstract pay(amount: number): Promise<string>; }
 class MockGateway extends PaymentGateway { pay(amount: number) { if (amount < 0) throw new Error("Invalid"); return Promise.resolve("paid" + amount); } }
 ```
 
 ### <a id="q08-10"></a>Q08-10 implements Logger interface
-*View:* runDemo("q08-10", () => "q08-10 sample")
+*Solution:* runDemo("q08-10", () => { new ConsoleLogger().log("hello"); return "logged"; })
 ```ts
 interface Logger { log(msg: string): void }
 class ConsoleLogger implements Logger { log(msg: string) { console.log(msg); } }
 ```
 
 ### <a id="q08-11"></a>Q08-11 Prevent invalid state (setter)
-*View:* runDemo("q08-11", () => "q08-11 sample")
+*Solution:* runDemo("q08-11", () => {
+  const p = new Product(10);
+  p.price = 20;
+  return p.price;
+})
 ```ts
 class Product { constructor(private _price: number) {}
   get price() { return this._price; }
@@ -1275,7 +1549,7 @@ class Product { constructor(private _price: number) {}
 ```
 
 ### <a id="q08-12"></a>Q08-12 Composition over inheritance
-*View:* runDemo("q08-12", () => "q08-12 sample")
+*Solution:* runDemo("q08-12", () => new OrderService(new PriceCalculator()).checkout([{ price: 10, qty: 2 }]))
 ```ts
 class PriceCalculator { total(items: { price: number; qty: number }[]) { return items.reduce((s, i) => s + i.price * i.qty, 0); } }
 class OrderService {
@@ -1285,7 +1559,7 @@ class OrderService {
 ```
 
 ### <a id="q08-13"></a>Q08-13 Simple role check method
-*View:* runDemo("q08-13", () => "q08-13 sample")
+*Solution:* runDemo("q08-13", () => new AdminPanel("ADMIN").deleteUser("u1"))
 ```ts
 type Role = "ADMIN" | "USER";
 class AdminPanel {
@@ -1295,7 +1569,7 @@ class AdminPanel {
 ```
 
 ### <a id="q08-14"></a>Q08-14 Factory method ensures invariants
-*View:* runDemo("q08-14", () => "q08-14 sample")
+*Solution:* runDemo("q08-14", () => UserEntity.create("1", "Ada"))
 ```ts
 class UserEntity {
   private constructor(public readonly id: string, public readonly name: string) {}
@@ -1307,7 +1581,7 @@ class UserEntity {
 ```
 
 ### <a id="q08-15"></a>Q08-15 Immutable class
-*View:* runDemo("q08-15", () => "q08-15 sample")
+*Solution:* runDemo("q08-15", () => new Money(10, "USD").add(new Money(5, "USD")).value())
 ```ts
 class Money {
   constructor(private readonly amount: number, private readonly currency: string) {}
@@ -1317,7 +1591,7 @@ class Money {
 ```
 
 ### <a id="q08-16"></a>Q08-16 Builder with private constructor
-*View:* runDemo("q08-16", () => "q08-16 sample")
+*Solution:* runDemo("q08-16", () => Order.builder().add("sku-1", 1).build().items.length)
 ```ts
 class Order {
   private constructor(public readonly items: { sku: string; qty: number }[]) {}
@@ -1331,13 +1605,13 @@ class OrderBuilder {
 ```
 
 ### <a id="q08-17"></a>Q08-17 Custom error classes
-*View:* runDemo("q08-17", () => "q08-17 sample")
+*Solution:* runDemo("q08-17", () => new InsufficientBalanceError().message)
 ```ts
 class InsufficientBalanceError extends Error { constructor() { super("Insufficient balance"); } }
 ```
 
 ### <a id="q08-18"></a>Q08-18 Strategy pattern shipping
-*View:* runDemo("q08-18", () => "q08-18 sample")
+*Solution:* runDemo("q08-18", () => price(new Express(), 2))
 ```ts
 interface ShippingStrategy { cost(weight: number): number }
 class Standard implements ShippingStrategy { cost(w: number) { return w * 1.1; } }
@@ -1346,7 +1620,12 @@ const price = (strategy: ShippingStrategy, weight: number) => strategy.cost(weig
 ```
 
 ### <a id="q08-19"></a>Q08-19 Lazy computed getter cache
-*View:* runDemo("q08-19", () => "q08-19 sample")
+*Solution:* runDemo("q08-19", () => {
+  const c = new Cached();
+  const v1 = c.value;
+  const v2 = c.value;
+  return v1 === v2;
+})
 ```ts
 class Cached {
   private _value?: number;
@@ -1356,7 +1635,7 @@ class Cached {
 ```
 
 ### <a id="q08-20"></a>Q08-20 Testability: mock dependency
-*View:* runDemo("q08-20", () => "q08-20 sample")
+*Solution:* runDemo("q08-20", () => new Service(new FakeClock(123)).getTimestamp())
 ```ts
 interface Clock { now(): number }
 class RealClock implements Clock { now() { return Date.now(); } }
@@ -1367,13 +1646,17 @@ class FakeClock implements Clock { constructor(private n: number) {} now() { ret
 ## 09) async await promise
 
 ### <a id="q09-01"></a>Q09-01 delay(ms)
-*View:* runDemo("q09-01", () => "q09-01 sample")
+*Solution:* runDemo("q09-01", async () => {
+  const before = Date.now();
+  await delay(5);
+  return Date.now() - before >= 5;
+})
 ```ts
 const delay = (ms: number) => new Promise<void>(res => setTimeout(res, Math.max(0, ms)));
 ```
 
 ### <a id="q09-02"></a>Q09-02 try/catch async error
-*View:* runDemo("q09-02", () => "q09-02 sample")
+*Solution:* runDemo("q09-02", () => safeCall(async () => { throw new Error("fail"); }, "fallback"))
 ```ts
 async function safeCall<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
   try { return await fn(); } catch { return fallback; }
@@ -1381,7 +1664,7 @@ async function safeCall<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
 ```
 
 ### <a id="q09-03"></a>Q09-03 Sequential calls
-*View:* runDemo("q09-03", () => "q09-03 sample")
+*Solution:* runDemo("q09-03", () => fetchUserWithOrders(async () => ({ id: "u1" }), async () => [{ id: "o1" }]))
 ```ts
 async function fetchUserWithOrders(fetchUser: () => Promise<{id:string}>, fetchOrders: (id:string)=>Promise<any[]>) {
   const user = await fetchUser();
@@ -1391,7 +1674,7 @@ async function fetchUserWithOrders(fetchUser: () => Promise<{id:string}>, fetchO
 ```
 
 ### <a id="q09-04"></a>Q09-04 Parallel calls with Promise.all
-*View:* runDemo("q09-04", () => "q09-04 sample")
+*Solution:* runDemo("q09-04", () => sumAll([Promise.resolve(1), Promise.resolve(2)]))
 ```ts
 async function sumAll(promises: Promise<number>[]) {
   const results = await Promise.all(promises);
@@ -1400,7 +1683,7 @@ async function sumAll(promises: Promise<number>[]) {
 ```
 
 ### <a id="q09-05"></a>Q09-05 Promise.race timeout
-*View:* runDemo("q09-05", () => "q09-05 sample")
+*Solution:* runDemo("q09-05", () => withTimeout(Promise.resolve("ok"), 10))
 ```ts
 const withTimeout = <T>(p: Promise<T>, ms: number) => Promise.race([
   p,
@@ -1409,7 +1692,7 @@ const withTimeout = <T>(p: Promise<T>, ms: number) => Promise.race([
 ```
 
 ### <a id="q09-06"></a>Q09-06 Retry 3 times
-*View:* runDemo("q09-06", () => "q09-06 sample")
+*Solution:* runDemo("q09-06", () => retry(async () => "success"))
 ```ts
 async function retry<T>(fn: () => Promise<T>, attempts = 3) {
   let delayMs = 200;
@@ -1421,7 +1704,7 @@ async function retry<T>(fn: () => Promise<T>, attempts = 3) {
 ```
 
 ### <a id="q09-07"></a>Q09-07 finally loading
-*View:* runDemo("q09-07", () => "q09-07 sample")
+*Solution:* runDemo("q09-07", () => loadWithFlag(async () => "done"))
 ```ts
 async function loadWithFlag<T>(fn: () => Promise<T>) {
   let loading = true;
@@ -1431,7 +1714,7 @@ async function loadWithFlag<T>(fn: () => Promise<T>) {
 ```
 
 ### <a id="q09-08"></a>Q09-08 Promise.allSettled report
-*View:* runDemo("q09-08", () => "q09-08 sample")
+*Solution:* runDemo("q09-08", () => report([Promise.resolve(1), Promise.reject(new Error("x"))]))
 ```ts
 async function report(tasks: Promise<any>[]) {
   const settled = await Promise.allSettled(tasks);
@@ -1443,7 +1726,7 @@ async function report(tasks: Promise<any>[]) {
 ```
 
 ### <a id="q09-09"></a>Q09-09 Concurrency limit (max 3)
-*View:* runDemo("q09-09", () => "q09-09 sample")
+*Solution:* runDemo("q09-09", () => runLimited([() => Promise.resolve(1), () => Promise.resolve(2), () => Promise.resolve(3)]))
 ```ts
 async function runLimited<T>(jobs: (() => Promise<T>)[], limit = 3) {
   const results: T[] = [];
@@ -1460,7 +1743,11 @@ async function runLimited<T>(jobs: (() => Promise<T>)[], limit = 3) {
 ```
 
 ### <a id="q09-10"></a>Q09-10 Cancel pattern simulation
-*View:* runDemo("q09-10", () => "q09-10 sample")
+*Solution:* runDemo("q09-10", () => {
+  const token = makeCancelToken();
+  token.cancel();
+  return token.isCancelled();
+})
 ```ts
 const makeCancelToken = () => {
   let cancelled = false;
@@ -1472,7 +1759,12 @@ const makeCancelToken = () => {
 ```
 
 ### <a id="q09-11"></a>Q09-11 FIFO async job queue
-*View:* runDemo("q09-11", () => "q09-11 sample")
+*Solution:* runDemo("q09-11", () => {
+  const q = new AsyncQueue<number>();
+  q.enqueue(async () => 1);
+  q.enqueue(async () => 2);
+  return q.start();
+})
 ```ts
 class AsyncQueue<T> {
   private queue: (() => Promise<T>)[] = [];
@@ -1482,7 +1774,12 @@ class AsyncQueue<T> {
 ```
 
 ### <a id="q09-12"></a>Q09-12 Debounced async search
-*View:* runDemo("q09-12", () => "q09-12 sample")
+*Solution:* runDemo("q09-12", async () => {
+  const search = debounceAsync(async (term: string) => term.toUpperCase(), 5);
+  const p = search("a");
+  const q = search("b"); // cancels previous
+  return q;
+})
 ```ts
 function debounceAsync<T extends (...a: any[]) => Promise<any>>(fn: T, ms = 300) {
   let timer: any; let lastReject: ((reason?: any) => void) | null = null;
@@ -1498,7 +1795,12 @@ function debounceAsync<T extends (...a: any[]) => Promise<any>>(fn: T, ms = 300)
 ```
 
 ### <a id="q09-13"></a>Q09-13 Async memoization cache
-*View:* runDemo("q09-13", () => "q09-13 sample")
+*Solution:* runDemo("q09-13", async () => {
+  let hits = 0;
+  const fn = memoAsync(async (k: string) => { hits++; return k; });
+  await fn("x"); await fn("x");
+  return hits; // should be 1
+})
 ```ts
 function memoAsync<T>(fn: (key: string) => Promise<T>) {
   const cache = new Map<string, Promise<T>>();
@@ -1510,7 +1812,13 @@ function memoAsync<T>(fn: (key: string) => Promise<T>) {
 ```
 
 ### <a id="q09-14"></a>Q09-14 Circuit breaker mini
-*View:* runDemo("q09-14", () => "q09-14 sample")
+*Solution:* runDemo("q09-14", async () => {
+  let count = 0;
+  const fn = circuit(async () => { count++; throw new Error("fail"); }, 2, 100);
+  try { await fn(); } catch {}
+  try { await fn(); } catch {}
+  try { await fn(); } catch (e) { return (e as Error).message; }
+})
 ```ts
 function circuit<T>(fn: () => Promise<T>, maxFailures = 3, openMs = 5000) {
   let failures = 0; let openUntil = 0;
@@ -1530,7 +1838,7 @@ function circuit<T>(fn: () => Promise<T>, maxFailures = 3, openMs = 5000) {
 ```
 
 ### <a id="q09-15"></a>Q09-15 Return Result instead of throwing
-*View:* runDemo("q09-15", () => "q09-15 sample")
+*Solution:* runDemo("q09-15", () => tryAsync(async () => "ok"))
 ```ts
 type AsyncResult<T> = Promise<{ ok: true; data: T } | { ok: false; error: unknown }>;
 const tryAsync = async <T>(fn: () => Promise<T>): AsyncResult<T> => {
@@ -1540,7 +1848,7 @@ const tryAsync = async <T>(fn: () => Promise<T>): AsyncResult<T> => {
 ```
 
 ### <a id="q09-16"></a>Q09-16 Async pipeline
-*View:* runDemo("q09-16", () => "q09-16 sample")
+*Solution:* runDemo("q09-16", () => pipeAsync(1, [async v => v + 1, async v => v * 2]))
 ```ts
 async function pipeAsync<T>(value: T, steps: Array<(v: any) => Promise<any>>): Promise<any> {
   let acc: any = value;
@@ -1550,7 +1858,12 @@ async function pipeAsync<T>(value: T, steps: Array<(v: any) => Promise<any>>): P
 ```
 
 ### <a id="q09-17"></a>Q09-17 Idempotent request dedupe
-*View:* runDemo("q09-17", () => "q09-17 sample")
+*Solution:* runDemo("q09-17", async () => {
+  let calls = 0;
+  const fetchOnce = requestOnce("key", async () => { calls++; return "data"; });
+  await fetchOnce(); await fetchOnce();
+  return calls; // should be 1
+})
 ```ts
 function requestOnce<T>(key: string, fn: () => Promise<T>) {
   const inflight = new Map<string, Promise<T>>();
@@ -1562,7 +1875,12 @@ function requestOnce<T>(key: string, fn: () => Promise<T>) {
 ```
 
 ### <a id="q09-18"></a>Q09-18 Backpressure simulation
-*View:* runDemo("q09-18", () => "q09-18 sample")
+*Solution:* runDemo("q09-18", async () => {
+  const jobs = [1, 2, 3, 4, 5, 6];
+  let handled: number[] = [];
+  await processWithBackpressure(jobs, async j => handled.push(j), 2);
+  return handled.length;
+})
 ```ts
 async function processWithBackpressure<T>(jobs: T[], handler: (job: T) => Promise<void>, maxQueue = 5) {
   const queue: Promise<void>[] = [];
@@ -1576,7 +1894,7 @@ async function processWithBackpressure<T>(jobs: T[], handler: (job: T) => Promis
 ```
 
 ### <a id="q09-19"></a>Q09-19 DLQ for failed jobs
-*View:* runDemo("q09-19", () => "q09-19 sample")
+*Solution:* runDemo("q09-19", () => runWithDLQ([1, 2], async job => { if (job === 2) throw new Error("bad"); }))
 ```ts
 type DeadLetter<T> = { job: T; reason: unknown; at: number };
 async function runWithDLQ<T>(jobs: T[], handler: (job: T) => Promise<void>) {
@@ -1590,7 +1908,7 @@ async function runWithDLQ<T>(jobs: T[], handler: (job: T) => Promise<void>) {
 ```
 
 ### <a id="q09-20"></a>Q09-20 CorrelationId tracing
-*View:* runDemo("q09-20", () => "q09-20 sample")
+*Solution:* runDemo("q09-20", () => withCorrelation("corr-1", async ctx => ctx.correlationId))
 ```ts
 async function withCorrelation<T>(id: string, fn: (ctx: { correlationId: string }) => Promise<T>) {
   return fn({ correlationId: id });
@@ -1600,7 +1918,7 @@ async function withCorrelation<T>(id: string, fn: (ctx: { correlationId: string 
 ## 10) inventory literal unions
 
 ### <a id="q10-01"></a>Q10-01 Basic dispense guard
-*View:* runDemo("q10-01", () => "q10-01 sample")
+*Solution:* runDemo("q10-01", () => dispense({ sku: "p1", qty: 3 }, 1))
 ```ts
 type StockItem = { sku: string; qty: number };
 function dispense(item: StockItem, qty: number) {
@@ -1611,7 +1929,7 @@ function dispense(item: StockItem, qty: number) {
 ```
 
 ### <a id="q10-02"></a>Q10-02 Category union
-*View:* runDemo("q10-02", () => "q10-02 sample")
+*Solution:* runDemo("q10-02", () => filterByCategory([{ sku: "1", qty: 1, category: "food" }], "food"))
 ```ts
 type Category = "food" | "electronics" | "fashion";
 const filterByCategory = (items: StockItem[] & { category?: Category }[], cat: Category) =>
@@ -1619,14 +1937,14 @@ const filterByCategory = (items: StockItem[] & { category?: Category }[], cat: C
 ```
 
 ### <a id="q10-03"></a>Q10-03 StockStatus computed
-*View:* runDemo("q10-03", () => "q10-03 sample")
+*Solution:* runDemo("q10-03", () => statusFromQty(2))
 ```ts
 type StockStatus = "in_stock" | "low" | "out";
 const statusFromQty = (qty: number): StockStatus => qty <= 0 ? "out" : qty < 5 ? "low" : "in_stock";
 ```
 
 ### <a id="q10-04"></a>Q10-04 Add item unique sku
-*View:* runDemo("q10-04", () => "q10-04 sample")
+*Solution:* runDemo("q10-04", () => addItem([], { sku: "p1", qty: 1 }))
 ```ts
 const addItem = (items: StockItem[], item: StockItem) => {
   if (items.some(i => i.sku === item.sku)) throw new Error("duplicate sku");
@@ -1635,7 +1953,7 @@ const addItem = (items: StockItem[], item: StockItem) => {
 ```
 
 ### <a id="q10-05"></a>Q10-05 Search by keyword
-*View:* runDemo("q10-05", () => "q10-05 sample")
+*Solution:* runDemo("q10-05", () => search([{ name: "Pen" }, { name: "Pencil" }], "pen"))
 ```ts
 const search = (items: { name: string }[], keyword: string) => keyword
   ? items.filter(i => i.name.toLowerCase().includes(keyword.toLowerCase()))
@@ -1643,13 +1961,13 @@ const search = (items: { name: string }[], keyword: string) => keyword
 ```
 
 ### <a id="q10-06"></a>Q10-06 Sort by qty desc
-*View:* runDemo("q10-06", () => "q10-06 sample")
+*Solution:* runDemo("q10-06", () => sortByQtyDesc([{ sku: "a", qty: 1 }, { sku: "b", qty: 3 }]))
 ```ts
 const sortByQtyDesc = (items: StockItem[]) => [...items].sort((a, b) => b.qty - a.qty);
 ```
 
 ### <a id="q10-07"></a>Q10-07 Restock validate positive
-*View:* runDemo("q10-07", () => "q10-07 sample")
+*Solution:* runDemo("q10-07", () => restock([{ sku: "a", qty: 1 }], "a", 2))
 ```ts
 const restock = (items: StockItem[], sku: string, addQty: number) => {
   if (addQty <= 0) throw new Error("addQty>0");
@@ -1658,7 +1976,7 @@ const restock = (items: StockItem[], sku: string, addQty: number) => {
 ```
 
 ### <a id="q10-08"></a>Q10-08 Batch dispense (transaction)
-*View:* runDemo("q10-08", () => "q10-08 sample")
+*Solution:* runDemo("q10-08", () => batchDispense([{ sku: "a", qty: 5 }], [{ sku: "a", qty: 2 }]))
 ```ts
 type Dispense = { sku: string; qty: number };
 const batchDispense = (items: StockItem[], reqs: Dispense[]) => {
@@ -1674,7 +1992,7 @@ const batchDispense = (items: StockItem[], reqs: Dispense[]) => {
 ```
 
 ### <a id="q10-09"></a>Q10-09 Result-based operations
-*View:* runDemo("q10-09", () => "q10-09 sample")
+*Solution:* runDemo("q10-09", () => addOp([], { sku: "a", qty: 1 }))
 ```ts
 type Result<T> = { ok: true; data: T } | { ok: false; error: string };
 const addOp = (items: StockItem[], item: StockItem): Result<StockItem[]> =>
@@ -1682,7 +2000,7 @@ const addOp = (items: StockItem[], item: StockItem): Result<StockItem[]> =>
 ```
 
 ### <a id="q10-10"></a>Q10-10 Group by category
-*View:* runDemo("q10-10", () => "q10-10 sample")
+*Solution:* runDemo("q10-10", () => groupByCategory([{ category: "food" } as any, { category: "electronics" } as any, { category: "food" } as any ]))
 ```ts
 const groupByCategory = (items: { category: Category }[]) => items.reduce<Record<Category, typeof items>>( (acc, item) => {
   acc[item.category] = acc[item.category] ?? [];
@@ -1692,27 +2010,34 @@ const groupByCategory = (items: { category: Category }[]) => items.reduce<Record
 ```
 
 ### <a id="q10-11"></a>Q10-11 Reorder tasks
-*View:* runDemo("q10-11", () => "q10-11 sample")
+*Solution:* runDemo("q10-11", () => reorderTasks([{ sku: "a", qty: 1, reorderThreshold: 2 }]))
 ```ts
 const reorderTasks = (items: { sku: string; qty: number; reorderThreshold: number }[]) =>
   items.filter(i => i.qty < i.reorderThreshold).map(i => ({ sku: i.sku, needed: i.reorderThreshold - i.qty }));
 ```
 
 ### <a id="q10-12"></a>Q10-12 Readonly sku in model
-*View:* runDemo("q10-12", () => "q10-12 sample")
+*Solution:* runDemo("q10-12", () => {
+  const item: Item = { sku: "a", qty: 1 };
+  return item.sku;
+})
 ```ts
 type Item = { readonly sku: string; qty: number };
 ```
 
 ### <a id="q10-13"></a>Q10-13 Audit log
-*View:* runDemo("q10-13", () => "q10-13 sample")
+*Solution:* runDemo("q10-13", () => logAction([], "add", "a").length)
 ```ts
 type Audit = { action: string; sku: string; at: number };
 const logAction = (logs: Audit[], action: string, sku: string): Audit[] => [...logs, { action, sku, at: Date.now() }];
 ```
 
 ### <a id="q10-14"></a>Q10-14 Queue to prevent race
-*View:* runDemo("q10-14", () => "q10-14 sample")
+*Solution:* runDemo("q10-14", async () => {
+  const q = new OperationQueue();
+  await q.enqueue(async () => "first");
+  return q.enqueue(async () => "second");
+})
 ```ts
 class OperationQueue {
   private chain = Promise.resolve();
@@ -1721,7 +2046,7 @@ class OperationQueue {
 ```
 
 ### <a id="q10-15"></a>Q10-15 Lifecycle state machine
-*View:* runDemo("q10-15", () => "q10-15 sample")
+*Solution:* runDemo("q10-15", () => transitionLife("active", "discontinued"))
 ```ts
 type Life = "active" | "discontinued" | "archived";
 const lifeTransitions: Record<Life, Life[]> = {
@@ -1736,7 +2061,7 @@ const transitionLife = (s: Life, next: Life) => {
 ```
 
 ### <a id="q10-16"></a>Q10-16 Exhaustive switch on lifecycle
-*View:* runDemo("q10-16", () => "q10-16 sample")
+*Solution:* runDemo("q10-16", () => lifeLabel("archived"))
 ```ts
 function assertNever(x: never): never { throw new Error(String(x)); }
 function lifeLabel(l: Life) {
@@ -1750,7 +2075,11 @@ function lifeLabel(l: Life) {
 ```
 
 ### <a id="q10-17"></a>Q10-17 Generic inventory store
-*View:* runDemo("q10-17", () => "q10-17 sample")
+*Solution:* runDemo("q10-17", () => {
+  const store = new Store<{ sku: string; qty: number }>();
+  store.add({ sku: "a", qty: 1 });
+  return store.get("a");
+})
 ```ts
 class Store<T extends { sku: string }> {
   private items = new Map<string, T>();
@@ -1761,7 +2090,7 @@ class Store<T extends { sku: string }> {
 ```
 
 ### <a id="q10-18"></a>Q10-18 CSV import with validation
-*View:* runDemo("q10-18", () => "q10-18 sample")
+*Solution:* runDemo("q10-18", () => importCsv(["p1,2", "bad"]))
 ```ts
 function importCsv(lines: string[]): { items: StockItem[]; errors: string[] } {
   const items: StockItem[] = []; const errors: string[] = [];
@@ -1776,7 +2105,7 @@ function importCsv(lines: string[]): { items: StockItem[]; errors: string[] } {
 ```
 
 ### <a id="q10-19"></a>Q10-19 Discount rules by category
-*View:* runDemo("q10-19", () => "q10-19 sample")
+*Solution:* runDemo("q10-19", () => discount("electronics", 100))
 ```ts
 const discount = (cat: Category, price: number) => {
   const rate: Record<Category, number> = { electronics: 0.1, fashion: 0.15, food: 0 };
@@ -1785,7 +2114,13 @@ const discount = (cat: Category, price: number) => {
 ```
 
 ### <a id="q10-20"></a>Q10-20 Typed event emitter for inventory
-*View:* runDemo("q10-20", () => "q10-20 sample")
+*Solution:* runDemo("q10-20", () => {
+  const emitter = new InventoryEmitter();
+  let last: string | undefined;
+  emitter.on("item_dispensed", p => last = p.sku);
+  emitter.emit("item_dispensed", { sku: "p1", qty: 1 });
+  return last;
+})
 ```ts
 type InventoryEvents = { item_dispensed: { sku: string; qty: number }; item_restocked: { sku: string; qty: number } };
 class InventoryEmitter extends Emitter<InventoryEvents> {}
@@ -1794,21 +2129,21 @@ class InventoryEmitter extends Emitter<InventoryEvents> {}
 ## 11) workflow exhaustive checks
 
 ### <a id="q11-01"></a>Q11-01 Ticket status union
-*View:* runDemo("q11-01", () => "q11-01 sample")
+*Solution:* runDemo("q11-01", () => canClose("resolved"))
 ```ts
 type Status = "open" | "in_progress" | "resolved";
 const canClose = (s: Status) => s === "resolved";
 ```
 
 ### <a id="q11-02"></a>Q11-02 Video pipeline statuses
-*View:* runDemo("q11-02", () => "q11-02 sample")
+*Solution:* runDemo("q11-02", () => labelVideo("uploaded"))
 ```ts
 type VideoStatus = "uploaded" | "transcoding" | "published" | "failed";
 const labelVideo = (s: VideoStatus) => ({ uploaded: "Uploaded", transcoding: "Transcoding", published: "Published", failed: "Failed" }[s]);
 ```
 
 ### <a id="q11-03"></a>Q11-03 Exhaustive handler
-*View:* runDemo("q11-03", () => "q11-03 sample")
+*Solution:* runDemo("q11-03", () => handleStatus("open"))
 ```ts
 function handleStatus(s: Status) {
   switch (s) {
@@ -1820,13 +2155,13 @@ function handleStatus(s: Status) {
 ```
 
 ### <a id="q11-04"></a>Q11-04 Filter open tickets
-*View:* runDemo("q11-04", () => "q11-04 sample")
+*Solution:* runDemo("q11-04", () => filterOpen([{ status: "open" }, { status: "resolved" }]))
 ```ts
 const filterOpen = (tickets: { status: Status }[]) => tickets.filter(t => t.status === "open");
 ```
 
 ### <a id="q11-05"></a>Q11-05 Transition with actions
-*View:* runDemo("q11-05", () => "q11-05 sample")
+*Solution:* runDemo("q11-05", () => transition("open", "start"))
 ```ts
 type Action = "start" | "resolve" | "reopen";
 const transition = (s: Status, action: Action): Status => {
@@ -1840,19 +2175,19 @@ const transition = (s: Status, action: Action): Status => {
 ```
 
 ### <a id="q11-06"></a>Q11-06 Resolved requires note
-*View:* runDemo("q11-06", () => "q11-06 sample")
+*Solution:* runDemo("q11-06", () => ({ status: "resolved", resolutionNote: "fixed" } as Ticket))
 ```ts
 type Ticket = { status: "open" | "in_progress" } | { status: "resolved"; resolutionNote: string };
 ```
 
 ### <a id="q11-07"></a>Q11-07 Process Result union
-*View:* runDemo("q11-07", () => "q11-07 sample")
+*Solution:* runDemo("q11-07", () => ({ ok: true, value: 1 } as StepResult<number>))
 ```ts
 type StepResult<T> = { ok: true; value: T } | { ok: false; error: string };
 ```
 
 ### <a id="q11-08"></a>Q11-08 Typed actions drive transitions
-*View:* runDemo("q11-08", () => "q11-08 sample")
+*Solution:* runDemo("q11-08", () => reduce({ status: "resolved" }, { type: "close" }))
 ```ts
 type TicketAction = { type: "assign"; agentId: string } | { type: "close" };
 function reduce(state: { assignee?: string; status: Status }, action: TicketAction) {
@@ -1864,7 +2199,7 @@ function reduce(state: { assignee?: string; status: Status }, action: TicketActi
 ```
 
 ### <a id="q11-09"></a>Q11-09 Guard invalid transition
-*View:* runDemo("q11-09", () => "q11-09 sample")
+*Solution:* runDemo("q11-09", () => safeTransition("open", "resolve"))
 ```ts
 const safeTransition = (s: Status, action: Action): Result<Status> => {
   try { return { ok: true, data: transition(s, action) }; }
@@ -1873,14 +2208,14 @@ const safeTransition = (s: Status, action: Action): Result<Status> => {
 ```
 
 ### <a id="q11-10"></a>Q11-10 Timeline event log
-*View:* runDemo("q11-10", () => "q11-10 sample")
+*Solution:* runDemo("q11-10", () => addEvent([], "open"))
 ```ts
 type TimelineEvent = { at: number; status: Status };
 const addEvent = (events: TimelineEvent[], status: Status) => [...events, { at: Date.now(), status }];
 ```
 
 ### <a id="q11-11"></a>Q11-11 Retry failed step
-*View:* runDemo("q11-11", () => "q11-11 sample")
+*Solution:* runDemo("q11-11", () => nextAfterRetry("failed", 1))
 ```ts
 const nextAfterRetry = (status: VideoStatus, retries: number) => {
   if (status === "failed" && retries < 2) return "transcoding";
@@ -1889,7 +2224,7 @@ const nextAfterRetry = (status: VideoStatus, retries: number) => {
 ```
 
 ### <a id="q11-12"></a>Q11-12 Must assign before in_progress
-*View:* runDemo("q11-12", () => "q11-12 sample")
+*Solution:* runDemo("q11-12", () => startTicket({ status: "open", assignee: "agent" }))
 ```ts
 function startTicket(ticket: { status: Status; assignee?: string }) {
   if (!ticket.assignee) throw new Error("Assign first");
@@ -1899,13 +2234,13 @@ function startTicket(ticket: { status: Status; assignee?: string }) {
 ```
 
 ### <a id="q11-13"></a>Q11-13 SLA overdue flag
-*View:* runDemo("q11-13", () => "q11-13 sample")
+*Solution:* runDemo("q11-13", () => isOverdue(Date.now() - 10_000, Date.now(), 0))
 ```ts
 const isOverdue = (createdAtMs: number, nowMs: number, thresholdHours: number) => (nowMs - createdAtMs) > thresholdHours * 3600_000;
 ```
 
 ### <a id="q11-14"></a>Q11-14 Batch process summary
-*View:* runDemo("q11-14", () => "q11-14 sample")
+*Solution:* runDemo("q11-14", () => countByStatus([{ status: "open" }, { status: "resolved" }]))
 ```ts
 const countByStatus = (tickets: { status: Status }[]): Record<Status, number> => ({
   open: tickets.filter(t => t.status === "open").length,
@@ -1915,26 +2250,35 @@ const countByStatus = (tickets: { status: Status }[]): Record<Status, number> =>
 ```
 
 ### <a id="q11-15"></a>Q11-15 Typed transition map (advanced)
-*View:* runDemo("q11-15", () => "q11-15 sample")
+*Solution:* runDemo("q11-15", () => allowed.open.includes("in_progress"))
 ```ts
 const allowed: Record<Status, Status[]> = { open: ["in_progress"], in_progress: ["resolved"], resolved: ["open"] };
 ```
 
 ### <a id="q11-16"></a>Q11-16 Reducer pattern
-*View:* runDemo("q11-16", () => "q11-16 sample")
+*Solution:* runDemo("q11-16", () => reducer("open", { type: "start" }))
 ```ts
 type TicketAction2 = { type: "start" } | { type: "resolve" } | { type: "reopen" };
 const reducer = (state: Status, action: TicketAction2): Status => transition(state, action.type as Action);
 ```
 
 ### <a id="q11-17"></a>Q11-17 Side-effect event
-*View:* runDemo("q11-17", () => "q11-17 sample")
+*Solution:* runDemo("q11-17", () => {
+  let notified: string | undefined;
+  resolveWithNotification("t1", id => notified = id);
+  return notified;
+})
 ```ts
 function resolveWithNotification(ticketId: string, notify: (id: string) => void) { notify(ticketId); return "notified"; }
 ```
 
 ### <a id="q11-18"></a>Q11-18 Async workflow simulation
-*View:* runDemo("q11-18", () => "q11-18 sample")
+*Solution:* runDemo("q11-18", async () => {
+  let seen: VideoStatus[] = [];
+  const steps: VideoStatus[] = ["uploaded", "transcoding", "published"];
+  for (const step of steps) { seen.push(step); }
+  return seen;
+})
 ```ts
 async function process(video: VideoStatus) {
   const steps: VideoStatus[] = ["uploaded", "transcoding", "published"];
@@ -1944,7 +2288,7 @@ async function process(video: VideoStatus) {
 ```
 
 ### <a id="q11-19"></a>Q11-19 Result-based async pipeline
-*View:* runDemo("q11-19", () => "q11-19 sample")
+*Solution:* runDemo("q11-19", async () => runSteps([async () => ({ ok: true, data: undefined })]))
 ```ts
 const runSteps = async (steps: Array<() => Promise<Result<void>>>) => {
   for (const step of steps) {
@@ -1956,7 +2300,7 @@ const runSteps = async (steps: Array<() => Promise<Result<void>>>) => {
 ```
 
 ### <a id="q11-20"></a>Q11-20 In-code metrics counters
-*View:* runDemo("q11-20", () => "q11-20 sample")
+*Solution:* runDemo("q11-20", () => ({ label: "q11-20", ok: true }))
 ```ts
 const transitionsCount: Record<string, number> = {};
 const recordTransition = (from: Status, to: Status) => transitionsCount[`${from}->${to}`] = (transitionsCount[`${from}->${to}`] ?? 0) + 1;
@@ -1965,7 +2309,7 @@ const recordTransition = (from: Status, to: Status) => transitionsCount[`${from}
 ## 12) tailwind ui snippets (non-hms)
 
 ### <a id="q12-01"></a>Q12-01 Product Card (React + Tailwind)
-*View:* runDemo("q12-01", () => "q12-01 ui sample"); render component to visualize.
+*Solution:* runDemo("q12-01", () => "Render ProductCard in React to view")
 ```tsx
 import React from "react";
 type Props = { readonly id: string; name: string; price: number; discount?: number; tags?: string[] };
@@ -1985,13 +2329,13 @@ export const ProductCard: React.FC<Props> = ({ name, price, discount = 0, tags }
 ```
 
 ### <a id="q12-02"></a>Q12-02 Login Form State
-*View:* runDemo("q12-02", () => "q12-02 ui sample"); render component to visualize.
+*Solution:* runDemo("q12-02", () => ({ email: "a@b.com", password: "pw", remember: true }))
 ```tsx
 type FormState = { email: string; password: string; remember: boolean };
 ```
 
 ### <a id="q12-03"></a>Q12-03 Loading Skeleton
-*View:* runDemo("q12-03", () => "q12-03 ui sample"); render component to visualize.
+*Solution:* runDemo("q12-03", () => "Render Skeleton with isLoading=true")
 ```tsx
 const Skeleton: React.FC<{ isLoading: boolean }> = ({ isLoading, children }) => isLoading ? (
   <div className="animate-pulse space-y-2">
@@ -2002,7 +2346,7 @@ const Skeleton: React.FC<{ isLoading: boolean }> = ({ isLoading, children }) => 
 ```
 
 ### <a id="q12-04"></a>Q12-04 Toast variants union
-*View:* runDemo("q12-04", () => "q12-04 ui sample"); render component to visualize.
+*Solution:* runDemo("q12-04", () => toastClass.success)
 ```ts
 type ToastType = "success" | "error" | "info";
 const toastClass: Record<ToastType, string> = {
@@ -2013,13 +2357,13 @@ const toastClass: Record<ToastType, string> = {
 ```
 
 ### <a id="q12-05"></a>Q12-05 Modal component typed callbacks
-*View:* runDemo("q12-05", () => "q12-05 ui sample"); render component to visualize.
+*Solution:* runDemo("q12-05", () => "Use ModalProps in React")
 ```tsx
 type ModalProps = { open: boolean; onClose: () => void; onConfirm: () => Promise<void> };
 ```
 
 ### <a id="q12-06"></a>Q12-06 Generic Table<T>
-*View:* runDemo("q12-06", () => "q12-06 ui sample"); render component to visualize.
+*Solution:* runDemo("q12-06", () => "Render Table component")
 ```tsx
 type Column<T> = { key: keyof T; label: string };
 function Table<T>({ rows, columns }: { rows: T[]; columns: Column<T>[] }) {
@@ -2037,13 +2381,13 @@ function Table<T>({ rows, columns }: { rows: T[]; columns: Column<T>[] }) {
 ```
 
 ### <a id="q12-07"></a>Q12-07 Pagination component
-*View:* runDemo("q12-07", () => "q12-07 ui sample"); render component to visualize.
+*Solution:* runDemo("q12-07", () => ({ page: 1, pageSize: 10, total: 100 }))
 ```tsx
 type PaginationProps = { page: number; pageSize: number; total: number; onPageChange: (p: number) => void };
 ```
 
 ### <a id="q12-08"></a>Q12-08 Debounced Search Bar
-*View:* runDemo("q12-08", () => "q12-08 ui sample"); render component to visualize.
+*Solution:* runDemo("q12-08", () => "Type to see debounce")
 ```tsx
 const DebouncedSearch: React.FC<{ onSearch: (q: string) => void }> = ({ onSearch }) => {
   const [value, setValue] = React.useState("");
@@ -2053,39 +2397,39 @@ const DebouncedSearch: React.FC<{ onSearch: (q: string) => void }> = ({ onSearch
 ```
 
 ### <a id="q12-09"></a>Q12-09 Dropdown union options
-*View:* runDemo("q12-09", () => "q12-09 ui sample"); render component to visualize.
+*Solution:* runDemo("q12-09", () => "Use Sort union in select")
 ```tsx
 type Sort = "price_asc" | "price_desc" | "rating";
 ```
 
 ### <a id="q12-10"></a>Q12-10 Badge variants map
-*View:* runDemo("q12-10", () => "q12-10 ui sample"); render component to visualize.
+*Solution:* runDemo("q12-10", () => badgeClass.hot)
 ```ts
 type Badge = "new" | "sale" | "hot";
 const badgeClass: Record<Badge, string> = { new: "bg-blue-100 text-blue-700", sale: "bg-amber-100 text-amber-700", hot: "bg-rose-100 text-rose-700" };
 ```
 
 ### <a id="q12-11"></a>Q12-11 Confirm dialog returns Promise<boolean>
-*View:* runDemo("q12-11", () => "q12-11 ui sample"); render component to visualize.
+*Solution:* runDemo("q12-11", () => "Confirm dialog shows in browser")
 ```ts
 const confirmAsync = (message: string) => new Promise<boolean>(resolve => resolve(window.confirm(message)));
 ```
 
 ### <a id="q12-12"></a>Q12-12 Stepper for workflow
-*View:* runDemo("q12-12", () => "q12-12 ui sample"); render component to visualize.
+*Solution:* runDemo("q12-12", () => steps)
 ```tsx
 type Step = "uploaded" | "processing" | "done";
 const steps: Step[] = ["uploaded", "processing", "done"];
 ```
 
 ### <a id="q12-13"></a>Q12-13 Tabs typed key union
-*View:* runDemo("q12-13", () => "q12-13 ui sample"); render component to visualize.
+*Solution:* runDemo("q12-13", () => "Use TabKey for tabs")
 ```tsx
 type TabKey = "overview" | "details" | "settings";
 ```
 
 ### <a id="q12-14"></a>Q12-14 Empty State component
-*View:* runDemo("q12-14", () => "q12-14 ui sample"); render component to visualize.
+*Solution:* runDemo("q12-14", () => "Render EmptyState in React")
 ```tsx
 const EmptyState: React.FC<{ title: string; description?: string; actionLabel?: string; onAction?: () => void }> = ({ title, description, actionLabel, onAction }) => (
   <div className="rounded-lg border p-6 text-center">
@@ -2097,19 +2441,19 @@ const EmptyState: React.FC<{ title: string; description?: string; actionLabel?: 
 ```
 
 ### <a id="q12-15"></a>Q12-15 Error UI state union
-*View:* runDemo("q12-15", () => "q12-15 ui sample"); render component to visualize.
+*Solution:* runDemo("q12-15", () => "Use UIState union")
 ```ts
 type UIState<T> = { kind: "loading" } | { kind: "ready"; data: T } | { kind: "error"; message: string };
 ```
 
 ### <a id="q12-16"></a>Q12-16 File Upload UI state
-*View:* runDemo("q12-16", () => "q12-16 ui sample"); render component to visualize.
+*Solution:* runDemo("q12-16", () => "Use UploadState union")
 ```ts
 type UploadState = { status: "idle" } | { status: "uploading"; progress: number } | { status: "success" } | { status: "error"; message: string };
 ```
 
 ### <a id="q12-17"></a>Q12-17 Progress bar for async job
-*View:* runDemo("q12-17", () => "q12-17 ui sample"); render component to visualize.
+*Solution:* runDemo("q12-17", () => "Render ProgressBar")
 ```tsx
 const ProgressBar: React.FC<{ progress: number }> = ({ progress }) => (
   <div className="h-2 rounded bg-slate-200"><div className="h-full rounded bg-indigo-500" style={{ width: `${progress}%` }} /></div>
@@ -2117,21 +2461,21 @@ const ProgressBar: React.FC<{ progress: number }> = ({ progress }) => (
 ```
 
 ### <a id="q12-18"></a>Q12-18 Sidebar menu typed routes
-*View:* runDemo("q12-18", () => "q12-18 ui sample"); render component to visualize.
+*Solution:* runDemo("q12-18", () => routes)
 ```ts
 const routes = [{ key: "home", path: "/" }, { key: "settings", path: "/settings" }] as const;
 type RouteKey = typeof routes[number]["key"];
 ```
 
 ### <a id="q12-19"></a>Q12-19 Form validation error map
-*View:* runDemo("q12-19", () => "q12-19 ui sample"); render component to visualize.
+*Solution:* runDemo("q12-19", () => errors)
 ```ts
 type Field = "email" | "password";
 type Errors = Partial<Record<Field, string>>;
 ```
 
 ### <a id="q12-20"></a>Q12-20 Theme switcher union
-*View:* runDemo("q12-20", () => "q12-20 ui sample"); render component to visualize.
+*Solution:* runDemo("q12-20", () => loadTheme())
 ```ts
 type Theme = "light" | "dark";
 const persistTheme = (t: Theme) => localStorage.setItem("theme", t);
