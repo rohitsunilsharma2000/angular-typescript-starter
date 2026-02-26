@@ -3431,757 +3431,1600 @@ Union switch এ default unreachable ensure করো; নতুন member add �
 ### Deliverables
 
 * union + switch + assertNever demo
-
-## 07) null undefined strict mode
-Top 20.
-
-1) **Nullable username display** — [Answer](typescript-interview-answers.md#q07-01)
-- Problem: `string | null`; display fallback "Guest".
-- Example I/O: null -> Guest
-- Edge cases: "" empty string should display "" (not Guest)
-- Concepts: nullish vs falsy
-
-2) **Optional param vs `string|undefined`** — [Answer](typescript-interview-answers.md#q07-02)
-- Problem: create two functions and show difference in call sites.
-- Example I/O: compile demo
-- Edge cases: exactOptionalPropertyTypes
-- Concepts: optional semantics
-
-3) **strictNullChecks demo** — [Answer](typescript-interview-answers.md#q07-03)
-- Problem: show why `let s:string = null` fails; fix with union.
-- Example I/O: compile
-- Edge cases: none
-- Concepts: TS strictness
-
-4) **Non-null assertion risk** — [Answer](typescript-interview-answers.md#q07-04)
-- Problem: `user!.name` risk; replace with guard.
-- Example I/O: safe output
-- Edge cases: undefined user
-- Concepts: safer patterns
-
-5) **Optional chaining safe access** — [Answer](typescript-interview-answers.md#q07-05)
-- Problem: read nested `config.api?.timeoutMs ?? 3000`.
-- Example I/O: missing -> 3000
-- Edge cases: timeout=0 should keep 0
-- Concepts: `?.`, `??`
-
-6) **`??` vs `||`** — [Answer](typescript-interview-answers.md#q07-06)
-- Problem: demonstrate with 0 and empty string.
-- Example I/O: 0 ?? 10 -> 0, 0 || 10 -> 10
-- Edge cases: false boolean
-- Concepts: operators
-
-7) **Default param** — [Answer](typescript-interview-answers.md#q07-07)
-- Problem: `function f(x:number=10)` compare with `x?:number`.
-- Example I/O: f() -> 10
-- Edge cases: explicit undefined
-- Concepts: defaults
-
-8) **parse optional to number** — [Answer](typescript-interview-answers.md#q07-08)
-- Problem: `parsePage(x:string|undefined): number` default 1.
-- Example I/O: undefined -> 1
-- Edge cases: invalid -> 1 or error (choose)
-- Concepts: parsing
-
-9) **Filter undefined with predicate** — [Answer](typescript-interview-answers.md#q07-09)
-- Problem: `(string|undefined)[]` to `string[]`.
-- Example I/O: ["a",undefined] -> ["a"]
-- Edge cases: "" stays
-- Concepts: type predicate
-
-10) **Maybe<T> helper** — [Answer](typescript-interview-answers.md#q07-10)
-- Problem: `type Maybe<T>=T|null|undefined`; `unwrapMaybe(x, fallback)`
-- Example I/O: null -> fallback
-- Edge cases: 0 not fallback
-- Concepts: nullish
-
-11) **Form value normalize** — [Answer](typescript-interview-answers.md#q07-11)
-- Problem: input `string|null` -> `string` (empty if null).
-- Example I/O: null -> ""
-- Edge cases: trim optional
-- Concepts: normalization
-
-12) **Date format safe** — [Answer](typescript-interview-answers.md#q07-12)
-- Problem: `Date|null` -> string; null -> "N/A".
-- Example I/O: null -> N/A
-- Edge cases: invalid date
-- Concepts: null handling
-
-13) **Config required env vars** — [Answer](typescript-interview-answers.md#q07-13)
-- Problem: `getEnv(name): string` throws if missing.
-- Example I/O: missing -> error
-- Edge cases: empty string treat as missing or allowed (define)
-- Concepts: runtime strictness
-
-14) **Strict function types (variance)** — [Answer](typescript-interview-answers.md#q07-14)
-- Problem: show why `(x: string) => void` not assignable to `(x: string|number)=>void` in strict mode.
-- Example I/O: explanation + code
-- Edge cases: none
-- Concepts: function variance
-
-15) **exactOptionalPropertyTypes behavior** — [Answer](typescript-interview-answers.md#q07-15)
-- Problem: show assignment differences.
-- Example I/O: `{a?:string}` cannot set `a: undefined` under exact optional settings.
-- Edge cases: config-dependent
-- Concepts: TS config
-
-16) **assertDefined utility** — [Answer](typescript-interview-answers.md#q07-16)
-- Problem: assertion fn to narrow null/undefined.
-- Example I/O: after assert, type is T
-- Edge cases: falsy values
-- Concepts: asserts
-
-17) **NonNullable usage** — [Answer](typescript-interview-answers.md#q07-17)
-- Problem: `type NN = NonNullable<string|null|undefined>`.
-- Example I/O: NN is string
-- Edge cases: unions
-- Concepts: utility types
-
-18) **Optional keys mapping** — [Answer](typescript-interview-answers.md#q07-18)
-- Problem: get optional keys of type `T` (advanced).
-- Example I/O: optional key union
-- Edge cases: tricky types
-- Concepts: mapped + conditional
-
-19) **Strict config schema runtime** — [Answer](typescript-interview-answers.md#q07-19)
-- Problem: load config object where no field remains undefined; validate and return typed config.
-- Example I/O: missing -> error
-- Edge cases: nested required fields
-- Concepts: validation
-
-20) **Builder ensures required fields before build** — [Answer](typescript-interview-answers.md#q07-20)
-- Problem: step builder: setApiBaseUrl then build; build not callable before set.
-- Example I/O: compile-time block
-- Edge cases: keep minimal
-- Concepts: typestate pattern
+## 07) Null / Undefined / Strict Mode — Interview Assignments (Top 20)
 
 ---
 
-## 08) classes access modifiers getter setter
-Top 20.
+## 1) Nullable username display — Interview Assignment
 
-1) **BankAccount encapsulation** — [Answer](typescript-interview-answers.md#q08-01)
-- Problem: private `balance`, methods `deposit`, `withdraw` (no negative).
-- Example I/O: withdraw too much -> error/result
-- Edge cases: deposit 0/negative
-- Concepts: private, validation
+### Objective
 
-2) **readonly accountId** — [Answer](typescript-interview-answers.md#q08-02)
-- Problem: readonly id set in constructor; cannot modify later.
-- Example I/O: assignment error
-- Edge cases: none
-- Concepts: readonly, constructor param properties
+`username: string | null` দিলে display value বের করো: null হলে `"Guest"`, কিন্তু empty string `""` হলে `""`-ই দেখাবে।
 
-3) **Getter masked id** — [Answer](typescript-interview-answers.md#q08-03)
-- Problem: getter returns masked id `****1234`.
-- Example I/O: "ABC1234" -> "****1234"
-- Edge cases: length <4
-- Concepts: getter
+### Requirements
 
-4) **Setter pin validation** — [Answer](typescript-interview-answers.md#q08-04)
-- Problem: setter for pin requires 4 digits.
-- Example I/O: "123" -> error
-- Edge cases: non-numeric
-- Concepts: setter
+* fallback only for `null` (and optionally `undefined` if included)
+* `""` should NOT become `"Guest"`
 
-5) **public/private access demo** — [Answer](typescript-interview-answers.md#q08-05)
-- Problem: show compile error when accessing private property outside class.
-- Example I/O: compile error
-- Edge cases: none
-- Concepts: access modifiers
+### Example (Expected Behavior)
 
-6) **Simple inheritance** — [Answer](typescript-interview-answers.md#q08-06)
-- Problem: `Vehicle` base with `move()`, `Car` extends adds `honk()`.
-- Example I/O: call both
-- Edge cases: override move
-- Concepts: extends, override
+```ts id="r4chgj"
+displayName(null); // "Guest"
+displayName("");   // ""
+displayName("A");  // "A"
+```
 
-7) **protected usage** — [Answer](typescript-interview-answers.md#q08-07)
-- Problem: base has protected `log()` used only by child classes.
-- Example I/O: outside call fails
-- Edge cases: none
-- Concepts: protected
+### Concepts Being Tested
 
-8) **static counter** — [Answer](typescript-interview-answers.md#q08-08)
-- Problem: count active sessions with static property.
-- Example I/O: create 2 -> count 2
-- Edge cases: destroy reduces count (implement)
-- Concepts: static
+* nullish vs falsy (`??` vs `||`)
 
-9) **abstract gateway** — [Answer](typescript-interview-answers.md#q08-09)
-- Problem: abstract `PaymentGateway` with `pay(amount)`; implement `MockGateway`.
-- Example I/O: pay returns receipt
-- Edge cases: negative amount
-- Concepts: abstract
+### Deliverables
 
-10) **implements Logger interface** — [Answer](typescript-interview-answers.md#q08-10)
-- Problem: `Logger` interface and `ConsoleLogger` class implements it.
-- Example I/O: logger.log("hi")
-- Edge cases: levels union
-- Concepts: implements
-
-11) **Prevent invalid state (setter)** — [Answer](typescript-interview-answers.md#q08-11)
-- Problem: `Product.price` cannot be negative; enforce in setter.
-- Example I/O: set -1 -> error
-- Edge cases: NaN
-- Concepts: invariants
-
-12) **Composition over inheritance** — [Answer](typescript-interview-answers.md#q08-12)
-- Problem: `OrderService` uses `PriceCalculator` injected in constructor.
-- Example I/O: calculate order total
-- Edge cases: none
-- Concepts: DI, testability
-
-13) **Simple role check method** — [Answer](typescript-interview-answers.md#q08-13)
-- Problem: `AdminPanel` method `deleteUser` only allowed if role is ADMIN.
-- Example I/O: USER -> error
-- Edge cases: none
-- Concepts: guard
-
-14) **Factory method ensures invariants** — [Answer](typescript-interview-answers.md#q08-14)
-- Problem: private constructor; static `create()` validates input.
-- Example I/O: invalid -> error
-- Edge cases: empty strings
-- Concepts: factory pattern
-
-15) **Immutable class** — [Answer](typescript-interview-answers.md#q08-15)
-- Problem: `Money` class; `add()` returns new instance, does not mutate.
-- Example I/O: m1 unchanged
-- Edge cases: rounding
-- Concepts: immutability
-
-16) **Builder with private constructor** — [Answer](typescript-interview-answers.md#q08-16)
-- Problem: `OrderBuilder` collects items; `build()` returns Order.
-- Example I/O: items empty -> error
-- Edge cases: qty <=0
-- Concepts: builder
-
-17) **Custom error classes** — [Answer](typescript-interview-answers.md#q08-17)
-- Problem: `InsufficientBalanceError`, map to message.
-- Example I/O: catch and print
-- Edge cases: unknown
-- Concepts: error modeling
-
-18) **Strategy pattern shipping** — [Answer](typescript-interview-answers.md#q08-18)
-- Problem: `ShippingStrategy` interface; `Standard`, `Express` implement.
-- Example I/O: cost differs
-- Edge cases: weight negative
-- Concepts: polymorphism
-
-19) **Lazy computed getter cache** — [Answer](typescript-interview-answers.md#q08-19)
-- Problem: expensive compute; compute once then cache.
-- Example I/O: repeated calls no recompute
-- Edge cases: invalidation
-- Concepts: caching
-
-20) **Testability: mock dependency** — [Answer](typescript-interview-answers.md#q08-20)
-- Problem: service depends on `Clock` interface; in tests pass FakeClock.
-- Example I/O: deterministic timestamps
-- Edge cases: none
-- Concepts: DI best practices
+* function + examples
 
 ---
 
-## 09) async await promise
-Top 20.
+## 2) Optional param vs `string | undefined` — Interview Assignment
 
-1) **delay(ms)** — [Answer](typescript-interview-answers.md#q09-01)
-- Problem: implement `delay(ms): Promise<void>`.
-- Example I/O: await delay(100)
-- Edge cases: ms < 0 -> treat 0
-- Concepts: promises
+### Objective
 
-2) **try/catch async error** — [Answer](typescript-interview-answers.md#q09-02)
-- Problem: async function throws; handle and return fallback.
-- Example I/O: fail -> "fallback"
-- Edge cases: non-Error thrown
-- Concepts: error handling
+2টা function বানাও এবং call sites এ difference দেখাও:
 
-3) **Sequential calls** — [Answer](typescript-interview-answers.md#q09-03)
-- Problem: fetch user then fetch orders(userId) sequentially.
-- Example I/O: returns combined result
-- Edge cases: first fails -> stop
-- Concepts: await chain
+1. `f(x?: string)`
+2. `g(x: string | undefined)`
 
-4) **Parallel calls with Promise.all** — [Answer](typescript-interview-answers.md#q09-04)
-- Problem: fetch A,B,C parallel and sum.
-- Example I/O: 1+2+3=6
-- Edge cases: if any fails -> reject
-- Concepts: Promise.all
+### Requirements
 
-5) **Promise.race timeout** — [Answer](typescript-interview-answers.md#q09-05)
-- Problem: wrap promise with timeout error after ms.
-- Example I/O: long -> timeout
-- Edge cases: cleanup mention
-- Concepts: race
+* demonstrate which calls compile and why
+* mention `exactOptionalPropertyTypes` effect (short note)
 
-6) **Retry 3 times** — [Answer](typescript-interview-answers.md#q09-06)
-- Problem: retry on failure with exponential backoff.
-- Example I/O: succeeds on 2nd try
-- Edge cases: always fail -> return error
-- Concepts: loops + await
+### Example (Expected Behavior)
 
-7) **finally loading** — [Answer](typescript-interview-answers.md#q09-07)
-- Problem: `loading=true` before await, set false in finally.
-- Example I/O: always false after
-- Edge cases: none
-- Concepts: finally
+```ts id="ak9pfx"
+f();          // ✅
+g(undefined); // ✅
+g();          // ❌ (argument missing)
+```
 
-8) **Promise.allSettled report** — [Answer](typescript-interview-answers.md#q09-08)
-- Problem: run tasks and return `{okCount, failCount}`.
-- Example I/O: 2 ok 1 fail
-- Edge cases: empty list
-- Concepts: allSettled
+### Concepts Being Tested
 
-9) **Concurrency limit (max 3)** — [Answer](typescript-interview-answers.md#q09-09)
-- Problem: process 20 async jobs with limit 3 in parallel.
-- Example I/O: completes all
-- Edge cases: job failure handling strategy
-- Concepts: queue, semaphore-like
+* optional semantics
+* `undefined` union vs optional parameter
 
-10) **Cancel pattern simulation** — [Answer](typescript-interview-answers.md#q09-10)
-- Problem: create cancel token; if cancelled, stop processing loop.
-- Example I/O: cancel mid-way
-- Edge cases: in-flight tasks
-- Concepts: cancellation patterns
+### Deliverables
 
-11) **FIFO async job queue** — [Answer](typescript-interview-answers.md#q09-11)
-- Problem: queue with `enqueue(job)` and worker `start()` processes one by one.
-- Example I/O: order preserved
-- Edge cases: enqueue while running
-- Concepts: producer-consumer
-
-12) **Debounced async search** — [Answer](typescript-interview-answers.md#q09-12)
-- Problem: debounce input changes and call async search only after 300ms idle.
-- Example I/O: rapid typing -> one call
-- Edge cases: last call only
-- Concepts: debounce
-
-13) **Async memoization cache** — [Answer](typescript-interview-answers.md#q09-13)
-- Problem: cache results by key; concurrent same key should share in-flight promise.
-- Example I/O: 2 calls -> 1 network
-- Edge cases: failure should clear cache
-- Concepts: inflight map
-
-14) **Circuit breaker mini** — [Answer](typescript-interview-answers.md#q09-14)
-- Problem: after 3 consecutive failures, open circuit for 5 seconds.
-- Example I/O: calls blocked during open
-- Edge cases: reset after time
-- Concepts: resilience
-
-15) **Return Result instead of throwing** — [Answer](typescript-interview-answers.md#q09-15)
-- Problem: async function returns `Result<T,E>` not throw.
-- Example I/O: ok/err
-- Edge cases: mapping errors
-- Concepts: typed error handling
-
-16) **Async pipeline** — [Answer](typescript-interview-answers.md#q09-16)
-- Problem: `pipeAsync(value, [fn1,fn2,fn3])`.
-- Example I/O: transforms sequentially
-- Edge cases: fn throws -> stop
-- Concepts: composition
-
-17) **Idempotent request dedupe** — [Answer](typescript-interview-answers.md#q09-17)
-- Problem: `requestOnce(key, fn)` ensures only one in-flight per key.
-- Example I/O: duplicates await same promise
-- Edge cases: failure release
-- Concepts: dedupe
-
-18) **Backpressure simulation** — [Answer](typescript-interview-answers.md#q09-18)
-- Problem: producer pushes jobs; if queue size > N, producer waits.
-- Example I/O: no memory blow
-- Edge cases: cancel
-- Concepts: backpressure
-
-19) **DLQ for failed jobs** — [Answer](typescript-interview-answers.md#q09-19)
-- Problem: failed jobs pushed to `deadLetterQueue` with reason and timestamp.
-- Example I/O: dlq length increments
-- Edge cases: retry before dlq
-- Concepts: error workflows
-
-20) **CorrelationId tracing** — [Answer](typescript-interview-answers.md#q09-20)
-- Problem: pass `correlationId` through async calls and include in logs.
-- Example I/O: logs contain id
-- Edge cases: missing id -> generate
-- Concepts: observability
+* 2 functions + compile-demo comments
 
 ---
 
-## 10) inventory literal unions
-Non-HMS: warehouse/store inventory.
+## 3) `strictNullChecks` demo — Interview Assignment
 
-1) **Basic dispense guard** — [Answer](typescript-interview-answers.md#q10-01)
-- Problem: `dispense(item, qty)` cannot reduce below 0.
-- Example I/O: qty 5, dispense 6 -> error
-- Edge cases: qty <=0 invalid
-- Concepts: guards
+### Objective
 
-2) **Category union** — [Answer](typescript-interview-answers.md#q10-02)
-- Problem: `Category = "food"|"electronics"|"fashion"`; filter items by category.
-- Example I/O: returns only electronics
-- Edge cases: unknown category not allowed
-- Concepts: literal unions
+Show why `let s: string = null` fails in strict mode, and fix with union.
 
-3) **StockStatus computed** — [Answer](typescript-interview-answers.md#q10-03)
-- Problem: compute `"in_stock"|"low"|"out"` based on qty thresholds.
-- Example I/O: 0 -> out
-- Edge cases: negative qty invalid
-- Concepts: unions, business rules
+### Requirements
 
-4) **Add item unique sku** — [Answer](typescript-interview-answers.md#q10-04)
-- Problem: add only if sku not exists.
-- Example I/O: duplicate -> error
-- Edge cases: whitespace sku
-- Concepts: map/indexing
+* show failing snippet
+* fix: `string | null`
 
-5) **Search by keyword** — [Answer](typescript-interview-answers.md#q10-05)
-- Problem: search by name contains keyword (case-insensitive).
-- Example I/O: "phone" -> matching items
-- Edge cases: empty keyword -> all
-- Concepts: string ops
+### Example (Expected Behavior)
 
-6) **Sort by qty desc** — [Answer](typescript-interview-answers.md#q10-06)
-- Problem: return new sorted array without mutating original.
-- Example I/O: sorted list
-- Edge cases: equal qty keep stable (optional)
-- Concepts: immutability
+```ts id="1i3ak9"
+let s: string = null;        // ❌
+let t: string | null = null; // ✅
+```
 
-7) **Restock validate positive** — [Answer](typescript-interview-answers.md#q10-07)
-- Problem: `restock(sku, addQty)` addQty must be >0.
-- Example I/O: restock 10
-- Edge cases: sku missing
-- Concepts: validation
+### Concepts Being Tested
 
-8) **Batch dispense (transaction)** — [Answer](typescript-interview-answers.md#q10-08)
-- Problem: dispense multiple items; if any insufficient, none change.
-- Example I/O: fails -> inventory unchanged
-- Edge cases: duplicates in request
-- Concepts: atomic update, copying
+* TS strictness (`strictNullChecks`)
 
-9) **Result-based operations** — [Answer](typescript-interview-answers.md#q10-09)
-- Problem: all inventory ops return `Result<Success, InventoryError>`.
-- Example I/O: ok/err
-- Edge cases: none
-- Concepts: typed errors
+### Deliverables
 
-10) **Group by category** — [Answer](typescript-interview-answers.md#q10-10)
-- Problem: group items into `Record<Category, StockItem[]>`.
-- Example I/O: map categories
-- Edge cases: empty categories
-- Concepts: Record
-
-11) **Reorder tasks** — [Answer](typescript-interview-answers.md#q10-11)
-- Problem: if qty below reorderThreshold, create reorder task entries.
-- Example I/O: low items produce tasks
-- Edge cases: threshold per category
-- Concepts: derived data
-
-12) **Readonly sku in model** — [Answer](typescript-interview-answers.md#q10-12)
-- Problem: ensure sku never changes on updates.
-- Example I/O: patch sku -> compile error
-- Edge cases: none
-- Concepts: readonly
-
-13) **Audit log** — [Answer](typescript-interview-answers.md#q10-13)
-- Problem: append audit entries for add/restock/dispense with timestamp.
-- Example I/O: audit length grows
-- Edge cases: log size limit (optional)
-- Concepts: logging
-
-14) **Queue to prevent race (simulation)** — [Answer](typescript-interview-answers.md#q10-14)
-- Problem: implement operation queue so dispense requests process sequentially.
-- Example I/O: no negative due to race
-- Edge cases: cancellation
-- Concepts: concurrency patterns
-
-15) **Lifecycle state machine** — [Answer](typescript-interview-answers.md#q10-15)
-- Problem: item lifecycle `"active"|"discontinued"|"archived"` with allowed transitions.
-- Example I/O: discontinued -> archived ok
-- Edge cases: active -> archived not allowed
-- Concepts: state machines
-
-16) **Exhaustive switch on lifecycle** — [Answer](typescript-interview-answers.md#q10-16)
-- Problem: switch all lifecycle states; default assertNever.
-- Example I/O: compile safe
-- Edge cases: add new state triggers compile fail
-- Concepts: never
-
-17) **Generic inventory store** — [Answer](typescript-interview-answers.md#q10-17)
-- Problem: generic store `T extends { sku:string }` with add/get/update.
-- Example I/O: works for different item types
-- Edge cases: none
-- Concepts: generics + constraints
-
-18) **CSV import with validation** — [Answer](typescript-interview-answers.md#q10-18)
-- Problem: parse CSV lines into items; invalid lines collected as errors.
-- Example I/O: returns {items, errors}
-- Edge cases: missing columns
-- Concepts: parsing + Result
-
-19) **Discount rules by category** — [Answer](typescript-interview-answers.md#q10-19)
-- Problem: apply discounts based on category union.
-- Example I/O: electronics 10% off
-- Edge cases: rounding
-- Concepts: unions + mapping
-
-20) **Typed event emitter for inventory** — [Answer](typescript-interview-answers.md#q10-20)
-- Problem: emit events `item_dispensed`, `item_restocked` with typed payloads.
-- Example I/O: handlers get correct types
-- Edge cases: none
-- Concepts: event maps
+* short snippet + 1–2 line explanation
 
 ---
 
-## 11) workflow exhaustive checks
+## 4) Non-null assertion risk — Interview Assignment
+
+### Objective
+
+`user!.name` কেন risky সেটা দেখাও এবং safer guard-based version লিখো।
+
+### Requirements
+
+* replace `!` with `if (!user) ...` guard
+
+### Example (Expected Behavior)
+
+```ts id="g5h6r1"
+getUserName(user); // safe output or fallback
+```
+
+### Edge Case
+
+* user undefined/null
+
+### Concepts Being Tested
+
+* safer patterns over non-null assertion
+
+### Deliverables
+
+* unsafe snippet + safe replacement
+
+---
+
+## 5) Optional chaining safe access — Interview Assignment
+
+### Objective
+
+`config.api?.timeoutMs ?? 3000` pattern implement করো।
+
+### Requirements
+
+* missing -> 3000
+* timeout=0 -> keep 0 (so use `??`, not `||`)
+
+### Example (Expected Behavior)
+
+```ts id="v2imn8"
+getTimeout({}); // 3000
+getTimeout({ api: { timeoutMs: 0 } }); // 0
+```
+
+### Concepts Being Tested
+
+* `?.` + `??`
+
+### Deliverables
+
+* types + `getTimeout()`
+
+---
+
+## 6) `??` vs `||` — Interview Assignment
+
+### Objective
+
+0, `""`, `false` দিয়ে `??` এবং `||` difference prove করো।
+
+### Requirements
+
+* show outputs clearly
+
+### Example (Expected Behavior)
+
+```ts id="u8c7n3"
+0 ?? 10;   // 0
+0 || 10;   // 10
+"" ?? "x"; // ""
+"" || "x"; // "x"
+false ?? true; // false
+false || true; // true
+```
+
+### Concepts Being Tested
+
+* operators + falsy vs nullish
+
+### Deliverables
+
+* demo snippet + 2–3 line explanation
+
+---
+
+## 7) Default param — Interview Assignment
+
+### Objective
+
+`function f(x: number = 10)` vs `function g(x?: number)` compare করো।
+
+### Requirements
+
+* show `f()` -> 10
+* show `g()` -> undefined unless you handle inside
+* discuss explicit `undefined` call
+
+### Example (Expected Behavior)
+
+```ts id="5o8u2y"
+f();           // 10
+f(undefined);  // 10
+g();           // undefined
+```
+
+### Concepts Being Tested
+
+* default params vs optional params
+
+### Deliverables
+
+* both functions + notes
+
+---
+
+## 8) Parse optional to number — Interview Assignment
+
+### Objective
+
+`parsePage(x: string | undefined): number` default 1. Invalid হলে 1 বা error—একটা choose করে document করো।
+
+### Requirements
+
+* undefined -> 1
+* `"10"` -> 10
+* invalid string -> chosen behavior
+
+### Example (Expected Behavior)
+
+```ts id="h3j5q1"
+parsePage(undefined); // 1
+parsePage("2");       // 2
+parsePage("x");       // 1 or error
+```
+
+### Concepts Being Tested
+
+* parsing + undefined handling
+
+### Deliverables
+
+* function + examples + behavior note
+
+---
+
+## 9) Filter undefined with predicate — Interview Assignment
+
+### Objective
+
+`(string | undefined)[]` -> `string[]` type-safely।
+
+### Requirements
+
+* keep `""` (empty string)
+* only remove `undefined`
+
+### Example (Expected Behavior)
+
+```ts id="q9sh4a"
+compact(["a", undefined, ""]); // ["a", ""]
+```
+
+### Concepts Being Tested
+
+* type predicate (`x is string`)
+
+### Deliverables
+
+* predicate + `compact()` function
+
+---
+
+## 10) `Maybe<T>` helper — Interview Assignment
+
+### Objective
+
+`type Maybe<T> = T | null | undefined` এবং `unwrapMaybe(x, fallback)` implement করো।
+
+### Requirements
+
+* null/undefined -> fallback
+* 0/""/false -> should NOT fallback
+
+### Example (Expected Behavior)
+
+```ts id="u9j0k1"
+unwrapMaybe(null, 10); // 10
+unwrapMaybe(0, 10);    // 0
+```
+
+### Concepts Being Tested
+
+* nullish handling
+
+### Deliverables
+
+* type + function + examples
+
+---
+
+## 11) Form value normalize — Interview Assignment
+
+### Objective
+
+Input `string | null` -> output `string` (null হলে `""`)।
+
+### Requirements
+
+* optional: trim behavior define
+
+### Example (Expected Behavior)
+
+```ts id="08p4ze"
+normalizeInput(null);     // ""
+normalizeInput(" A ");    // " A " (or "A" if trimming)
+```
+
+### Concepts Being Tested
+
+* normalization
+
+### Deliverables
+
+* function + note
+
+---
+
+## 12) Date format safe — Interview Assignment
+
+### Objective
+
+`Date | null` -> string; null -> `"N/A"`।
+
+### Requirements
+
+* invalid date handling (define): `"Invalid date"` or `"N/A"`
+
+### Example (Expected Behavior)
+
+```ts id="xg2b1m"
+formatDate(null); // "N/A"
+```
+
+### Concepts Being Tested
+
+* null handling + runtime checks
+
+### Deliverables
+
+* function + examples
+
+---
+
+## 13) Config required env vars — Interview Assignment
+
+### Objective
+
+`getEnv(name): string` throws if missing.
+
+### Requirements
+
+* decide: empty string allowed or treated as missing (document)
+
+### Example (Expected Behavior)
+
+```ts id="u2h2xq"
+getEnv("API_KEY"); // string or throws
+```
+
+### Concepts Being Tested
+
+* runtime strictness
+
+### Deliverables
+
+* function + behavior note
+
+---
+
+## 14) Strict function types (variance) — Interview Assignment
+
+### Objective
+
+Explain + show code why `(x: string) => void` not assignable to `(x: string | number) => void` in strict mode।
+
+### Requirements
+
+* short explanation
+* show assignment error snippet
+
+### Example (Expected Behavior)
+
+```ts id="f2q2l7"
+let wide: (x: string | number) => void;
+const narrow: (x: string) => void = (x) => {};
+wide = narrow; // ❌ in strictFunctionTypes (common in TS)
+```
+
+### Concepts Being Tested
+
+* variance / function parameter compatibility
+
+### Deliverables
+
+* snippet + explanation
+
+---
+
+## 15) `exactOptionalPropertyTypes` behavior — Interview Assignment
+
+### Objective
+
+Show `{ a?: string }` vs `{ a: string | undefined }` assignment differences under exact optional setting.
+
+### Requirements
+
+* mention config dependent
+
+### Example (Expected Behavior)
+
+```ts id="p0x2v9"
+type A = { a?: string };
+type B = { a: string | undefined };
+// demonstrate assignments + note about exactOptionalPropertyTypes
+```
+
+### Concepts Being Tested
+
+* TS config awareness
+
+### Deliverables
+
+* snippet + 3–6 line explanation
+
+---
+
+## 16) `assertDefined` utility — Interview Assignment
+
+### Objective
+
+Assertion function to narrow null/undefined.
+
+### Requirements
+
+* falsy values pass; only null/undefined fail
+* signature: `asserts x is NonNullable<T>`
+
+### Example (Expected Behavior)
+
+```ts id="2b1bbr"
+assertDefined(x);
+x.toString(); // safe
+```
+
+### Concepts Being Tested
+
+* assertion functions
+
+### Deliverables
+
+* `assertDefined()` + example
+
+---
+
+## 17) `NonNullable` usage — Interview Assignment
+
+### Objective
+
+`type NN = NonNullable<string | null | undefined>` demonstrate result is `string`.
+
+### Example (Expected Behavior)
+
+```ts id="b7b4fi"
+type NN = NonNullable<string | null | undefined>; // string
+```
+
+### Concepts Being Tested
+
+* utility types
+
+### Deliverables
+
+* type alias + example
+
+---
+
+## 18) Optional keys mapping (advanced) — Interview Assignment
+
+### Objective
+
+Type-level: `OptionalKeys<T>` বের করো (optional keys union)।
+
+### Requirements
+
+* mapped + conditional types
+* mention “tricky types” limitation (brief)
+
+### Example (Expected Behavior)
+
+```ts id="1t3bzx"
+type X = OptionalKeys<{ a: string; b?: number; c?: undefined }>;
+// "b" | "c"
+```
+
+### Concepts Being Tested
+
+* mapped + conditional types
+
+### Deliverables
+
+* `OptionalKeys<T>` + example
+
+---
+
+## 19) Strict config schema runtime — Interview Assignment
+
+### Objective
+
+Config load করো যেখানে **কোন field undefined থাকবে না**; validate করে typed config return করো।
+
+### Requirements
+
+* missing -> throw/result
+* nested required fields supported (at least 1 level)
+
+### Example (Expected Behavior)
+
+```ts id="8dn2r0"
+loadConfig({ apiBaseUrl: "x" }); // ok
+loadConfig({});                  // error
+```
+
+### Concepts Being Tested
+
+* runtime validation + typed return
+
+### Deliverables
+
+* config type + loader + validation
+
+---
+
+## 20) Builder ensures required fields before build — Interview Assignment
+
+### Objective
+
+Typestate builder: `setApiBaseUrl()` call না করলে `build()` callable হবে না।
+
+### Requirements
+
+* minimal version acceptable
+* compile-time blocking demo
+
+### Example (Expected Behavior)
+
+```ts id="v1b7o3"
+createConfigBuilder().build();                 // ❌
+createConfigBuilder().setApiBaseUrl("x").build(); // ✅
+```
+
+### Concepts Being Tested
+
+* typestate pattern (generics)
+
+### Deliverables
+
+* builder types + example
+
+---
+## 11) Workflow + Exhaustive Checks — Interview Assignments (Top 20)  
 Non-HMS: support tickets / content pipeline.
 
-1) **Ticket status union** — [Answer](typescript-interview-answers.md#q11-01)
-- Problem: `Status="open"|"in_progress"|"resolved"`; `canClose(status)`.
-- Example I/O: open -> false
-- Edge cases: none
-- Concepts: unions
-
-2) **Video pipeline statuses** — [Answer](typescript-interview-answers.md#q11-02)
-- Problem: `"uploaded"|"transcoding"|"published"|"failed"` label function.
-- Example I/O: failed -> "Failed"
-- Edge cases: exhaustive check
-- Concepts: switch
-
-3) **Exhaustive handler** — [Answer](typescript-interview-answers.md#q11-03)
-- Problem: handle all statuses; default assertNever.
-- Example I/O: compile safe
-- Edge cases: add new status triggers compile fail
-- Concepts: never
-
-4) **Filter open tickets** — [Answer](typescript-interview-answers.md#q11-04)
-- Problem: filter list to status "open".
-- Example I/O: returns subset
-- Edge cases: none
-- Concepts: filter + unions
-
-5) **Transition with actions** — [Answer](typescript-interview-answers.md#q11-05)
-- Problem: action union `"start"|"resolve"|"reopen"`; transition rules.
-- Example I/O: open+start -> in_progress
-- Edge cases: resolved+start invalid
-- Concepts: state machine
-
-6) **Resolved requires note** — [Answer](typescript-interview-answers.md#q11-06)
-- Problem: resolved state must include `resolutionNote`.
-- Example I/O: cannot create resolved without note (type-level or runtime)
-- Edge cases: empty note invalid
-- Concepts: discriminated union payloads
-
-7) **Process Result union** — [Answer](typescript-interview-answers.md#q11-07)
-- Problem: workflow step returns ok/err; bubble errors.
-- Example I/O: err -> stop
-- Edge cases: multiple errors list
-- Concepts: Result<T,E>
-
-8) **Typed actions drive transitions** — [Answer](typescript-interview-answers.md#q11-08)
-- Problem: model actions with payload e.g. `{type:"assign";agentId}`.
-- Example I/O: assign sets assignee
-- Edge cases: assign when resolved invalid
-- Concepts: action union
-
-9) **Guard invalid transition** — [Answer](typescript-interview-answers.md#q11-09)
-- Problem: invalid transition returns error object not throw.
-- Example I/O: {ok:false,error:"InvalidTransition"}
-- Edge cases: none
-- Concepts: result errors
-
-10) **Timeline event log** — [Answer](typescript-interview-answers.md#q11-10)
-- Problem: maintain timeline events array every transition.
-- Example I/O: includes timestamps
-- Edge cases: monotonic time
-- Concepts: event logging
-
-11) **Retry failed step** — [Answer](typescript-interview-answers.md#q11-11)
-- Problem: failed -> retry -> transcoding; max retries 2.
-- Example I/O: after 2, stays failed
-- Edge cases: reset counter on success
-- Concepts: counters + state
-
-12) **Must assign before in_progress** — [Answer](typescript-interview-answers.md#q11-12)
-- Problem: cannot start ticket unless assigned.
-- Example I/O: open unassigned + start -> error
-- Edge cases: auto assign optional
-- Concepts: invariants
-
-13) **SLA overdue flag** — [Answer](typescript-interview-answers.md#q11-13)
-- Problem: if open more than N hours, overdue true.
-- Example I/O: compute boolean
-- Edge cases: timezone ignore, use ms
-- Concepts: time logic
-
-14) **Batch process summary** — [Answer](typescript-interview-answers.md#q11-14)
-- Problem: count tickets by status -> `Record<Status, number>`.
-- Example I/O: {open:2,...}
-- Edge cases: empty list -> zeros
-- Concepts: Record
-
-15) **Typed transition map (advanced)** — [Answer](typescript-interview-answers.md#q11-15)
-- Problem: `const allowed: Record<Status, Status[]>` and check membership.
-- Example I/O: validates
-- Edge cases: none
-- Concepts: mapping
-
-16) **Reducer pattern** — [Answer](typescript-interview-answers.md#q11-16)
-- Problem: `(state, action) => newState` for workflow.
-- Example I/O: action -> state
-- Edge cases: unknown action -> state
-- Concepts: reducer + unions
-
-17) **Side-effect event** — [Answer](typescript-interview-answers.md#q11-17)
-- Problem: when resolved, emit `notification.send`.
-- Example I/O: event emitted with payload
-- Edge cases: none
-- Concepts: events
-
-18) **Async workflow simulation** — [Answer](typescript-interview-answers.md#q11-18)
-- Problem: simulate steps with `await delay`; state updates after each.
-- Example I/O: printed logs
-- Edge cases: failure at step 2
-- Concepts: async state machine
-
-19) **Result-based async pipeline** — [Answer](typescript-interview-answers.md#q11-19)
-- Problem: async steps return Result; pipeline stops on first error.
-- Example I/O: ok -> final, err -> early exit
-- Edge cases: none
-- Concepts: functional error handling
-
-20) **In-code metrics counters** — [Answer](typescript-interview-answers.md#q11-20)
-- Problem: maintain counters for each transition type.
-- Example I/O: transitions["open->in_progress"]++
-- Edge cases: unknown transitions
-- Concepts: observability basics
-
 ---
 
-## 12) tailwind ui snippets (non-hms)
-These are UI coding prompts. Use React/Angular/HTML as you like, but keep state typed in TS.
-Each item includes a TS typing requirement + UI requirement.
+## 1) Ticket status union — Interview Assignment
 
-1) **Product Card** — [Answer](typescript-interview-answers.md#q12-01)
-- Problem: build product card UI. Props: `{readonly id; name; price; discount?:number; tags?:string[]}`.
-- Example I/O: missing discount shows normal price
-- Edge cases: discount=0
-- Concepts: optional, readonly
+### Objective  
+`type Status = "open" | "in_progress" | "resolved"` এবং `canClose(status)` লিখো।
 
-2) **Login Form State** — [Answer](typescript-interview-answers.md#q12-02)
-- Problem: create login form UI. State type: `{email; password; remember:boolean}`.
-- Example I/O: submit disabled if invalid
-- Edge cases: trim email
-- Concepts: types for form state
+### Requirements  
+- only `"resolved"` হলে close allowed (বা তোমার rule define করো—then document)
 
-3) **Loading Skeleton** — [Answer](typescript-interview-answers.md#q12-03)
-- Problem: create skeleton UI toggled by `isLoading:boolean`.
-- Example I/O: show skeleton then content
-- Edge cases: none
-- Concepts: union UI states optional
+### Example (Expected Behavior)
 
-4) **Toast variants union** — [Answer](typescript-interview-answers.md#q12-04)
-- Problem: `type ToastType="success"|"error"|"info"`; style map typed.
-- Example I/O: show success toast
-- Edge cases: none
-- Concepts: Record + unions
-
-5) **Modal component typed callbacks** — [Answer](typescript-interview-answers.md#q12-05)
-- Problem: modal props: `{open:boolean; onClose:()=>void; onConfirm:()=>Promise<void>}`.
-- Example I/O: confirm shows loading
-- Edge cases: confirm fails -> show error
-- Concepts: async + props typing
-
-6) **Generic Table<T>** — [Answer](typescript-interview-answers.md#q12-06)
-- Problem: table component takes `rows:T[]` and `columns: Array<{key: keyof T; label:string}>`.
-- Example I/O: renders any row type
-- Edge cases: empty list shows empty state
-- Concepts: generics + keyof
-
-7) **Pagination component** — [Answer](typescript-interview-answers.md#q12-07)
-- Problem: `page:number`, `pageSize:number`, `total:number`, `onPageChange(p)` typed.
-- Example I/O: next/prev
-- Edge cases: last page
-- Concepts: typed events
-
-8) **Debounced Search Bar** — [Answer](typescript-interview-answers.md#q12-08)
-- Problem: search input triggers async search after 300ms idle.
-- Example I/O: rapid typing -> 1 request
-- Edge cases: cancel stale responses
-- Concepts: async + state
-
-9) **Dropdown union options** — [Answer](typescript-interview-answers.md#q12-09)
-- Problem: `type Sort="price_asc"|"price_desc"|"rating"`; dropdown selects sort.
-- Example I/O: list sorted
-- Edge cases: none
-- Concepts: unions
-
-10) **Badge variants map** — [Answer](typescript-interview-answers.md#q12-10)
-- Problem: `type Badge="new"|"sale"|"hot"`; map to class names via Record.
-- Example I/O: badge displays
-- Edge cases: none
-- Concepts: Record
-
-11) **Confirm dialog returns Promise<boolean>** — [Answer](typescript-interview-answers.md#q12-11)
-- Problem: `confirm("Delete?")` returns Promise<boolean> using modal.
-- Example I/O: resolve true/false
-- Edge cases: multiple confirms queued
-- Concepts: Promise patterns
-
-12) **Stepper for workflow** — [Answer](typescript-interview-answers.md#q12-12)
-- Problem: stepper UI for statuses union; highlight current.
-- Example I/O: current step shown
-- Edge cases: unknown status not allowed
-- Concepts: unions + mapping
-
-13) **Tabs typed key union** — [Answer](typescript-interview-answers.md#q12-13)
-- Problem: `type TabKey="overview"|"details"|"settings"`; tab state typed.
-- Example I/O: switch tab
-- Edge cases: none
-- Concepts: unions
-
-14) **Empty State component** — [Answer](typescript-interview-answers.md#q12-14)
-- Problem: show empty state with typed props `{title; description?; actionLabel?; onAction?}`.
-- Example I/O: optional action
-- Edge cases: no action
-- Concepts: optional props
-
-15) **Error UI state union** — [Answer](typescript-interview-answers.md#q12-15)
-- Problem: `UIState = {kind:"loading"}|{kind:"ready";data:T}|{kind:"error";message:string}`.
-- Example I/O: render each
-- Edge cases: exhaustive check
-- Concepts: discriminated union
-
-16) **File Upload UI state** — [Answer](typescript-interview-answers.md#q12-16)
-- Problem: states: idle/uploading/success/error; show progress number.
-- Example I/O: uploading 40%
-- Edge cases: retry
-- Concepts: unions + async
-
-17) **Progress bar for async job** — [Answer](typescript-interview-answers.md#q12-17)
-- Problem: simulate job that updates progress 0..100.
-- Example I/O: bar moves
-- Edge cases: cancel
-- Concepts: async loops
-
-18) **Sidebar menu typed routes** — [Answer](typescript-interview-answers.md#q12-18)
-- Problem: `const routes = [{key:"home", path:"/"}...] as const` derive type and render.
-- Example I/O: select active
-- Edge cases: none
-- Concepts: as const, derived types
-
-19) **Form validation error map** — [Answer](typescript-interview-answers.md#q12-19)
-- Problem: `type Field="email"|"password"`; error map `Partial<Record<Field,string>>`.
-- Example I/O: show field errors
-- Edge cases: none
-- Concepts: Partial + Record
-
-20) **Theme switcher union** — [Answer](typescript-interview-answers.md#q12-20)
-- Problem: `type Theme="light"|"dark"`; toggle UI and persist to localStorage with parser.
-- Example I/O: reload retains theme
-- Edge cases: corrupted storage
-- Concepts: unions + parsing
-
----
-End of file.
+```ts id="q11_01"
+canClose("open");        // false
+canClose("resolved");    // true
 ```
- 
+
+### Concepts Being Tested  
+- unions
+
+### Deliverables  
+- `Status` + `canClose()`
+
+---
+
+## 2) Video pipeline statuses — Interview Assignment
+
+### Objective  
+`"uploaded" | "transcoding" | "published" | "failed"` → label function লিখো।
+
+### Requirements  
+- `failed -> "Failed"`  
+- exhaustive switch + `assertNever`
+
+### Example (Expected Behavior)
+
+```ts id="q11_02"
+toVideoLabel("failed"); // "Failed"
+```
+
+### Concepts Being Tested  
+- switch exhaustiveness
+
+### Deliverables  
+- `VideoStatus` + label function
+
+---
+
+## 3) Exhaustive handler — Interview Assignment
+
+### Objective  
+All statuses handle করতে হবে; `default` এ `assertNever(x)`।
+
+### Requirements  
+- new status add করলে compile error trigger হবে (demo comment)
+
+### Example (Expected Behavior)
+
+```ts id="q11_03"
+handleStatus(status); // compile-safe
+```
+
+### Concepts Being Tested  
+- never + exhaustive checks
+
+### Deliverables  
+- `assertNever` + handler
+
+---
+
+## 4) Filter open tickets — Interview Assignment
+
+### Objective  
+Tickets list থেকে শুধু `"open"` status filter করো।
+
+### Requirements  
+- return new array
+
+### Example (Expected Behavior)
+
+```ts id="q11_04"
+filterOpen([{status:"open"},{status:"resolved"}]); // only open
+```
+
+### Concepts Being Tested  
+- filter + unions
+
+### Deliverables  
+- `Ticket` type + `filterOpen()`
+
+---
+
+## 5) Transition with actions — Interview Assignment
+
+### Objective  
+Action union: `"start"|"resolve"|"reopen"`; state transition rules enforce করো।
+
+### Suggested Rules  
+- open + start → in_progress  
+- in_progress + resolve → resolved  
+- resolved + reopen → open  
+- other combos invalid
+
+### Example (Expected Behavior)
+
+```ts id="q11_05"
+transition("open", "start"); // "in_progress"
+transition("resolved", "start"); // error/result
+```
+
+### Concepts Being Tested  
+- state machine + unions
+
+### Deliverables  
+- `Status`, `Action`, `transition()`
+
+---
+
+## 6) Resolved requires note — Interview Assignment
+
+### Objective  
+Resolved ticket এ `resolutionNote` must. Type-level বা runtime—যেকোনো একভাবে enforce করো।
+
+### Requirements  
+- note empty string invalid
+
+### Example (Expected Behavior)
+
+```ts id="q11_06"
+const t: Ticket = { status:"resolved", resolutionNote:"Fixed" }; // ✅
+const x: Ticket = { status:"resolved" }; // ❌ (type-level) OR runtime reject
+```
+
+### Concepts Being Tested  
+- discriminated union payloads
+
+### Deliverables  
+- ticket model + validation
+
+---
+
+## 7) Process Result union — Interview Assignment
+
+### Objective  
+Workflow step returns `Result<T,E>`; error হলে bubble করে pipeline stop করো।
+
+### Requirements  
+- support single error or `errors: string[]` (choose + document)
+
+### Example (Expected Behavior)
+
+```ts id="q11_07"
+runSteps(); // stops on first err
+```
+
+### Concepts Being Tested  
+- Result<T,E> flow
+
+### Deliverables  
+- `Result` type + small pipeline
+
+---
+
+## 8) Typed actions drive transitions — Interview Assignment
+
+### Objective  
+Actions payload সহ model করো:  
+`{ type:"assign"; agentId:string }`, `{ type:"resolve"; note:string }` etc.
+
+### Requirements  
+- assign করলে `assigneeId` set হবে  
+- resolved ticket এ assign invalid
+
+### Example (Expected Behavior)
+
+```ts id="q11_08"
+reduce(ticket, { type:"assign", agentId:"a1" }); // assignee set
+```
+
+### Concepts Being Tested  
+- action unions + typed payloads
+
+### Deliverables  
+- action union + reducer/transition
+
+---
+
+## 9) Guard invalid transition — Interview Assignment
+
+### Objective  
+Invalid transition হলে throw না করে error object return করো।
+
+### Requirements  
+- `{ ok:false, error:"InvalidTransition" }` style
+
+### Example (Expected Behavior)
+
+```ts id="q11_09"
+tryTransition("resolved", "start"); // {ok:false,...}
+```
+
+### Concepts Being Tested  
+- result errors
+
+### Deliverables  
+- `tryTransition()` + error type
+
+---
+
+## 10) Timeline event log — Interview Assignment
+
+### Objective  
+Every transition এ timeline event append করো।
+
+### Requirements  
+- events include `type`, `at` (timestamp), `from`, `to`
+
+### Example (Expected Behavior)
+
+```ts id="q11_10"
+ticket.timeline.length++; // on each transition
+```
+
+### Edge Case  
+- monotonic time: `Date.now()` sufficient (note)
+
+### Concepts Being Tested  
+- event logging
+
+### Deliverables  
+- event model + update logic
+
+---
+
+## 11) Retry failed step — Interview Assignment
+
+### Objective  
+Pipeline state: `failed -> retry -> transcoding` with max retries 2.
+
+### Requirements  
+- after 2 retries, stay failed  
+- success হলে retryCounter reset
+
+### Example (Expected Behavior)
+
+```ts id="q11_11"
+retry(failedState); // may move to transcoding until max
+```
+
+### Concepts Being Tested  
+- counters + state rules
+
+### Deliverables  
+- state model + retry logic
+
+---
+
+## 12) Must assign before in_progress — Interview Assignment
+
+### Objective  
+Ticket assigned না থাকলে `"start"` action invalid.
+
+### Requirements  
+- open unassigned + start -> error/result  
+- optional: auto-assign (if you choose, document)
+
+### Example (Expected Behavior)
+
+```ts id="q11_12"
+startTicket({status:"open", assigneeId: undefined}); // error/result
+```
+
+### Concepts Being Tested  
+- invariants
+
+### Deliverables  
+- rule enforced in transition/reducer
+
+---
+
+## 13) SLA overdue flag — Interview Assignment
+
+### Objective  
+Open থাকা সময় N hours ছাড়ালে `overdue=true` compute করো।
+
+### Requirements  
+- use ms math (`Date.now()` - createdAtMs)  
+- ignore timezone (ms-based)
+
+### Example (Expected Behavior)
+
+```ts id="q11_13"
+isOverdue(ticket, 24); // boolean
+```
+
+### Concepts Being Tested  
+- time logic
+
+### Deliverables  
+- `isOverdue()` + example
+
+---
+
+## 14) Batch process summary — Interview Assignment
+
+### Objective  
+Tickets count by status → `Record<Status, number>`.
+
+### Requirements  
+- empty list -> zeros for all statuses
+
+### Example (Expected Behavior)
+
+```ts id="q11_14"
+summarize([]); // {open:0,in_progress:0,resolved:0}
+```
+
+### Concepts Being Tested  
+- Record + initialization
+
+### Deliverables  
+- `summarizeByStatus()`
+
+---
+
+## 15) Typed transition map (advanced) — Interview Assignment
+
+### Objective  
+`const allowed: Record<Status, Status[]>` define করো এবং membership check করো।
+
+### Example (Expected Behavior)
+
+```ts id="q11_15"
+allowed.open.includes("in_progress"); // true
+```
+
+### Concepts Being Tested  
+- mapping + validation
+
+### Deliverables  
+- `allowed` map + `canMove(from,to)`
+
+---
+
+## 16) Reducer pattern — Interview Assignment
+
+### Objective  
+`(state, action) => newState` reducer বানাও workflow এর জন্য।
+
+### Requirements  
+- unknown action -> same state  
+- no mutation
+
+### Example (Expected Behavior)
+
+```ts id="q11_16"
+reduce(state, {type:"start"}); // new state
+```
+
+### Concepts Being Tested  
+- reducer + unions
+
+### Deliverables  
+- reducer + action union
+
+---
+
+## 17) Side-effect event — Interview Assignment
+
+### Objective  
+Ticket resolved হলে side-effect event emit করো: `notification.send`.
+
+### Requirements  
+- return `{ state, events }` pattern (recommended)  
+- payload includes ticketId + message
+
+### Example (Expected Behavior)
+
+```ts id="q11_17"
+const { events } = reduce(...resolve...); // includes notification.send
+```
+
+### Concepts Being Tested  
+- events + side-effect modeling
+
+### Deliverables  
+- event type + emission logic
+
+---
+
+## 18) Async workflow simulation — Interview Assignment
+
+### Objective  
+`await delay()` দিয়ে steps simulate করো; each step শেষে state update + log print।
+
+### Requirements  
+- failure at step 2 scenario handle
+
+### Example (Expected Behavior)
+
+```ts id="q11_18"
+await runPipeline(); // prints progress logs
+```
+
+### Concepts Being Tested  
+- async state machine
+
+### Deliverables  
+- `delay()` + `runPipeline()` demo
+
+---
+
+## 19) Result-based async pipeline — Interview Assignment
+
+### Objective  
+Async steps return `Result`; pipeline stops on first error.
+
+### Requirements  
+- `await step()` returns ok/err  
+- err -> early exit
+
+### Example (Expected Behavior)
+
+```ts id="q11_19"
+await run(); // ok(final) or err(firstFailure)
+```
+
+### Concepts Being Tested  
+- functional error handling in async
+
+### Deliverables  
+- `Result` + 2–3 steps pipeline
+
+---
+
+## 20) In-code metrics counters — Interview Assignment
+
+### Objective  
+Transition counters maintain করো:  
+`metrics["open->in_progress"]++`
+
+### Requirements  
+- typed transition key union OR runtime-safe string keys (choose)  
+- unknown transitions handling define
+
+### Example (Expected Behavior)
+
+```ts id="q11_20"
+metrics["open->in_progress"] += 1;
+```
+
+### Concepts Being Tested  
+- observability basics
+
+### Deliverables  
+- metrics map + update points
+
+---  
+ ## 12) Tailwind UI Snippets (Non-HMS) — Interview Assignments (Top 20)
+
+Rule: Use React/Angular/HTML as you like, but keep **state typed in TypeScript**. Tailwind only.
+
+---
+
+## 1) Product Card — Interview Assignment
+
+### Objective
+
+Product card UI বানাও।
+
+### Requirements
+
+* Props type: `{ readonly id: string; name: string; price: number; discount?: number; tags?: string[] }`
+* discount missing হলে normal price দেখাবে
+* discount=0 হলে discount apply হবে না (treat as no discount)
+
+### Example (Expected Behavior)
+
+```ts id="q12_01"
+<ProductCard id="p1" name="Mouse" price={999} />
+<ProductCard id="p2" name="Keyboard" price={1999} discount={10} tags={["hot"]} />
+```
+
+### Concepts Being Tested
+
+* readonly + optional props
+* rendering conditions
+
+### Deliverables
+
+* UI component + typed props + Tailwind classes
+
+---
+
+## 2) Login Form State — Interview Assignment
+
+### Objective
+
+Login form UI বানাও।
+
+### Requirements
+
+* State type: `{ email: string; password: string; remember: boolean }`
+* submit disabled if invalid (email empty/invalid OR password < 6)
+* trim email before validation
+
+### Example (Expected Behavior)
+
+```ts id="q12_02"
+state.email = " a@b.com " -> validate as "a@b.com"
+```
+
+### Concepts Being Tested
+
+* typed form state
+* validation rules
+
+### Deliverables
+
+* form UI + typed state + disable logic
+
+---
+
+## 3) Loading Skeleton — Interview Assignment
+
+### Objective
+
+`isLoading: boolean` toggled skeleton UI।
+
+### Requirements
+
+* loading হলে skeleton, else content
+* skeleton uses Tailwind animate-pulse blocks
+
+### Example (Expected Behavior)
+
+```ts id="q12_03"
+{isLoading ? <Skeleton/> : <Content/>}
+```
+
+### Concepts Being Tested
+
+* UI state toggle
+
+### Deliverables
+
+* skeleton component + demo container
+
+---
+
+## 4) Toast variants union — Interview Assignment
+
+### Objective
+
+Toast component বানাও with union variants.
+
+### Requirements
+
+* `type ToastType = "success" | "error" | "info"`
+* `Record<ToastType, string>` দিয়ে class map typed
+* show toast on button click
+
+### Example (Expected Behavior)
+
+```ts id="q12_04"
+showToast("success", "Saved!");
+```
+
+### Concepts Being Tested
+
+* unions + Record mapping
+
+### Deliverables
+
+* toast UI + typed variant map
+
+---
+
+## 5) Modal component typed callbacks — Interview Assignment
+
+### Objective
+
+Modal component with typed async confirm flow।
+
+### Requirements
+
+Props:
+
+* `{ open: boolean; onClose: () => void; onConfirm: () => Promise<void> }`
+* confirm click করলে loading state
+* confirm fails -> show error text
+
+### Example (Expected Behavior)
+
+```ts id="q12_05"
+<ConfirmModal open={open} onClose={...} onConfirm={async()=>{...}} />
+```
+
+### Concepts Being Tested
+
+* async + props typing + UI state
+
+### Deliverables
+
+* modal UI + loading/error handling
+
+---
+
+## 6) Generic Table<T> — Interview Assignment
+
+### Objective
+
+Reusable generic table বানাও।
+
+### Requirements
+
+* Props: `rows: T[]`
+* `columns: Array<{ key: keyof T; label: string }>`
+* empty list হলে empty state message
+
+### Example (Expected Behavior)
+
+```ts id="q12_06"
+<Table rows={users} columns={[{key:"name",label:"Name"}]} />
+```
+
+### Concepts Being Tested
+
+* generics + keyof
+
+### Deliverables
+
+* generic table component
+
+---
+
+## 7) Pagination component — Interview Assignment
+
+### Objective
+
+Pagination UI with typed events।
+
+### Requirements
+
+* props: `{ page: number; pageSize: number; total: number; onPageChange: (p: number) => void }`
+* next/prev disable at boundaries
+
+### Example (Expected Behavior)
+
+```ts id="q12_07"
+onPageChange(page + 1);
+```
+
+### Concepts Being Tested
+
+* typed callbacks + boundary logic
+
+### Deliverables
+
+* pagination UI
+
+---
+
+## 8) Debounced Search Bar — Interview Assignment
+
+### Objective
+
+Search input 300ms idle পরে async search triggers.
+
+### Requirements
+
+* state typed
+* cancel stale responses (simple version ok: requestId compare)
+* show loading + results list
+
+### Example (Expected Behavior)
+
+```ts id="q12_08"
+type SearchState = { query: string; isLoading: boolean; results: string[]; error?: string }
+```
+
+### Concepts Being Tested
+
+* async + stale response handling
+
+### Deliverables
+
+* search bar UI + debounce logic
+
+---
+
+## 9) Dropdown union options — Interview Assignment
+
+### Objective
+
+Sort dropdown with union type।
+
+### Requirements
+
+* `type Sort = "price_asc" | "price_desc" | "rating"`
+* selecting sort reorders list
+* invalid sort should not compile
+
+### Example (Expected Behavior)
+
+```ts id="q12_09"
+setSort("price_asc"); // ✅
+setSort("x");         // ❌
+```
+
+### Concepts Being Tested
+
+* unions + typed state
+
+### Deliverables
+
+* dropdown UI + sorting
+
+---
+
+## 10) Badge variants map — Interview Assignment
+
+### Objective
+
+Badge component with variant union + class map.
+
+### Requirements
+
+* `type Badge = "new" | "sale" | "hot"`
+* `Record<Badge, string>` for classes
+
+### Example (Expected Behavior)
+
+```ts id="q12_10"
+<BadgeChip kind="sale" />
+```
+
+### Concepts Being Tested
+
+* Record + unions
+
+### Deliverables
+
+* badge component
+
+---
+
+## 11) Confirm dialog returns `Promise<boolean>` — Interview Assignment
+
+### Objective
+
+`confirm(message)` returns `Promise<boolean>` using modal.
+
+### Requirements
+
+* resolve true/false on button click
+* handle multiple confirms queued (basic approach ok: reject if already open OR queue array)
+
+### Example (Expected Behavior)
+
+```ts id="q12_11"
+const ok = await confirm("Delete?");
+```
+
+### Concepts Being Tested
+
+* Promise patterns + UI orchestration
+
+### Deliverables
+
+* confirm utility + modal UI
+
+---
+
+## 12) Stepper for workflow — Interview Assignment
+
+### Objective
+
+Stepper UI for status union; current step highlight.
+
+### Requirements
+
+* `type Step = "draft" | "review" | "published"`
+* current step typed and must be valid
+* render steps horizontally
+
+### Example (Expected Behavior)
+
+```ts id="q12_12"
+<Stepper current="review" />
+```
+
+### Concepts Being Tested
+
+* unions + mapping to UI
+
+### Deliverables
+
+* stepper component
+
+---
+
+## 13) Tabs typed key union — Interview Assignment
+
+### Objective
+
+Tabs UI with typed tab keys.
+
+### Requirements
+
+* `type TabKey = "overview" | "details" | "settings"`
+* active tab state typed
+* keyboard accessible (basic: buttons)
+
+### Example (Expected Behavior)
+
+```ts id="q12_13"
+setActive("details");
+```
+
+### Concepts Being Tested
+
+* union keys + state typing
+
+### Deliverables
+
+* tabs component
+
+---
+
+## 14) Empty State component — Interview Assignment
+
+### Objective
+
+Reusable empty state component with optional action.
+
+### Requirements
+
+Props: `{ title: string; description?: string; actionLabel?: string; onAction?: () => void }`
+
+* if no action props, button not shown
+
+### Example (Expected Behavior)
+
+```ts id="q12_14"
+<EmptyState title="No items" actionLabel="Add" onAction={...} />
+```
+
+### Concepts Being Tested
+
+* optional props rendering
+
+### Deliverables
+
+* component + demo usage
+
+---
+
+## 15) Error UI state union — Interview Assignment
+
+### Objective
+
+Discriminated union based UI renderer।
+
+### Requirements
+
+* `UIState<T> = {kind:"loading"} | {kind:"ready";data:T} | {kind:"error";message:string}`
+* render with exhaustive switch
+
+### Example (Expected Behavior)
+
+```ts id="q12_15"
+renderState({kind:"error", message:"Oops"})
+```
+
+### Concepts Being Tested
+
+* discriminated unions + exhaustive checks
+
+### Deliverables
+
+* UIState type + renderer component
+
+---
+
+## 16) File Upload UI state — Interview Assignment
+
+### Objective
+
+Upload UI with state machine + progress।
+
+### Requirements
+
+* states: `idle | uploading | success | error`
+* show progress number (0..100)
+* retry button on error
+
+### Example (Expected Behavior)
+
+```ts id="q12_16"
+type UploadState =
+  | { kind: "idle" }
+  | { kind: "uploading"; progress: number }
+  | { kind: "success"; url: string }
+  | { kind: "error"; message: string };
+```
+
+### Concepts Being Tested
+
+* unions + async UI state
+
+### Deliverables
+
+* UI + simulated upload
+
+---
+
+## 17) Progress bar for async job — Interview Assignment
+
+### Objective
+
+Simulated async job progress bar (0..100).
+
+### Requirements
+
+* progress update via interval/await loop
+* cancel support (optional)
+
+### Example (Expected Behavior)
+
+```ts id="q12_17"
+startJob(); // progress increases
+```
+
+### Concepts Being Tested
+
+* async loops + state updates
+
+### Deliverables
+
+* progress bar component + job simulation
+
+---
+
+## 18) Sidebar menu typed routes — Interview Assignment
+
+### Objective
+
+Typed routes derived from `as const` and render sidebar.
+
+### Requirements
+
+* `const routes = [...] as const`
+* derive `RouteKey` union from routes
+* active route highlight
+
+### Example (Expected Behavior)
+
+```ts id="q12_18"
+type RouteKey = typeof routes[number]["key"];
+```
+
+### Concepts Being Tested
+
+* `as const` + derived types
+
+### Deliverables
+
+* sidebar UI + typed selection state
+
+---
+
+## 19) Form validation error map — Interview Assignment
+
+### Objective
+
+Typed field errors map show under inputs.
+
+### Requirements
+
+* `type Field = "email" | "password"`
+* errors type: `Partial<Record<Field, string>>`
+* show only existing errors
+
+### Example (Expected Behavior)
+
+```ts id="q12_19"
+errors.email = "Invalid email";
+```
+
+### Concepts Being Tested
+
+* Partial + Record + typed form validation
+
+### Deliverables
+
+* small form + error rendering
+
+---
+
+## 20) Theme switcher union — Interview Assignment
+
+### Objective
+
+Theme toggle UI and persist to localStorage with parser.
+
+### Requirements
+
+* `type Theme = "light" | "dark"`
+* load theme from localStorage safely (corrupted -> default)
+* toggle updates UI classes
+
+### Example (Expected Behavior)
+
+```ts id="q12_20"
+setTheme("dark"); // persisted
+```
+
+### Concepts Being Tested
+
+* unions + parsing + persistence
+
+### Deliverables
+
+* theme toggle component + `parseTheme()` + localStorage integration
+
+---
