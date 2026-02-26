@@ -730,632 +730,2707 @@ callApi("/login", { username: "a" });                // ❌ error (missing passw
 - A few examples showing correct and incorrect usage
 
 ---
-
-## 02) union and intersection
-Top 20.
-
-1) **Payment Union** — [Answer](typescript-interview-answers.md#q02-01)
-- Problem: `type Payment = "card"|"upi"|"cod"`; `isOnline(p)` true for card/upi.
-- Example I/O: `"cod" -> false`
-- Edge cases: none
-- Concepts: unions
-
-2) **LoginResult Union Objects** — [Answer](typescript-interview-answers.md#q02-02)
-- Problem: `{ok:true;token}` | `{ok:false;message}`; `printLogin()`.
-- Example I/O: prints token/message
-- Edge cases: none
-- Concepts: narrowing
-
-3) **Intersection Profile** — [Answer](typescript-interview-answers.md#q02-03)
-- Problem: `BasicUser & Address` -> `UserProfile`.
-- Example I/O: combine two objects
-- Edge cases: key overlap
-- Concepts: intersections
-
-4) **Narrowing with `in`** — [Answer](typescript-interview-answers.md#q02-04)
-- Problem: union where only one has `token`; use `if ("token" in x)`.
-- Example I/O: safe access
-- Edge cases: property exists but undefined (explain)
-- Concepts: `in` guard
-
-5) **typeof Narrowing** — [Answer](typescript-interview-answers.md#q02-05)
-- Problem: param `string | number` -> if number double else uppercase.
-- Example I/O: `"ab"->"AB"`, `2->4`
-- Edge cases: empty string
-- Concepts: typeof guard
-
-6) **Filter Union Array Safely** — [Answer](typescript-interview-answers.md#q02-06)
-- Problem: `(number | string)[]` -> `number[]` using predicate.
-- Example I/O: `[1,"a",2] -> [1,2]`
-- Edge cases: NaN handling optional
-- Concepts: type predicate
-
-7) **Free vs Paid Video** — [Answer](typescript-interview-answers.md#q02-07)
-- Problem: `{kind:"free"}` | `{kind:"paid";price:number}`; `getPriceOrZero()`.
-- Example I/O: free -> 0
-- Edge cases: negative price invalid (validate)
-- Concepts: discriminant
-
-8) **Event Union Handler** — [Answer](typescript-interview-answers.md#q02-08)
-- Problem: `page_view/add_to_cart/purchase`; return log string.
-- Example I/O: purchase -> "Purchased orderId=..."
-- Edge cases: missing fields should not compile
-- Concepts: discriminated union
-
-9) **Error Union to Message** — [Answer](typescript-interview-answers.md#q02-09)
-- Problem: `NetworkError | ValidationError | AuthError`; `toUserMessage(e)`.
-- Example I/O: network -> "Try again later"
-- Edge cases: unknown default
-- Concepts: unions, switch
-
-10) **Exhaustive Check with never** — [Answer](typescript-interview-answers.md#q02-10)
-- Problem: in switch default: `assertNever(x)`.
-- Example I/O: compile-time guard
-- Edge cases: none
-- Concepts: never
-
-11) **Intersection of Capabilities** — [Answer](typescript-interview-answers.md#q02-11)
-- Problem: `Trackable` + `Serializable`; create object that satisfies both.
-- Example I/O: has `track()` and `toJSON()`
-- Edge cases: method name conflicts
-- Concepts: intersections
-
-12) **Union Parameter vs Overload** — [Answer](typescript-interview-answers.md#q02-12)
-- Problem: `formatDate(input: string | Date)`; parse string to Date safely.
-- Example I/O: "2026-01-01" -> "01 Jan 2026"
-- Edge cases: invalid string -> error/result
-- Concepts: union params
-
-13) **Type Predicate Guard** — [Answer](typescript-interview-answers.md#q02-13)
-- Problem: `function isPaidVideo(v): v is {kind:"paid";price:number}`.
-- Example I/O: used in filter
-- Edge cases: v is unknown
-- Concepts: type predicate
-
-14) **Compose Search Filters (intersection)** — [Answer](typescript-interview-answers.md#q02-14)
-- Problem: `Filter = ByPrice & ByCategory & ByRating`; apply all filters to products.
-- Example I/O: list -> filtered list
-- Edge cases: missing filter values
-- Concepts: intersections + optional
-
-15) **UnionToIntersection Utility** — [Answer](typescript-interview-answers.md#q02-15)
-- Problem: Implement `UnionToIntersection<U>` type utility.
-- Example I/O: `"a"| "b"` -> `"a"&"b"` concept test (type-level)
-- Edge cases: distribute conditional
-- Concepts: conditional types
-
-16) **Simplify Intersection Output** — [Answer](typescript-interview-answers.md#q02-16)
-- Problem: `Simplify<T>` to flatten display in IDE.
-- Example I/O: `Simplify<A & B>`
-- Edge cases: none
-- Concepts: mapped types
-
-17) **Order State Machine (union + transitions)** — [Answer](typescript-interview-answers.md#q02-17)
-- Problem: `Status = "created"|"paid"|"packed"|"shipped"|"delivered"|"cancelled"`.
-  `transition(status, action)` prevents invalid transitions.
-- Example I/O: created + pay -> paid, delivered + cancel -> error
-- Edge cases: cancel from some states only
-- Concepts: unions, exhaustive checks
-
-18) **ParseResult Union** — [Answer](typescript-interview-answers.md#q02-18)
-- Problem: parse number from string returning `Result<number,string>`.
-- Example I/O: "12.5" -> ok(12.5), "x" -> err("Invalid number")
-- Edge cases: whitespace, NaN
-- Concepts: result union
-
-19) **Handler Map from Union** — [Answer](typescript-interview-answers.md#q02-19)
-- Problem: `type Event = ...`; create `handlers` map typed so each handler gets correct payload type.
-- Example I/O: wrong handler param -> compile error
-- Edge cases: missing handler key
-- Concepts: mapped types over union
-
-20) **Next Step Depends on Previous (advanced)** — [Answer](typescript-interview-answers.md#q02-20)
-- Problem: onboarding steps; only allow calling `verifyEmail()` after `signup()`.
-- Example I/O: wrong order should not compile (type-level)
-- Edge cases: simplify if too hard
-- Concepts: generics, state typing
+## 02) Union and Intersection — Interview Assignments (Top 20)
 
 ---
 
-## 03) optional and readonly
-Top 20.
+## 1) Payment Union — Interview Assignment
 
-1) **Optional Profile Display** — [Answer](typescript-interview-answers.md#q03-01)
-- Problem: `Profile { name; bio?; avatarUrl? }`; `renderProfile(p)` uses fallback texts.
-- Example I/O: missing bio -> "No bio"
-- Edge cases: empty string vs undefined
-- Concepts: optional, nullish
+### Objective
 
-2) **Readonly SKU Update** — [Answer](typescript-interview-answers.md#q03-02)
-- Problem: `Product { readonly sku; name; price }`; `updateProduct(p, patch)` returns new product without changing sku.
-- Example I/O: attempt patch sku should fail
-- Edge cases: patch includes sku
-- Concepts: readonly, immutability
+`type Payment = "card" | "upi" | "cod"` বানাও এবং `isOnline(p)` লিখে `card/upi` হলে `true`, `cod` হলে `false` রিটার্ন করো।
 
-3) **Optional Discount Apply** — [Answer](typescript-interview-answers.md#q03-03)
-- Problem: `applyDiscount(price, discount?)` uses `discount ?? 0`.
-- Example I/O: (100, undefined)->100
-- Edge cases: discount=0 should keep 100
-- Concepts: `??` vs `||`
+### Requirements
 
-4) **Readonly Array Add** — [Answer](typescript-interview-answers.md#q03-04)
-- Problem: given `readonly number[]`, return new array with extra value.
-- Example I/O: [1,2]+3 -> [1,2,3]
-- Edge cases: none
-- Concepts: readonly arrays
+* Only union literals allowed (`"card"|"upi"|"cod"`).
+* `isOnline(p: Payment): boolean`
 
-5) **Optional Chaining Nested** — [Answer](typescript-interview-answers.md#q03-05)
-- Problem: `user.address?.city ?? "Unknown"` utility function.
-- Example I/O: no address -> "Unknown"
-- Edge cases: city empty string
-- Concepts: `?.`, `??`
+### Example (Expected Behavior)
 
-6) **Partial Update Merge** — [Answer](typescript-interview-answers.md#q03-06)
-- Problem: `merge<T>(base:T, patch:Partial<T>):T` without mutation.
-- Example I/O: update name only
-- Edge cases: nested objects shallow merge only (mention)
-- Concepts: Partial, spread
+```ts
+isOnline("cod");  // false
+isOnline("upi");  // true
+```
 
-7) **Optional Param Currency** — [Answer](typescript-interview-answers.md#q03-07)
-- Problem: `formatMoney(amount, currency?)` default "INR".
-- Example I/O: 100 -> "INR 100"
-- Edge cases: invalid currency string
-- Concepts: default params
+### Concepts Being Tested
 
-8) **Readonly vs Object.freeze Demo** — [Answer](typescript-interview-answers.md#q03-08)
-- Problem: show compile-time readonly vs runtime freeze difference with code + explanation.
-- Example I/O: freeze prevents runtime mutation
-- Edge cases: deep freeze not automatic
-- Concepts: runtime vs compile-time
+* Union types
 
-9) **Immutable Cart Qty Update** — [Answer](typescript-interview-answers.md#q03-09)
-- Problem: cart items array; update qty by sku immutably.
-- Example I/O: update -> new array
-- Edge cases: sku not found -> return same array
-- Concepts: immutability
+### Deliverables
 
-10) **DeepReadonly vs Readonly** — [Answer](typescript-interview-answers.md#q03-10)
-- Problem: demonstrate `Readonly<T>` does not deep lock nested; implement DeepReadonly.
-- Example I/O: nested mutation should fail with DeepReadonly
-- Edge cases: arrays
-- Concepts: mapped + conditional
-
-11) **exactOptionalPropertyTypes scenario** — [Answer](typescript-interview-answers.md#q03-11)
-- Problem: explain with code `{a?:string}` vs `{a:string|undefined}` behavior.
-- Example I/O: assignment differences
-- Edge cases: toolchain dependent
-- Concepts: TS config
-
-12) **Patch Unknown Key Reject (type-level)** — [Answer](typescript-interview-answers.md#q03-12)
-- Problem: `updateUser(u, patch)` should not allow keys outside User at compile time.
-- Example I/O: patch `{role:"x"}` error
-- Edge cases: generics inference
-- Concepts: keyof constraints
-
-13) **ReadonlyMap read** — [Answer](typescript-interview-answers.md#q03-13)
-- Problem: store rates in `ReadonlyMap<string, number>` and read rate for key with fallback.
-- Example I/O: missing -> 0
-- Edge cases: none
-- Concepts: readonly collections
-
-14) **mergeDefaults<T>** — [Answer](typescript-interview-answers.md#q03-14)
-- Problem: `mergeDefaults(defaults:T, overrides?:Partial<T>):T`.
-- Example I/O: overrides missing -> defaults
-- Edge cases: overrides undefined
-- Concepts: generics + optional
-
-15) **DeepPartial Utility** — [Answer](typescript-interview-answers.md#q03-15)
-- Problem: implement `DeepPartial<T>` for nested patch.
-- Example I/O: patch nested fields
-- Edge cases: arrays
-- Concepts: conditional types
-
-16) **Immutable Tree Update** — [Answer](typescript-interview-answers.md#q03-16)
-- Problem: update node label by id in nested tree without mutation.
-- Example I/O: returns new tree
-- Edge cases: id missing
-- Concepts: recursion, immutability
-
-17) **Readonly State Reducer** — [Answer](typescript-interview-answers.md#q03-17)
-- Problem: todo reducer with readonly state; return new state for add/toggle/remove.
-- Example I/O: action -> next state
-- Edge cases: unknown action -> same state
-- Concepts: union actions, immutability
-
-18) **Branded ID** — [Answer](typescript-interview-answers.md#q03-18)
-- Problem: `type UserId = string & { __brand:"UserId" }`; `makeUserId(s)` validation.
-- Example I/O: "" -> throw
-- Edge cases: trim
-- Concepts: branded types
-
-19) **Readonly constructor param** — [Answer](typescript-interview-answers.md#q03-19)
-- Problem: class with `readonly id` set in constructor param property.
-- Example I/O: cannot reassign
-- Edge cases: none
-- Concepts: parameter properties
-
-20) **Persistent List Update** — [Answer](typescript-interview-answers.md#q03-20)
-- Problem: given readonly list, remove item by id returning new list.
-- Example I/O: list size decreases
-- Edge cases: id not found -> same list
-- Concepts: immutability
+* `Payment` type + `isOnline()` + examples
 
 ---
 
-## 04) generics
-Top 20.
+## 2) LoginResult Union Objects — Interview Assignment
 
-1) **identity<T>** — [Answer](typescript-interview-answers.md#q04-01)
-- Problem: `identity<T>(x:T):T`
-- Example I/O: identity(5)->5
-- Edge cases: none
-- Concepts: generics basics
+### Objective
 
-2) **first<T>** — [Answer](typescript-interview-answers.md#q04-02)
-- Problem: return first element or undefined.
-- Example I/O: [] -> undefined
-- Edge cases: empty array
-- Concepts: `T | undefined`
+`LoginResult` union বানাও: `{ ok: true; token: string } | { ok: false; message: string }`
+এবং `printLogin(result)` লিখে token/message print করো।
 
-3) **wrap<T>** — [Answer](typescript-interview-answers.md#q04-03)
-- Problem: return `{ value:T }`
-- Example I/O: wrap("a") -> {value:"a"}
-- Edge cases: none
-- Concepts: generics
+### Requirements
 
-4) **pair<T,U>** — [Answer](typescript-interview-answers.md#q04-04)
-- Problem: return tuple/object pair typed.
-- Example I/O: pair(1,"a") -> [1,"a"]
-- Edge cases: none
-- Concepts: multiple type params
+* Narrowing using `if (result.ok)`.
 
-5) **mapArray<T,R>** — [Answer](typescript-interview-answers.md#q04-05)
-- Problem: implement generic map.
-- Example I/O: [1,2] -> ["1","2"]
-- Edge cases: none
-- Concepts: higher-order functions
+### Example (Expected Behavior)
 
-6) **ApiResponse<T>** — [Answer](typescript-interview-answers.md#q04-06)
-- Problem: generic response model and `mapResponse<T,R>()`
-- Example I/O: ok(data) -> ok(mapped)
-- Edge cases: error pass-through
-- Concepts: generics + union
+```ts
+printLogin({ ok: true, token: "t123" });   // prints token
+printLogin({ ok: false, message: "bad" }); // prints message
+```
 
-7) **Box<T> class** — [Answer](typescript-interview-answers.md#q04-07)
-- Problem: class holds value with getter/setter typed.
-- Example I/O: set number only
-- Edge cases: validation in setter
-- Concepts: generics + class
+### Concepts Being Tested
 
-8) **Constraint `T extends {id:string}`** — [Answer](typescript-interview-answers.md#q04-08)
-- Problem: `indexById(list)` returns `Record<string,T>`
-- Example I/O: list -> map
-- Edge cases: duplicate id last wins
-- Concepts: constraints
+* Union narrowing via boolean discriminant
 
-9) **pluck<T,K extends keyof T>** — [Answer](typescript-interview-answers.md#q04-09)
-- Problem: return `obj[key]`
-- Example I/O: pluck(user,"name")->string
-- Edge cases: none
-- Concepts: keyof
+### Deliverables
 
-10) **sortByKey<T, K extends keyof T>** — [Answer](typescript-interview-answers.md#q04-10)
-- Problem: sort array by key (number/string only).
-- Example I/O: products sort by price
-- Edge cases: undefined values
-- Concepts: constraints
-
-11) **Generic default type** — [Answer](typescript-interview-answers.md#q04-11)
-- Problem: `type Result<T=string,E=Error> = ...`
-- Example I/O: Result without args defaults
-- Edge cases: none
-- Concepts: default generic params
-
-12) **parseJson<T>(s, guard)** — [Answer](typescript-interview-answers.md#q04-12)
-- Problem: parse JSON as unknown then guard to T.
-- Example I/O: invalid -> err
-- Edge cases: JSON parse error
-- Concepts: unknown + guard
-
-13) **freeze<T>(obj): Readonly<T>** — [Answer](typescript-interview-answers.md#q04-13)
-- Problem: return typed readonly, and demonstrate compile-time protection.
-- Example I/O: cannot assign
-- Edge cases: shallow
-- Concepts: Readonly
-
-14) **timeout<T>(promise, ms)** — [Answer](typescript-interview-answers.md#q04-14)
-- Problem: resolve or reject after ms.
-- Example I/O: long task -> timeout error
-- Edge cases: cleanup
-- Concepts: Promise generics
-
-15) **PromiseReturn<T>** — [Answer](typescript-interview-answers.md#q04-15)
-- Problem: `type PromiseReturn<T> = T extends Promise<infer X> ? X : T`
-- Example I/O: PromiseReturn<Promise<number>> = number
-- Edge cases: nested promises optional
-- Concepts: infer
-
-16) **FuncReturn<T>** — [Answer](typescript-interview-answers.md#q04-16)
-- Problem: return type extraction: `T extends (...a:any)=>infer R ? R : never`
-- Example I/O: Fn -> return type
-- Edge cases: non-function -> never
-- Concepts: infer
-
-17) **Typed Event Emitter** — [Answer](typescript-interview-answers.md#q04-17)
-- Problem: event map generic with `on` and `emit` typed.
-- Example I/O: emit("login",{userId:"u1"})
-- Edge cases: wrong payload errors
-- Concepts: mapped types + generics
-
-18) **Fluent Builder Accumulating Keys** — [Answer](typescript-interview-answers.md#q04-18)
-- Problem: builder sets keys and build returns object with those keys typed.
-- Example I/O: set("name","A").build() -> {name:string}
-- Edge cases: duplicate set overwrites
-- Concepts: advanced generics
-
-19) **Primitive Schema to Type** — [Answer](typescript-interview-answers.md#q04-19)
-- Problem: schema `{ kind:"string" }|{kind:"number"}` maps to TS types.
-- Example I/O: infer output type
-- Edge cases: arrays
-- Concepts: conditional types
-
-20) **decode<T>(unknown, guard)** — [Answer](typescript-interview-answers.md#q04-20)
-- Problem: safe decode pattern.
-- Example I/O: decode<User>(u,isUser)
-- Edge cases: guard false -> throw/result
-- Concepts: runtime validation
+* `LoginResult` + `printLogin()`
 
 ---
 
-## 05) enum vs string literal union
-Top 20.
+## 3) Intersection Profile — Interview Assignment
 
-1) **Status union** — [Answer](typescript-interview-answers.md#q05-01)
-- Problem: `type Status="draft"|"published"`; `canEdit(status)` true only for draft.
-- Example I/O: "published" -> false
-- Edge cases: none
-- Concepts: string unions
+### Objective
 
-2) **Same as enum** — [Answer](typescript-interview-answers.md#q05-02)
-- Problem: Implement `enum StatusEnum { Draft="draft", Published="published" }` and compare usage.
-- Example I/O: `StatusEnum.Draft`
-- Edge cases: runtime output explain
-- Concepts: enums
+`BasicUser & Address` intersection করে `UserProfile` বানাও।
 
-3) **Switch label** — [Answer](typescript-interview-answers.md#q05-03)
-- Problem: map status to label via switch.
-- Example I/O: draft -> "Draft"
-- Edge cases: exhaustive check
-- Concepts: switch + never
+### Requirements
 
-4) **Record label map** — [Answer](typescript-interview-answers.md#q05-04)
-- Problem: `Record<Status,string>` label map.
-- Example I/O: labelMap[status]
-- Edge cases: missing key compile error
-- Concepts: Record
+* `type UserProfile = BasicUser & Address`
 
-5) **Prevent invalid string** — [Answer](typescript-interview-answers.md#q05-05)
-- Problem: `"drafft"` assignment should fail.
-- Example I/O: compile error
-- Edge cases: external data parse required
-- Concepts: literal unions
+### Example (Expected Behavior)
 
-6) **const object + as const** — [Answer](typescript-interview-answers.md#q05-06)
-- Problem: `const STATUS = {...} as const` derive type.
-- Example I/O: `type Status = typeof STATUS[keyof typeof STATUS]`
-- Edge cases: none
-- Concepts: as const
+```ts
+const profile: UserProfile = { id: "u1", name: "A", city: "Kolkata", pin: "700001" };
+```
 
-7) **parseStatus(input: unknown)** — [Answer](typescript-interview-answers.md#q05-07)
-- Problem: validate external value into Status else throw/result.
-- Example I/O: "draft" -> ok
-- Edge cases: uppercase, whitespace
-- Concepts: validation
+### Edge Case
 
-8) **Exhaustive transitions** — [Answer](typescript-interview-answers.md#q05-08)
-- Problem: status transitions: draft->published only; enforce.
-- Example I/O: published->draft error
-- Edge cases: none
-- Concepts: state machine
+* Key overlap হলে কী হয় (type conflict) — demo দাও।
 
-9) **Enum compile footprint explanation** — [Answer](typescript-interview-answers.md#q05-09)
-- Problem: show numeric vs string enum output (brief).
-- Example I/O: explain
-- Edge cases: bundlers
-- Concepts: runtime JS output
+### Concepts Being Tested
 
-10) **Reverse mapping demo** — [Answer](typescript-interview-answers.md#q05-10)
-- Problem: numeric enum reverse mapping example.
-- Example I/O: Enum[0] -> "A"
-- Edge cases: none
-- Concepts: enums
+* Intersection types
 
-11) **Tree-shaking discussion (coding hint)** — [Answer](typescript-interview-answers.md#q05-11)
-- Problem: show why string unions often smaller than enums for libs.
-- Example I/O: explain
-- Edge cases: none
-- Concepts: bundling
+### Deliverables
 
-12) **Serialize/deserialize** — [Answer](typescript-interview-answers.md#q05-12)
-- Problem: store Status in localStorage as string; restore with parser.
-- Example I/O: read -> Status
-- Edge cases: corrupted storage
-- Concepts: parsing
-
-13) **Role permission map** — [Answer](typescript-interview-answers.md#q05-13)
-- Problem: `type Role="ADMIN"|"USER"|"GUEST"`; `Record<Role,string[]>`.
-- Example I/O: get permissions
-- Edge cases: none
-- Concepts: Record
-
-14) **Feature flag keys union** — [Answer](typescript-interview-answers.md#q05-14)
-- Problem: flags keys union; typed `isEnabled(flag)` function.
-- Example I/O: `isEnabled("newUI")`
-- Edge cases: unknown flag should error
-- Concepts: unions
-
-15) **Enum-like object pattern** — [Answer](typescript-interview-answers.md#q05-15)
-- Problem: create enum-like const object for PaymentMethod and derived type.
-- Example I/O: PaymentMethod.Card -> "card"
-- Edge cases: none
-- Concepts: as const
-
-16) **Strict parser with helpful error** — [Answer](typescript-interview-answers.md#q05-16)
-- Problem: error message includes allowed values list.
-- Example I/O: input "x" -> "Allowed: draft,published"
-- Edge cases: none
-- Concepts: runtime + types
-
-17) **Typed transition map** — [Answer](typescript-interview-answers.md#q05-17)
-- Problem: `const transitions: Record<Status, Status[]>` enforce allowed next states.
-- Example I/O: transitions["draft"] includes published
-- Edge cases: none
-- Concepts: Record
-
-18) **Template literal type events** — [Answer](typescript-interview-answers.md#q05-18)
-- Problem: `type EventName = \`user:${"created"|"deleted"}\``
-- Example I/O: "user:created" ok
-- Edge cases: none
-- Concepts: template literal types
-
-19) **i18n labels mapping** — [Answer](typescript-interview-answers.md#q05-19)
-- Problem: `Record<Status,{en:string;bn:string}>`
-- Example I/O: labels[status].bn
-- Edge cases: none
-- Concepts: mapping
-
-20) **Endpoint by status** — [Answer](typescript-interview-answers.md#q05-20)
-- Problem: `getEndpoint(status:Status)` returns string; exhaustive switch.
-- Example I/O: draft -> "/draft"
-- Edge cases: none
-- Concepts: switch exhaustive
+* `BasicUser`, `Address`, `UserProfile` + overlap example
 
 ---
 
-## 06) any unknown never
-Top 20.
+## 4) Narrowing with `in` — Interview Assignment
 
-1) **unknown to string** — [Answer](typescript-interview-answers.md#q06-01)
-- Problem: `normalizeName(x:unknown):string` string হলে trim else throw.
-- Example I/O: " A " -> "A"
-- Edge cases: empty after trim -> throw
-- Concepts: unknown narrowing
+### Objective
 
-2) **Replace any with unknown** — [Answer](typescript-interview-answers.md#q06-02)
-- Problem: given function param any; change to unknown and add safe checks.
-- Example I/O: show before/after
-- Edge cases: none
-- Concepts: safety
+একটা union type বানাও যেখানে শুধু একটাতে `token` আছে।
+`if ("token" in x)` দিয়ে safe access দেখাও।
 
-3) **safeJsonParse returns unknown** — [Answer](typescript-interview-answers.md#q06-03)
-- Problem: `safeJsonParse(s): unknown | null` parse fail -> null.
-- Example I/O: invalid JSON -> null
-- Edge cases: none
-- Concepts: unknown
+### Requirements
 
-4) **isNumberArray guard** — [Answer](typescript-interview-answers.md#q06-04)
-- Problem: `isNumberArray(u): u is number[]`.
-- Example I/O: [1,2] true
-- Edge cases: [1,"2"] false
-- Concepts: type predicate
+* `token` based narrowing using `in`.
 
-5) **fail(msg): never** — [Answer](typescript-interview-answers.md#q06-05)
-- Problem: function always throws.
-- Example I/O: throw Error
-- Edge cases: none
-- Concepts: never
+### Example (Expected Behavior)
 
-6) **assertNever helper** — [Answer](typescript-interview-answers.md#q06-06)
-- Problem: `assertNever(x:never):never` used in exhaustive switch.
-- Example I/O: compile-time guarantee
-- Edge cases: none
-- Concepts: exhaustive
+```ts
+if ("token" in x) {
+  x.token; // ✅ safe
+}
+```
 
-7) **catch error safely** — [Answer](typescript-interview-answers.md#q06-07)
-- Problem: `catch(e)` is unknown; print message if e is Error else stringify.
-- Example I/O: prints message
-- Edge cases: thrown string
-- Concepts: unknown in catch
+### Edge Case
 
-8) **validate User shape at runtime** — [Answer](typescript-interview-answers.md#q06-08)
-- Problem: `isUser(u:unknown): u is {id:string;name:string}`
-- Example I/O: valid -> true
-- Edge cases: missing keys
-- Concepts: runtime validation
+* `token?: string` হলে property “exists” but could be `undefined` — explain in comment.
 
-9) **decode API response unknown -> User** — [Answer](typescript-interview-answers.md#q06-09)
-- Problem: `decodeUser(u:unknown):User` using guard.
-- Example I/O: invalid -> throw
-- Edge cases: nested types optional
-- Concepts: decode pattern
+### Concepts Being Tested
 
-10) **Error union mapping** — [Answer](typescript-interview-answers.md#q06-10)
-- Problem: custom errors union; map to HTTP-like status codes.
-- Example I/O: AuthError -> 401
-- Edge cases: unknown -> 500
-- Concepts: unions
+* `in` type guard
 
-11) **Remove unsafe casting** — [Answer](typescript-interview-answers.md#q06-11)
-- Problem: code uses `as User`; replace with guards.
-- Example I/O: compile safe
-- Edge cases: none
-- Concepts: avoid `as`
+### Deliverables
 
-12) **Conditional returns never on invalid** — [Answer](typescript-interview-answers.md#q06-12)
-- Problem: `type NonString<T> = T extends string ? never : T`
-- Example I/O: NonString<string> -> never
-- Edge cases: union distribution
-- Concepts: conditional types
-
-13) **Parse query params unknown** — [Answer](typescript-interview-answers.md#q06-13)
-- Problem: `parseLimit(x:unknown):number` must be 1..100.
-- Example I/O: "10" -> 10
-- Edge cases: 0, 101 -> error
-- Concepts: validation
-
-14) **Narrow unknown event payload by topic** — [Answer](typescript-interview-answers.md#q06-14)
-- Problem: topic string determines payload guard.
-- Example I/O: "user.created" expects {id}
-- Edge cases: unknown topic -> error
-- Concepts: mapping
-
-15) **Mini validator combinators** — [Answer](typescript-interview-answers.md#q06-15)
-- Problem: implement `isString`, `isNumber`, `isObject`, `hasKey`.
-- Example I/O: compose to validate shapes
-- Edge cases: null is object in JS (handle)
-- Concepts: runtime checks
-
-16) **Result-based errors instead of throw** — [Answer](typescript-interview-answers.md#q06-16)
-- Problem: return `Result<T,E>` from parser instead of throwing.
-- Example I/O: ok/err
-- Edge cases: none
-- Concepts: result union
-
-17) **assertDefined** — [Answer](typescript-interview-answers.md#q06-17)
-- Problem: `assertDefined(x): asserts x is NonNullable<T>`
-- Example I/O: after assert, x not null/undefined
-- Edge cases: falsy values should pass if not null
-- Concepts: assertion functions
-
-18) **Safe deep get** — [Answer](typescript-interview-answers.md#q06-18)
-- Problem: `get(u:unknown, path:string[]): unknown` handle missing path safely.
-- Example I/O: missing -> undefined
-- Edge cases: arrays index strings
-- Concepts: unknown-safe utilities
-
-19) **Unknown payload registry typed** — [Answer](typescript-interview-answers.md#q06-19)
-- Problem: registry map `topic -> parser`; output type inferred.
-- Example I/O: parse("user.created", payload) returns UserCreatedEvent typed
-- Edge cases: topic not found
-- Concepts: generics + mapping
-
-20) **Never unreachable branch demonstration** — [Answer](typescript-interview-answers.md#q06-20)
-- Problem: in union switch, ensure default unreachable; show compile error if new union member added and not handled.
-- Example I/O: add new member -> compile fail
-- Edge cases: none
-- Concepts: never exhaustive
+* union type + function demonstrating `in` guard
 
 ---
+
+## 5) typeof Narrowing — Interview Assignment
+
+### Objective
+
+`string | number` param নাও।
+
+* number হলে double
+* string হলে uppercase
+
+### Example (Expected Behavior)
+
+```ts
+transform("ab"); // "AB"
+transform(2);    // 4
+```
+
+### Edge Case
+
+* empty string -> `""` stays `""`
+
+### Concepts Being Tested
+
+* `typeof` guard
+
+### Deliverables
+
+* `transform()` function
+
+---
+
+## 6) Filter Union Array Safely — Interview Assignment
+
+### Objective
+
+`(number | string)[]` থেকে শুধু `number[]` বের করো type-safe ভাবে (predicate/type guard দিয়ে)।
+
+### Example (Expected Behavior)
+
+```ts
+onlyNumbers([1, "a", 2]); // [1, 2]
+```
+
+### Optional Edge Case
+
+* `NaN` keep/remove choice (comment)
+
+### Concepts Being Tested
+
+* Type predicate (`x is number`)
+
+### Deliverables
+
+* `onlyNumbers()` + predicate
+
+---
+
+## 7) Free vs Paid Video — Interview Assignment
+
+### Objective
+
+Discriminated union বানাও:
+
+* `{ kind: "free" }`
+* `{ kind: "paid"; price: number }`
+  এবং `getPriceOrZero(v)` implement করো।
+
+### Example (Expected Behavior)
+
+```ts
+getPriceOrZero({ kind: "free" }); // 0
+getPriceOrZero({ kind: "paid", price: 99 }); // 99
+```
+
+### Edge Case
+
+* negative price invalid → runtime validation (throw / clamp) define in comment.
+
+### Concepts Being Tested
+
+* Discriminated unions
+
+### Deliverables
+
+* types + `getPriceOrZero()`
+
+---
+
+## 8) Event Union Handler — Interview Assignment
+
+### Objective
+
+`page_view | add_to_cart | purchase` event union বানাও (payload fields সহ)
+এবং `toLog(e)` string return করবে।
+
+### Example (Expected Behavior)
+
+```ts
+toLog({ type: "purchase", orderId: "o1", amount: 100 });
+// "Purchased orderId=o1 amount=100"
+```
+
+### Compile-time Rule
+
+* Missing required fields should not compile.
+
+### Concepts Being Tested
+
+* Discriminated union with payload
+
+### Deliverables
+
+* event types + handler function
+
+---
+
+## 9) Error Union to Message — Interview Assignment
+
+### Objective
+
+`NetworkError | ValidationError | AuthError` union বানাও
+`toUserMessage(e)` user-friendly message return করবে।
+
+### Example (Expected Behavior)
+
+```ts
+toUserMessage({ type: "network", code: "ETIMEDOUT" }); // "Try again later"
+```
+
+### Edge Case
+
+* unknown/default branch handling
+
+### Concepts Being Tested
+
+* Unions + switch
+
+### Deliverables
+
+* error union + `toUserMessage()`
+
+---
+
+## 10) Exhaustive Check with `never` — Interview Assignment
+
+### Objective
+
+Switch-case এ exhaustive check enforce করো: default branch এ `assertNever(x)`।
+
+### Requirements
+
+* `function assertNever(x: never): never`
+
+### Example (Expected Behavior)
+
+* নতুন union case add করলে switch compile error হওয়া উচিত।
+
+### Concepts Being Tested
+
+* `never` exhaustive checking
+
+### Deliverables
+
+* `assertNever()` + one switch example
+
+---
+
+## 11) Intersection of Capabilities — Interview Assignment
+
+### Objective
+
+`Trackable` + `Serializable` intersection type satisfy করে এমন object বানাও।
+
+### Example (Expected Behavior)
+
+```ts
+const obj: Trackable & Serializable = {
+  track: () => {},
+  toJSON: () => ({ ok: true }),
+};
+```
+
+### Edge Case
+
+* method name conflict হলে কী হবে — comment/demo.
+
+### Concepts Being Tested
+
+* Intersections
+
+### Deliverables
+
+* capability types + sample object
+
+---
+
+## 12) Union Parameter vs Overload — Interview Assignment
+
+### Objective
+
+`formatDate(input: string | Date)` implement করো।
+string হলে parse করে safe ভাবে Date বানাও।
+
+### Example (Expected Behavior)
+
+```ts
+formatDate("2026-01-01"); // "01 Jan 2026"
+formatDate(new Date("2026-01-01"));
+```
+
+### Edge Case
+
+* invalid string → return `"Invalid date"` or throw (decide + document)
+
+### Concepts Being Tested
+
+* Union parameters + runtime checks
+
+### Deliverables
+
+* `formatDate()` + parsing strategy
+
+---
+
+## 13) Type Predicate Guard — Interview Assignment
+
+### Objective
+
+`isPaidVideo(v): v is { kind: "paid"; price: number }` guard লিখো
+এবং filter এ ব্যবহার দেখাও।
+
+### Example (Expected Behavior)
+
+```ts
+const paidOnly = videos.filter(isPaidVideo);
+```
+
+### Edge Case
+
+* `unknown` input handle (optional): `isPaidVideo(v: unknown): v is PaidVideo`
+
+### Concepts Being Tested
+
+* Type predicates
+
+### Deliverables
+
+* `isPaidVideo()` + usage example
+
+---
+
+## 14) Compose Search Filters (intersection) — Interview Assignment
+
+### Objective
+
+`Filter = ByPrice & ByCategory & ByRating` বানাও এবং products এ apply করে filtered list রিটার্ন করো।
+
+### Requirements
+
+* Each filter field optional (missing means “don’t filter by it”).
+
+### Example (Expected Behavior)
+
+```ts
+applyFilters(products, { minPrice: 100, category: "phone" });
+```
+
+### Edge Case
+
+* filter values missing/undefined
+
+### Concepts Being Tested
+
+* Intersections + optional props
+
+### Deliverables
+
+* Filter types + `applyFilters()`
+
+---
+
+## 15) UnionToIntersection Utility — Interview Assignment
+
+### Objective
+
+Type-level utility `UnionToIntersection<U>` implement করো।
+
+### Requirements
+
+* Use conditional types distribution trick.
+
+### Example (Concept Check)
+
+```ts
+type X = UnionToIntersection<{a:1} | {b:2}>; // {a:1} & {b:2}
+```
+
+### Concepts Being Tested
+
+* Conditional types distribution
+
+### Deliverables
+
+* `UnionToIntersection<U>` + 1–2 type examples
+
+---
+
+## 16) Simplify Intersection Output — Interview Assignment
+
+### Objective
+
+`Simplify<T>` implement করো যাতে IDE তে intersection output flattened দেখায়।
+
+### Example
+
+```ts
+type Y = Simplify<{a:number} & {b:string}>; // shows {a:number;b:string}
+```
+
+### Concepts Being Tested
+
+* Mapped types
+
+### Deliverables
+
+* `Simplify<T>` + example
+
+---
+
+## 17) Order State Machine (union + transitions) — Interview Assignment
+
+### Objective
+
+`Status` union বানাও এবং `transition(status, action)` লিখো যাতে invalid transitions prevent হয়।
+
+### Requirements
+
+* `Status = "created"|"paid"|"packed"|"shipped"|"delivered"|"cancelled"`
+* Example: `created + pay -> paid`
+* Example: `delivered + cancel -> error`
+
+### Edge Case
+
+* cancel allowed only from some states (define rules)
+
+### Concepts Being Tested
+
+* Unions + exhaustive checks + state transitions
+
+### Deliverables
+
+* status/action types + transition function + invalid demo
+
+---
+
+## 18) ParseResult Union — Interview Assignment
+
+### Objective
+
+string থেকে number parse করে `Result<number, string>` return করো।
+
+### Requirements
+
+* success → `{ ok: true; data: number }`
+* failure → `{ ok: false; error: string }`
+
+### Example (Expected Behavior)
+
+```ts
+parseNumber("12.5"); // ok(12.5)
+parseNumber("x");    // err("Invalid number")
+```
+
+### Edge Cases
+
+* whitespace trimming
+* `NaN` handling
+
+### Concepts Being Tested
+
+* Result union pattern
+
+### Deliverables
+
+* `Result<T,E>` + `parseNumber()`
+
+---
+
+## 19) Handler Map from Union — Interview Assignment
+
+### Objective
+
+`Event` union থেকে strongly typed `handlers` map বানাও যেন প্রতিটা handler ঠিক payload টাইপ পায়।
+
+### Example (Expected Behavior)
+
+* wrong handler param type দিলে compile error
+
+### Edge Case
+
+* missing handler key (decide: allow partial or require full)
+
+### Concepts Being Tested
+
+* Mapped types over union
+
+### Deliverables
+
+* union event type + handlers type + example usage
+
+---
+
+## 20) Next Step Depends on Previous (advanced) — Interview Assignment
+
+### Objective
+
+Onboarding flow type-safe করো: `verifyEmail()` only allowed after `signup()`.
+
+### Requirements
+
+* Wrong order should not compile (type-level).
+* If too hard, simplify: runtime check + typed state enum.
+
+### Example (Expected Behavior)
+
+```ts
+flow.verifyEmail(); // ❌ if not signed up
+flow.signup().verifyEmail(); // ✅
+```
+
+### Concepts Being Tested
+
+* Generics
+* State typing / phantom types
+
+### Deliverables
+
+* Minimal typed flow API + example of compile-time ordering rule
+
+---
+## 03) Optional and Readonly — Interview Assignments (Top 20)
+
+---
+
+## 1) Optional Profile Display — Interview Assignment
+
+### Objective
+
+`Profile { name; bio?; avatarUrl? }` বানাও এবং `renderProfile(p)` লিখো যাতে missing হলে fallback text দেখায়।
+
+### Requirements
+
+* `bio` missing হলে `"No bio"`
+* `avatarUrl` missing হলে `"default-avatar.png"` (বা `"No avatar"`—choose one and document)
+* `nullish coalescing (??)` ব্যবহার করো
+
+### Example (Expected Behavior)
+
+```ts
+renderProfile({ name: "A" });
+// bio -> "No bio"
+```
+
+### Edge Case
+
+* `bio: ""` (empty string) vs `bio: undefined` difference explain (comment)
+
+### Concepts Being Tested
+
+* optional properties
+* `??` vs `||` mindset
+
+### Deliverables
+
+* `Profile` type + `renderProfile()` + examples
+
+---
+
+## 2) Readonly SKU Update — Interview Assignment
+
+### Objective
+
+`Product { readonly sku; name; price }` বানাও এবং `updateProduct(p, patch)` এমন বানাও যাতে **sku change না হয়**, নতুন object return করে।
+
+### Requirements
+
+* return new product (no mutation)
+* `patch`-এ `sku` দিলে compile-time এ reject হওয়া উচিত (best effort)
+
+### Example (Expected Behavior)
+
+```ts
+updateProduct({ sku: "S1", name: "Pen", price: 10 }, { price: 12 });
+// returns new product with same sku
+```
+
+### Edge Case
+
+* `patch` includes `sku` should fail
+
+### Concepts Being Tested
+
+* readonly
+* immutability
+* patch typing (Omit/Partial)
+
+### Deliverables
+
+* Product type + update function + fail example
+
+---
+
+## 3) Optional Discount Apply — Interview Assignment
+
+### Objective
+
+`applyDiscount(price, discount?)` implement করো যেখানে `discount ?? 0` ব্যবহার হবে।
+
+### Requirements
+
+* `discount` undefined/null হলে 0 ধরবে
+* `discount = 0` হলে price unchanged থাকবে (this is why `??`, not `||`)
+
+### Example (Expected Behavior)
+
+```ts
+applyDiscount(100, undefined); // 100
+applyDiscount(100, 0);         // 100
+applyDiscount(100, 10);        // 90 (if percent) OR 90 (if flat) — define rule
+```
+
+### Concepts Being Tested
+
+* `??` vs `||`
+
+### Deliverables
+
+* function + examples + rule comment
+
+---
+
+## 4) Readonly Array Add — Interview Assignment
+
+### Objective
+
+`readonly number[]` দিলে নতুন array return করো যেখানে extra value যোগ হবে।
+
+### Requirements
+
+* input mutate করা যাবে না
+* return a new array
+
+### Example (Expected Behavior)
+
+```ts
+addValue([1, 2] as readonly number[], 3); // [1,2,3]
+```
+
+### Concepts Being Tested
+
+* readonly arrays
+* immutability with spread
+
+### Deliverables
+
+* `addValue()` + example
+
+---
+
+## 5) Optional Chaining Nested — Interview Assignment
+
+### Objective
+
+`user.address?.city ?? "Unknown"` pattern দিয়ে utility function লিখো।
+
+### Requirements
+
+* address missing -> `"Unknown"`
+* city missing -> `"Unknown"`
+
+### Example (Expected Behavior)
+
+```ts
+getCity({ name: "A" }); // "Unknown"
+```
+
+### Edge Case
+
+* city = "" should return "" (use `??` not `||`)
+
+### Concepts Being Tested
+
+* optional chaining `?.`
+* nullish coalescing `??`
+
+### Deliverables
+
+* types + `getCity()` function
+
+---
+
+## 6) Partial Update Merge — Interview Assignment
+
+### Objective
+
+`merge<T>(base:T, patch:Partial<T>):T` implement করো without mutation.
+
+### Requirements
+
+* return `{...base, ...patch}`
+* base unchanged
+
+### Example (Expected Behavior)
+
+```ts
+merge({ name: "A", age: 1 }, { name: "B" }); // {name:"B", age:1}
+```
+
+### Edge Case
+
+* Nested objects: shallow merge only (mention in comment)
+
+### Concepts Being Tested
+
+* `Partial<T>`
+* immutability + spread
+
+### Deliverables
+
+* `merge<T>()` + note about shallow merge
+
+---
+
+## 7) Optional Param Currency — Interview Assignment
+
+### Objective
+
+`formatMoney(amount, currency?)` default `"INR"`.
+
+### Requirements
+
+* currency optional param with default value
+* output format: `"INR 100"` (or `"₹100"`—choose and document)
+
+### Example (Expected Behavior)
+
+```ts
+formatMoney(100);          // "INR 100"
+formatMoney(100, "USD");   // "USD 100"
+```
+
+### Edge Case
+
+* invalid currency string handling (optional): restrict union or runtime validate
+
+### Concepts Being Tested
+
+* default params
+* optional parameters
+
+### Deliverables
+
+* function + examples
+
+---
+
+## 8) Readonly vs `Object.freeze` Demo — Interview Assignment
+
+### Objective
+
+Compile-time `readonly` vs runtime `Object.freeze()` difference দেখাও (code + short explanation)।
+
+### Requirements
+
+* `readonly` blocks TypeScript assignment but runtime can still mutate if you bypass types
+* `Object.freeze` blocks runtime mutation (shallow)
+
+### Example (Expected Behavior)
+
+* show 2 snippets: one compile-time error, one runtime error (or no effect in non-strict)
+* mention deep-freeze not automatic
+
+### Concepts Being Tested
+
+* compile-time vs runtime
+* shallow freeze
+
+### Deliverables
+
+* demo code + 4–6 line explanation
+
+---
+
+## 9) Immutable Cart Qty Update — Interview Assignment
+
+### Objective
+
+Cart items array থেকে `sku` অনুযায়ী qty update করো immutably.
+
+### Requirements
+
+* return new array
+* item found হলে only that item copied/updated
+* not found -> return same reference (optional) or same values (document)
+
+### Example (Expected Behavior)
+
+```ts
+updateQty([{ sku:"S1", qty:1 }], "S1", 2); // [{sku:"S1", qty:2}]
+```
+
+### Edge Case
+
+* sku not found -> unchanged
+
+### Concepts Being Tested
+
+* immutability
+* array map/update pattern
+
+### Deliverables
+
+* types + `updateQty()`
+
+---
+
+## 10) DeepReadonly vs Readonly — Interview Assignment
+
+### Objective
+
+Show that `Readonly<T>` deep lock করে না; DeepReadonly implement/ ব্যবহার দেখাও।
+
+### Requirements
+
+* Demonstrate: nested mutation allowed in Readonly, blocked in DeepReadonly
+* Handle arrays too
+
+### Example (Expected Behavior)
+
+```ts
+type R = Readonly<{ nested: { v: number } }>;   // nested.v mutable
+type DR = DeepReadonly<{ nested: { v: number } }>; // nested.v readonly
+```
+
+### Concepts Being Tested
+
+* mapped + conditional types
+* recursion
+
+### Deliverables
+
+* demo + DeepReadonly (or reuse from Q01-17)
+
+---
+
+## 11) `exactOptionalPropertyTypes` Scenario — Interview Assignment
+
+### Objective
+
+Explain with code: `{ a?: string }` vs `{ a: string | undefined }` behavior difference.
+
+### Requirements
+
+* show assignment differences
+* mention TS config `exactOptionalPropertyTypes` impacts behavior
+
+### Example (Expected Behavior)
+
+* `{a?:string}` cannot always accept `{a: undefined}` when config enabled (explain)
+
+### Concepts Being Tested
+
+* TS compiler option awareness
+
+### Deliverables
+
+* 2–3 code snippets + short explanation
+
+---
+
+## 12) Patch Unknown Key Reject (type-level) — Interview Assignment
+
+### Objective
+
+`updateUser(u, patch)` এমন করো যাতে `patch`-এ `User` ছাড়া অন্য keys দিলে compile error হয়।
+
+### Requirements
+
+* enforce `patch` keys are subset of `keyof User`
+
+### Example (Expected Behavior)
+
+```ts
+updateUser(u, { name: "B" });     // ✅
+updateUser(u, { role: "x" });     // ❌
+```
+
+### Edge Case
+
+* generics inference limitation mention (comment)
+
+### Concepts Being Tested
+
+* `keyof` constraints
+* generic function typing
+
+### Deliverables
+
+* update function signature + examples
+
+---
+
+## 13) ReadonlyMap Read — Interview Assignment
+
+### Objective
+
+Rates store করো `ReadonlyMap<string, number>` এ এবং key দিয়ে safe read করো fallback সহ।
+
+### Requirements
+
+* missing key -> `0`
+
+### Example (Expected Behavior)
+
+```ts
+getRate(rates, "USD"); // 0 if missing
+```
+
+### Concepts Being Tested
+
+* readonly collections
+* safe map access
+
+### Deliverables
+
+* function + example map
+
+---
+
+## 14) `mergeDefaults<T>` — Interview Assignment
+
+### Objective
+
+`mergeDefaults(defaults:T, overrides?:Partial<T>):T` implement করো।
+
+### Requirements
+
+* overrides missing/undefined -> defaults return
+* no mutation
+
+### Example (Expected Behavior)
+
+```ts
+mergeDefaults({ a:1, b:2 });           // {a:1,b:2}
+mergeDefaults({ a:1, b:2 }, { b:9 });  // {a:1,b:9}
+```
+
+### Concepts Being Tested
+
+* generics
+* optional parameter
+* Partial
+
+### Deliverables
+
+* function + examples
+
+---
+
+## 15) DeepPartial Utility — Interview Assignment
+
+### Objective
+
+Nested patch এর জন্য `DeepPartial<T>` implement করো।
+
+### Requirements
+
+* object properties recursively optional
+* arrays handled (element type DeepPartial)
+* functions unchanged (optional rule—state your choice)
+
+### Example (Expected Behavior)
+
+```ts
+type P = DeepPartial<{ a: { b: number }, arr: {x:number}[] }>;
+/*
+{ a?: { b?: number }, arr?: { x?: number }[] }
+*/
+```
+
+### Concepts Being Tested
+
+* conditional types
+* recursion + arrays
+
+### Deliverables
+
+* `DeepPartial<T>` + example
+
+---
+
+## 16) Immutable Tree Update — Interview Assignment
+
+### Objective
+
+Nested tree structure এ `id` দিয়ে node label update করো without mutation.
+
+### Requirements
+
+* recursion
+* return new tree
+* unchanged branches keep reference (optional optimization)
+
+### Example (Expected Behavior)
+
+```ts
+updateLabel(tree, "n2", "New"); // returns new tree
+```
+
+### Edge Case
+
+* id missing -> return same tree
+
+### Concepts Being Tested
+
+* recursion
+* immutability
+
+### Deliverables
+
+* Tree type + update function + examples
+
+---
+
+## 17) Readonly State Reducer — Interview Assignment
+
+### Objective
+
+Todo reducer লিখো: state readonly, actions union; add/toggle/remove => new state return।
+
+### Requirements
+
+* `State` readonly (at least array readonly)
+* unknown action -> same state
+
+### Example (Expected Behavior)
+
+```ts
+reduce(state, { type:"add", text:"x" });
+```
+
+### Concepts Being Tested
+
+* union actions
+* immutability patterns
+
+### Deliverables
+
+* action union + reducer
+
+---
+
+## 18) Branded ID — Interview Assignment
+
+### Objective
+
+`type UserId = string & { __brand: "UserId" }` বানাও এবং `makeUserId(s)` validation সহ implement করো।
+
+### Requirements
+
+* empty/whitespace -> throw
+* return branded type
+
+### Example (Expected Behavior)
+
+```ts
+const id = makeUserId("u1"); // UserId
+makeUserId("");              // throws
+```
+
+### Concepts Being Tested
+
+* branded types
+* runtime validation
+
+### Deliverables
+
+* branded type + constructor function
+
+---
+
+## 19) Readonly Constructor Param — Interview Assignment
+
+### Objective
+
+Class বানাও যেখানে constructor param property দিয়ে `readonly id` set হবে।
+
+### Requirements
+
+* `constructor(readonly id: string, public name: string)` style
+* reassign should fail
+
+### Example (Expected Behavior)
+
+```ts
+const u = new UserModel("u1", "A");
+u.id = "x"; // ❌
+```
+
+### Concepts Being Tested
+
+* parameter properties
+* readonly in classes
+
+### Deliverables
+
+* class + demo
+
+---
+
+## 20) Persistent List Update — Interview Assignment
+
+### Objective
+
+Given readonly list, `removeById(list, id)` returns new list without that item.
+
+### Requirements
+
+* no mutation
+* id not found -> return same list (optional) or unchanged copy (document)
+
+### Example (Expected Behavior)
+
+```ts
+removeById([{id:"1"},{id:"2"}] as const, "2"); // [{id:"1"}]
+```
+
+### Edge Case
+
+* id not found -> same
+
+### Concepts Being Tested
+
+* immutability
+* readonly arrays
+
+### Deliverables
+
+* function + examples
+---
+## 04) Generics — Interview Assignments (Top 20)
+
+---
+
+## 1) `identity<T>` — Interview Assignment
+
+### Objective
+
+`identity<T>(x: T): T` implement করো।
+
+### Requirements
+
+* input যেটা, output সেইটাই (same type + same value)
+
+### Example (Expected Behavior)
+
+```ts
+identity(5);       // 5
+identity("hello"); // "hello"
+```
+
+### Concepts Being Tested
+
+* generics basics
+
+### Deliverables
+
+* `identity<T>` function + examples
+
+---
+
+## 2) `first<T>` — Interview Assignment
+
+### Objective
+
+Array থেকে first element return করো, না থাকলে `undefined`.
+
+### Requirements
+
+* signature: `first<T>(arr: T[]): T | undefined`
+
+### Example (Expected Behavior)
+
+```ts
+first([1, 2, 3]); // 1
+first([]);        // undefined
+```
+
+### Edge Case
+
+* empty array
+
+### Concepts Being Tested
+
+* `T | undefined`
+
+### Deliverables
+
+* `first<T>` + examples
+
+---
+
+## 3) `wrap<T>` — Interview Assignment
+
+### Objective
+
+`wrap<T>(value: T)` -> `{ value: T }`
+
+### Example (Expected Behavior)
+
+```ts
+wrap("a"); // { value: "a" }
+```
+
+### Concepts Being Tested
+
+* generics
+
+### Deliverables
+
+* `wrap<T>` + examples
+
+---
+
+## 4) `pair<T, U>` — Interview Assignment
+
+### Objective
+
+Two values নিয়ে typed pair return করো (tuple or object—choose one).
+
+### Requirements
+
+* multiple type params use করতে হবে
+
+### Example (Expected Behavior)
+
+```ts
+pair(1, "a"); // [1, "a"]
+```
+
+### Concepts Being Tested
+
+* multiple generic params
+
+### Deliverables
+
+* `pair<T, U>` + examples
+
+---
+
+## 5) `mapArray<T, R>` — Interview Assignment
+
+### Objective
+
+Generic map function implement করো।
+
+### Requirements
+
+* signature: `mapArray<T, R>(arr: T[], fn: (x: T) => R): R[]`
+
+### Example (Expected Behavior)
+
+```ts
+mapArray([1, 2], String); // ["1", "2"]
+```
+
+### Concepts Being Tested
+
+* higher-order functions + generics
+
+### Deliverables
+
+* `mapArray<T, R>` + example
+
+---
+
+## 6) `ApiResponse<T>` + `mapResponse<T, R>` — Interview Assignment
+
+### Objective
+
+Generic response model বানাও এবং mapper লিখো যা ok হলে data map করবে, error হলে pass-through।
+
+### Requirements
+
+* `ApiResponse<T>` union-like shape allowed (recommended):
+
+  * `{ ok: true; data: T } | { ok: false; error: string }`
+* `mapResponse<T, R>(r, fn)` returns `ApiResponse<R>`
+
+### Example (Expected Behavior)
+
+```ts
+mapResponse({ ok: true, data: 2 }, (n) => String(n)); // ok("2")
+mapResponse({ ok: false, error: "bad" }, (n) => n);   // error pass-through
+```
+
+### Concepts Being Tested
+
+* generics + union
+
+### Deliverables
+
+* `ApiResponse<T>` + `mapResponse()`
+
+---
+
+## 7) `Box<T>` class — Interview Assignment
+
+### Objective
+
+Generic class বানাও যা value ধরে রাখে, getter/setter typed থাকবে।
+
+### Requirements
+
+* `get(): T`
+* `set(v: T): void`
+* (optional) setter validation
+
+### Example (Expected Behavior)
+
+```ts
+const b = new Box<number>(1);
+b.set(2);     // ✅
+b.set("x");   // ❌
+```
+
+### Concepts Being Tested
+
+* generics + class
+
+### Deliverables
+
+* `Box<T>` + usage examples
+
+---
+
+## 8) Constraint `T extends { id: string }` — Interview Assignment
+
+### Objective
+
+`indexById(list)` implement করো যা `Record<string, T>` return করবে।
+
+### Requirements
+
+* `T` must have `id: string`
+* duplicate id হলে “last wins” (document)
+
+### Example (Expected Behavior)
+
+```ts
+indexById([{ id: "u1", name: "A" }]); // { u1: {id:"u1", name:"A"} }
+```
+
+### Concepts Being Tested
+
+* generic constraints
+
+### Deliverables
+
+* `indexById<T extends {id:string}>()` + example
+
+---
+
+## 9) `pluck<T, K extends keyof T>` — Interview Assignment
+
+### Objective
+
+Object থেকে key দিয়ে value বের করো (typed)।
+
+### Requirements
+
+* signature: `pluck<T, K extends keyof T>(obj: T, key: K): T[K]`
+
+### Example (Expected Behavior)
+
+```ts
+pluck({ name: "A", age: 1 }, "name"); // typed as string
+```
+
+### Concepts Being Tested
+
+* `keyof`
+* indexed access `T[K]`
+
+### Deliverables
+
+* `pluck()` + example
+
+---
+
+## 10) `sortByKey<T, K extends keyof T>` — Interview Assignment
+
+### Objective
+
+Array sort করো given key দিয়ে, কিন্তু key-এর value **only string/number** হলে।
+
+### Requirements
+
+* enforce comparable keys (best effort with constraints)
+* return new sorted array (no mutation) OR document mutation
+
+### Example (Expected Behavior)
+
+```ts
+sortByKey([{ price: 10 }, { price: 5 }], "price"); // price ascending
+```
+
+### Edge Case
+
+* undefined values (define behavior: treat as last / throw / filter)
+
+### Concepts Being Tested
+
+* constraints + generics
+
+### Deliverables
+
+* `sortByKey()` + examples
+
+---
+
+## 11) Generic Default Type — Interview Assignment
+
+### Objective
+
+Default generic params সহ type বানাও: `type Result<T = string, E = Error> = ...`
+
+### Requirements
+
+* generic args না দিলে defaults apply হবে
+
+### Example (Expected Behavior)
+
+```ts
+type R1 = Result;              // Result<string, Error>
+type R2 = Result<number, string>;
+```
+
+### Concepts Being Tested
+
+* default generic params
+
+### Deliverables
+
+* `Result<T=..., E=...>` + 2 examples
+
+---
+
+## 12) `parseJson<T>(s, guard)` — Interview Assignment
+
+### Objective
+
+JSON string parse করে `unknown` নাও, তারপর guard দিয়ে `T` validate করো।
+
+### Requirements
+
+* invalid JSON -> error/result
+* guard false -> error/result
+* you choose: return `Result<T,string>` or throw (document)
+
+### Example (Expected Behavior)
+
+```ts
+parseJson('{"id":"u1"}', isUser); // ok(User) or User
+parseJson("{bad", isUser);        // error
+```
+
+### Concepts Being Tested
+
+* `unknown`
+* runtime type guards
+
+### Deliverables
+
+* `parseJson<T>()` + a sample guard
+
+---
+
+## 13) `freeze<T>(obj): Readonly<T>` — Interview Assignment
+
+### Objective
+
+`freeze<T>(obj)` return type should be `Readonly<T>`; compile-time protection demo করো।
+
+### Requirements
+
+* implement using `Object.freeze` (shallow)
+* show TS prevents assignment
+
+### Example (Expected Behavior)
+
+```ts
+const u = freeze({ id: "u1", name: "A" });
+u.name = "B"; // ❌ TS error
+```
+
+### Edge Case
+
+* shallow only (nested still mutable unless DeepReadonly)
+
+### Concepts Being Tested
+
+* `Readonly<T>`
+
+### Deliverables
+
+* `freeze<T>` + demo
+
+---
+
+## 14) `timeout<T>(promise, ms)` — Interview Assignment
+
+### Objective
+
+Promise কে wrap করে `ms` পরে reject করবে যদি resolve না হয়।
+
+### Requirements
+
+* return type: `Promise<T>`
+* cleanup timer (best effort)
+
+### Example (Expected Behavior)
+
+```ts
+await timeout(fetchData(), 1000); // throws on timeout
+```
+
+### Concepts Being Tested
+
+* Promise generics
+
+### Deliverables
+
+* `timeout<T>()` + example usage
+
+---
+
+## 15) `PromiseReturn<T>` — Interview Assignment
+
+### Objective
+
+`type PromiseReturn<T> = T extends Promise<infer X> ? X : T`
+
+### Example (Expected Behavior)
+
+```ts
+type A = PromiseReturn<Promise<number>>; // number
+type B = PromiseReturn<string>;          // string
+```
+
+### Optional Edge Case
+
+* nested promises handle (optional): `PromiseReturn<Promise<Promise<number>>>`
+
+### Concepts Being Tested
+
+* conditional types + `infer`
+
+### Deliverables
+
+* `PromiseReturn<T>` + examples
+
+---
+
+## 16) `FuncReturn<T>` — Interview Assignment
+
+### Objective
+
+Function return type extract করো: `T extends (...a:any)=>infer R ? R : never`
+
+### Example (Expected Behavior)
+
+```ts
+type R = FuncReturn<() => number>; // number
+type N = FuncReturn<string>;       // never
+```
+
+### Concepts Being Tested
+
+* `infer` + conditional types
+
+### Deliverables
+
+* `FuncReturn<T>` + examples
+
+---
+
+## 17) Typed Event Emitter — Interview Assignment
+
+### Objective
+
+Event map generic বানাও যেখানে `on(event, handler)` এবং `emit(event, payload)` fully typed থাকবে।
+
+### Requirements
+
+* `Events` map: `{ login: {userId:string}; logout: void; }` style
+* wrong payload -> compile error
+
+### Example (Expected Behavior)
+
+```ts
+emitter.emit("login", { userId: "u1" }); // ✅
+emitter.emit("login", { id: "u1" });     // ❌
+```
+
+### Concepts Being Tested
+
+* mapped types + generics
+
+### Deliverables
+
+* minimal emitter type + tiny runtime stub
+
+---
+
+## 18) Fluent Builder Accumulating Keys — Interview Assignment
+
+### Objective
+
+Builder chain typed: `set(key, value)` accumulates keys; `build()` returns final typed object.
+
+### Requirements
+
+* duplicate set overwrites type/value (latest wins)
+
+### Example (Expected Behavior)
+
+```ts
+createBuilder().set("name", "A").build(); // { name: string }
+```
+
+### Concepts Being Tested
+
+* advanced generics
+* type accumulation
+
+### Deliverables
+
+* builder API + examples
+
+---
+
+## 19) Primitive Schema to Type — Interview Assignment
+
+### Objective
+
+Schema union থেকে TS type map করো:
+`{ kind:"string" } | { kind:"number" }` → `string | number` (type-level mapping)
+
+### Requirements
+
+* conditional types mapping
+* optional: arrays support `{ kind:"array"; of: Schema }`
+
+### Example (Expected Behavior)
+
+```ts
+type S = { kind: "string" } | { kind: "number" };
+type T = SchemaToType<S>; // string | number (depending on design)
+```
+
+### Concepts Being Tested
+
+* conditional types
+
+### Deliverables
+
+* `SchemaToType<S>` + examples
+
+---
+
+## 20) `decode<T>(unknown, guard)` — Interview Assignment
+
+### Objective
+
+Safe decode pattern implement করো: `decode<User>(u, isUser)`।
+
+### Requirements
+
+* input `unknown`
+* guard false হলে throw বা Result return (document)
+* guard true হলে typed `T` return
+
+### Example (Expected Behavior)
+
+```ts
+decode<User>(payload, isUser); // returns User or error
+```
+
+### Concepts Being Tested
+
+* runtime validation + generics
+
+### Deliverables
+
+* `decode<T>()` + sample guard + examples
+## 05) Enum vs String Literal Union — Interview Assignments (Top 20)
+
+---
+
+## 1) Status union — Interview Assignment
+
+### Objective
+
+`type Status = "draft" | "published"` বানাও এবং `canEdit(status)` true হবে শুধু `"draft"` হলে।
+
+### Requirements
+
+* `canEdit(status: Status): boolean`
+
+### Example (Expected Behavior)
+
+```ts
+canEdit("published"); // false
+canEdit("draft");     // true
+```
+
+### Concepts Being Tested
+
+* string literal unions
+
+### Deliverables
+
+* `Status` + `canEdit()`
+
+---
+
+## 2) Same as enum — Interview Assignment
+
+### Objective
+
+`enum StatusEnum { Draft="draft", Published="published" }` বানাও এবং union type-এর সাথে usage compare করো।
+
+### Requirements
+
+* show: `StatusEnum.Draft`
+
+### Example (Expected Behavior)
+
+```ts
+const s: StatusEnum = StatusEnum.Draft;
+```
+
+### Edge Case
+
+* runtime output explain (enum exists at runtime; union doesn’t)
+
+### Concepts Being Tested
+
+* enums + runtime JS output
+
+### Deliverables
+
+* enum code + short comparison note
+
+---
+
+## 3) Switch label — Interview Assignment
+
+### Objective
+
+Status → label map করো `switch` দিয়ে।
+
+### Requirements
+
+* `draft -> "Draft"`, `published -> "Published"`
+* exhaustive check (`assertNever`)
+
+### Example (Expected Behavior)
+
+```ts
+toLabel("draft"); // "Draft"
+```
+
+### Concepts Being Tested
+
+* switch + never exhaustive
+
+### Deliverables
+
+* `toLabel(status: Status)` + `assertNever`
+
+---
+
+## 4) Record label map — Interview Assignment
+
+### Objective
+
+`Record<Status, string>` দিয়ে label map বানাও।
+
+### Requirements
+
+* missing key দিলে compile error হওয়া উচিত
+
+### Example (Expected Behavior)
+
+```ts
+labelMap[status];
+```
+
+### Concepts Being Tested
+
+* `Record`
+
+### Deliverables
+
+* `labelMap: Record<Status,string>`
+
+---
+
+## 5) Prevent invalid string — Interview Assignment
+
+### Objective
+
+`"drafft"` assignment fail করা দেখাও।
+
+### Requirements
+
+* only valid `Status` assignable
+
+### Example (Expected Behavior)
+
+```ts
+const s: Status = "drafft"; // ❌
+```
+
+### Edge Case
+
+* external data parse needed (mention)
+
+### Concepts Being Tested
+
+* literal unions safety
+
+### Deliverables
+
+* failing snippet + short note
+
+---
+
+## 6) const object + `as const` — Interview Assignment
+
+### Objective
+
+`const STATUS = {...} as const` দিয়ে enum-like pattern বানাও এবং type derive করো।
+
+### Requirements
+
+* `type Status = typeof STATUS[keyof typeof STATUS]`
+
+### Example (Expected Behavior)
+
+```ts
+STATUS.Draft; // "draft"
+```
+
+### Concepts Being Tested
+
+* `as const`
+* deriving union from values
+
+### Deliverables
+
+* STATUS const + derived `Status`
+
+---
+
+## 7) `parseStatus(input: unknown)` — Interview Assignment
+
+### Objective
+
+External value validate করে `Status` বানাও; invalid হলে throw বা Result return (choose + document)।
+
+### Requirements
+
+* trim whitespace
+* optional: lowercase/uppercase normalize (document)
+
+### Example (Expected Behavior)
+
+```ts
+parseStatus("draft"); // ok
+parseStatus(" DRAFT "); // ok if normalized
+parseStatus("x"); // error
+```
+
+### Concepts Being Tested
+
+* runtime validation + types
+
+### Deliverables
+
+* `parseStatus()` + examples
+
+---
+
+## 8) Exhaustive transitions — Interview Assignment
+
+### Objective
+
+Only transition allowed: `draft -> published`.
+`published -> draft` invalid.
+
+### Requirements
+
+* enforce rule in `transition(current, next)` (throw or Result)
+
+### Example (Expected Behavior)
+
+```ts
+transition("draft", "published"); // ok
+transition("published", "draft"); // error
+```
+
+### Concepts Being Tested
+
+* state machine with unions
+
+### Deliverables
+
+* `transition()` + tests
+
+---
+
+## 9) Enum compile footprint explanation — Interview Assignment
+
+### Objective
+
+Numeric enum vs string enum runtime output brief explain করো (small code + comment)।
+
+### Requirements
+
+* show that enums emit JS
+
+### Concepts Being Tested
+
+* runtime JS output awareness
+
+### Deliverables
+
+* short snippet + 3–5 line explanation
+
+---
+
+## 10) Reverse mapping demo — Interview Assignment
+
+### Objective
+
+Numeric enum reverse mapping দেখাও: `Enum[0] -> "A"`.
+
+### Requirements
+
+* must be numeric enum (not string)
+
+### Example (Expected Behavior)
+
+```ts
+enum E { A, B }
+E[0]; // "A"
+```
+
+### Concepts Being Tested
+
+* enums reverse mapping
+
+### Deliverables
+
+* demo code
+
+---
+
+## 11) Tree-shaking discussion (coding hint) — Interview Assignment
+
+### Objective
+
+Explain why string unions / `as const` objects often smaller than enums in libraries.
+
+### Requirements
+
+* short explanation, bundler note
+
+### Concepts Being Tested
+
+* bundling awareness
+
+### Deliverables
+
+* 4–8 line explanation + tiny example
+
+---
+
+## 12) Serialize/deserialize — Interview Assignment
+
+### Objective
+
+Status localStorage এ string হিসেবে store করো, restore করার সময় parser ব্যবহার করো।
+
+### Requirements
+
+* corrupted storage handle (fallback or error)
+
+### Example (Expected Behavior)
+
+```ts
+saveStatus("draft");
+loadStatus(); // Status
+```
+
+### Concepts Being Tested
+
+* parsing + validation
+
+### Deliverables
+
+* `saveStatus`, `loadStatus`, uses `parseStatus`
+
+---
+
+## 13) Role permission map — Interview Assignment
+
+### Objective
+
+`type Role="ADMIN"|"USER"|"GUEST"` এবং `Record<Role,string[]>` permission map।
+
+### Example (Expected Behavior)
+
+```ts
+permissions.ADMIN; // string[]
+```
+
+### Concepts Being Tested
+
+* unions + Record
+
+### Deliverables
+
+* Role type + permissions map + getter function (optional)
+
+---
+
+## 14) Feature flag keys union — Interview Assignment
+
+### Objective
+
+Flags keys union বানাও এবং `isEnabled(flag)` typed করো।
+
+### Requirements
+
+* unknown flag should error at compile-time
+
+### Example (Expected Behavior)
+
+```ts
+isEnabled("newUI");   // ✅
+isEnabled("unknown"); // ❌
+```
+
+### Concepts Being Tested
+
+* unions for keys
+
+### Deliverables
+
+* flag union + function
+
+---
+
+## 15) Enum-like object pattern — Interview Assignment
+
+### Objective
+
+PaymentMethod const object + derived type pattern বানাও।
+
+### Example (Expected Behavior)
+
+```ts
+PaymentMethod.Card; // "card"
+```
+
+### Concepts Being Tested
+
+* `as const` enum-like pattern
+
+### Deliverables
+
+* const object + derived union type
+
+---
+
+## 16) Strict parser with helpful error — Interview Assignment
+
+### Objective
+
+Parser error message এ allowed values list থাকবে।
+
+### Example (Expected Behavior)
+
+```ts
+parseStatus("x"); // throws "Allowed: draft,published"
+```
+
+### Concepts Being Tested
+
+* runtime validation UX
+
+### Deliverables
+
+* improved `parseStatus()` error formatting
+
+---
+
+## 17) Typed transition map — Interview Assignment
+
+### Objective
+
+`const transitions: Record<Status, Status[]>` দিয়ে allowed next states define করো।
+
+### Example (Expected Behavior)
+
+```ts
+transitions["draft"]; // includes "published"
+```
+
+### Concepts Being Tested
+
+* Record + state transitions
+
+### Deliverables
+
+* `transitions` + `canTransition(from,to)` helper
+
+---
+
+## 18) Template literal type events — Interview Assignment
+
+### Objective
+
+`type EventName = \`user:${"created"|"deleted"}``
+
+### Example (Expected Behavior)
+
+```ts
+const e: EventName = "user:created"; // ✅
+```
+
+### Concepts Being Tested
+
+* template literal types
+
+### Deliverables
+
+* EventName type + example
+
+---
+
+## 19) i18n labels mapping — Interview Assignment
+
+### Objective
+
+`Record<Status, { en: string; bn: string }>` labels map বানাও।
+
+### Example (Expected Behavior)
+
+```ts
+labels[status].bn;
+```
+
+### Concepts Being Tested
+
+* Record mapping
+
+### Deliverables
+
+* labels map + usage
+
+---
+
+## 20) Endpoint by status — Interview Assignment
+
+### Objective
+
+`getEndpoint(status: Status)` exhaustive switch দিয়ে implement করো।
+
+### Example (Expected Behavior)
+
+```ts
+getEndpoint("draft"); // "/draft"
+```
+
+### Concepts Being Tested
+
+* exhaustive switch
+
+### Deliverables
+
+* function + assertNever
+
+---
+
+---
+
+## 06) Any / Unknown / Never — Interview Assignments (Top 20)
+
+---
+
+## 1) unknown to string — Interview Assignment
+
+### Objective
+
+`normalizeName(x: unknown): string`
+string হলে trim করো, না হলে throw.
+
+### Requirements
+
+* empty after trim -> throw
+
+### Example (Expected Behavior)
+
+```ts
+normalizeName(" A "); // "A"
+normalizeName(12);    // throws
+normalizeName("   "); // throws
+```
+
+### Concepts Being Tested
+
+* unknown narrowing
+
+### Deliverables
+
+* function + examples
+
+---
+
+## 2) Replace `any` with `unknown` — Interview Assignment
+
+### Objective
+
+একটা function param `any` ছিল—`unknown` করো এবং safe checks যোগ করো (before/after দেখাও)।
+
+### Requirements
+
+* show unsafe version and safe version
+
+### Concepts Being Tested
+
+* safety improvements
+
+### Deliverables
+
+* 2 snippets (before/after) + short note
+
+---
+
+## 3) safeJsonParse returns unknown — Interview Assignment
+
+### Objective
+
+`safeJsonParse(s): unknown | null`
+parse fail -> null.
+
+### Example (Expected Behavior)
+
+```ts
+safeJsonParse('{"a":1}'); // object (unknown)
+safeJsonParse("{bad");    // null
+```
+
+### Concepts Being Tested
+
+* unknown-safe parsing
+
+### Deliverables
+
+* function
+
+---
+
+## 4) `isNumberArray` guard — Interview Assignment
+
+### Objective
+
+`isNumberArray(u): u is number[]` implement করো।
+
+### Example (Expected Behavior)
+
+```ts
+isNumberArray([1, 2]);     // true
+isNumberArray([1, "2"]);   // false
+```
+
+### Concepts Being Tested
+
+* type predicate
+
+### Deliverables
+
+* guard function + examples
+
+---
+
+## 5) `fail(msg): never` — Interview Assignment
+
+### Objective
+
+Always throws এমন function লিখো।
+
+### Requirements
+
+* return type `never`
+
+### Example (Expected Behavior)
+
+```ts
+fail("oops"); // throws
+```
+
+### Concepts Being Tested
+
+* never
+
+### Deliverables
+
+* `fail()` function
+
+---
+
+## 6) `assertNever` helper — Interview Assignment
+
+### Objective
+
+`assertNever(x: never): never` লিখে exhaustive switch এ ব্যবহার করো।
+
+### Example (Expected Behavior)
+
+* new union member add করলে switch compile fail হবে
+
+### Concepts Being Tested
+
+* exhaustive checking
+
+### Deliverables
+
+* helper + switch example
+
+---
+
+## 7) catch error safely — Interview Assignment
+
+### Objective
+
+`catch (e)` এ `e` unknown—
+`e instanceof Error` হলে message print, না হলে stringify.
+
+### Example (Expected Behavior)
+
+```ts
+try { throw "bad"; } catch (e) { /* safe */ }
+```
+
+### Concepts Being Tested
+
+* unknown in catch
+
+### Deliverables
+
+* try/catch snippet + safe printer
+
+---
+
+## 8) validate User shape at runtime — Interview Assignment
+
+### Objective
+
+`isUser(u: unknown): u is { id: string; name: string }`
+
+### Example (Expected Behavior)
+
+```ts
+isUser({ id: "u1", name: "A" }); // true
+isUser({ id: "u1" });            // false
+```
+
+### Concepts Being Tested
+
+* runtime validation
+
+### Deliverables
+
+* guard + examples
+
+---
+
+## 9) decode API response unknown -> User — Interview Assignment
+
+### Objective
+
+`decodeUser(u: unknown): User` guard ব্যবহার করে decode করো; invalid হলে throw.
+
+### Requirements
+
+* reuse `isUser`
+
+### Example (Expected Behavior)
+
+```ts
+decodeUser(payload); // User or throws
+```
+
+### Concepts Being Tested
+
+* decode pattern
+
+### Deliverables
+
+* `User` type + `isUser` + `decodeUser`
+
+---
+
+## 10) Error union mapping — Interview Assignment
+
+### Objective
+
+Custom error union বানাও এবং HTTP-like status code map করো।
+
+### Example (Expected Behavior)
+
+```ts
+toStatus({ type: "auth" }); // 401
+```
+
+### Edge Case
+
+* unknown -> 500
+
+### Concepts Being Tested
+
+* unions + fallback
+
+### Deliverables
+
+* error union + mapper
+
+---
+
+## 11) Remove unsafe casting — Interview Assignment
+
+### Objective
+
+কোডে `as User` আছে—এটা remove করে guard-based safe code করো।
+
+### Requirements
+
+* show “unsafe” then “safe”
+
+### Concepts Being Tested
+
+* avoid `as` casts
+
+### Deliverables
+
+* before/after snippet
+
+---
+
+## 12) Conditional returns `never` on invalid — Interview Assignment
+
+### Objective
+
+`type NonString<T> = T extends string ? never : T`
+
+### Example (Expected Behavior)
+
+```ts
+type A = NonString<string>;        // never
+type B = NonString<number>;        // number
+type C = NonString<string|number>; // number (distribution)
+```
+
+### Concepts Being Tested
+
+* conditional types distribution
+
+### Deliverables
+
+* type + examples
+
+---
+
+## 13) Parse query params unknown — Interview Assignment
+
+### Objective
+
+`parseLimit(x: unknown): number` where limit must be 1..100.
+
+### Requirements
+
+* accept `"10"` or `10`
+* reject 0, 101, NaN
+
+### Example (Expected Behavior)
+
+```ts
+parseLimit("10"); // 10
+parseLimit(0);    // error
+```
+
+### Concepts Being Tested
+
+* runtime validation + narrowing
+
+### Deliverables
+
+* function + examples
+
+---
+
+## 14) Narrow unknown event payload by topic — Interview Assignment
+
+### Objective
+
+Topic string দেখে payload validate করো (topic→guard mapping)।
+
+### Example (Expected Behavior)
+
+```ts
+decodeEvent("user.created", payload); // expects {id:string}
+```
+
+### Edge Case
+
+* unknown topic -> error
+
+### Concepts Being Tested
+
+* mapping + validation
+
+### Deliverables
+
+* topic union + decoder
+
+---
+
+## 15) Mini validator combinators — Interview Assignment
+
+### Objective
+
+Basic validators বানাও: `isString`, `isNumber`, `isObject`, `hasKey` এবং compose করে shape validate দেখাও।
+
+### Edge Case
+
+* `typeof null === "object"` handle করো
+
+### Concepts Being Tested
+
+* runtime checks composition
+
+### Deliverables
+
+* 4 validators + one composed example
+
+---
+
+## 16) Result-based errors instead of throw — Interview Assignment
+
+### Objective
+
+Throw না করে `Result<T,E>` return করো parser/decoder থেকে।
+
+### Example (Expected Behavior)
+
+```ts
+ok(value) / err(message)
+```
+
+### Concepts Being Tested
+
+* result union
+
+### Deliverables
+
+* `Result` type + one parser
+
+---
+
+## 17) `assertDefined` — Interview Assignment
+
+### Objective
+
+`assertDefined(x): asserts x is NonNullable<T>` implement করো।
+
+### Requirements
+
+* null/undefined only fail; falsy values (0,"") pass
+
+### Example (Expected Behavior)
+
+```ts
+assertDefined(x);
+x.toString(); // safe after assert
+```
+
+### Concepts Being Tested
+
+* assertion functions
+
+### Deliverables
+
+* `assertDefined` + example
+
+---
+
+## 18) Safe deep get — Interview Assignment
+
+### Objective
+
+`get(u: unknown, path: string[]): unknown` safe deep access (missing path -> undefined)।
+
+### Edge Case
+
+* arrays index as string (optional)
+
+### Concepts Being Tested
+
+* unknown-safe utilities
+
+### Deliverables
+
+* `get()` + examples
+
+---
+
+## 19) Unknown payload registry typed — Interview Assignment
+
+### Objective
+
+`topic -> parser` registry বানাও যাতে `parse(topic, payload)` return type inferred হয়।
+
+### Requirements
+
+* topic not found -> error/result
+
+### Concepts Being Tested
+
+* generics + mapping
+
+### Deliverables
+
+* registry + typed parse function
+
+---
+
+## 20) Never unreachable branch demonstration — Interview Assignment
+
+### Objective
+
+Union switch এ default unreachable ensure করো; নতুন member add করলে compile error দেখাও।
+
+### Requirements
+
+* use `assertNever`
+
+### Concepts Being Tested
+
+* never exhaustive
+
+### Deliverables
+
+* union + switch + assertNever demo
 
 ## 07) null undefined strict mode
 Top 20.
