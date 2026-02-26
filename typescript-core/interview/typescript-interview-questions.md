@@ -33,136 +33,701 @@ Each problem includes:
 ## 01) type vs interface
 Top 20 coding prompts.
 
-1) **User Shape (interface + type)** — [Answer](typescript-interview-answers.md#q01-01)
-- Problem: `User` model বানাও: `readonly id: string`, `name: string`, `email?: string`.
-  Create it once with `interface`, once with `type`.
-- Example I/O:
-  - Input: `{ id:"u1", name:"A" }`
-  - Output: valid compile
-- Edge cases: email missing, id reassignment should fail
-- Concepts: interface vs type, readonly, optional
+## 1) User Shape (interface + type) — Interview Assignment
 
-2) **Admin Extends User** — [Answer](typescript-interview-answers.md#q01-02)
-- Problem: `AdminUser` বানাও যা `User` extend করে `permissions: string[]` যোগ করবে।
-- Example I/O: `permissions: ["read","write"]`
-- Edge cases: permissions empty allowed
-- Concepts: `extends`, structural typing
+### Objective
 
-3) **Declaration Merging Demo** — [Answer](typescript-interview-answers.md#q01-03)
-- Problem: `interface AppConfig` দুইবার declare করো যাতে final shape merge হয়।
-- Example I/O:
-  - First: `{ apiBaseUrl: string }`
-  - Second: `{ timeoutMs: number }`
-- Edge cases: name conflict types mismatch should error
-- Concepts: interface merging
+`User` model বানাও: `readonly id: string`, `name: string`, `email?: string` — একবার `interface` দিয়ে, একবার `type` দিয়ে।
 
-4) **Type Alias Union Model** — [Answer](typescript-interview-answers.md#q01-04)
-- Problem: `type Account = PersonalAccount | BusinessAccount` with `kind` discriminant.
-- Example I/O:
-  - `{ kind:"personal", pan:"..." }`
-  - `{ kind:"business", gst:"..." }`
-- Edge cases: invalid kind should error
-- Concepts: type alias, discriminated unions
+### Requirements
 
-5) **Excess Property Check** — [Answer](typescript-interview-answers.md#q01-05)
-- Problem: `createUser(u: User)` লিখে object literal pass করলে extra key error দেখাও।
-- Example I/O: `createUser({ id:"u1", name:"A", role:"x" })` should error
-- Edge cases: if variable assigned first, may pass (explain)
-- Concepts: excess property checks
+1. `id` অবশ্যই `readonly` হবে (reassign করলে compile error)।
+2. `email` optional (না দিলেও valid)।
 
-6) **Function Type via Interface** — [Answer](typescript-interview-answers.md#q01-06)
-- Problem: `interface Validator { (value: string): boolean }` বানাও এবং `isEmail` implement করো।
-- Example I/O: `"a@b.com" -> true`
-- Edge cases: empty string
-- Concepts: callable interface
+### Example (Expected Behavior)
 
-7) **Hybrid Function + Property** — [Answer](typescript-interview-answers.md#q01-07)
-- Problem: `logger` এমন বানাও যেটা function হিসেবে call হবে এবং `.level` property থাকবে।
-- Example I/O:
-  - `logger("msg")`
-  - `logger.level = "debug"`
-- Edge cases: restrict level union
-- Concepts: intersection types, callable objects
+```ts
+// Input object literal should compile
+const u1: User = { id: "u1", name: "A" };
+const u2: UserType = { id: "u2", name: "B", email: "b@x.com" };
+```
 
-8) **Pick User Preview** — [Answer](typescript-interview-answers.md#q01-08)
-- Problem: `type UserPreview = Pick<User,"id"|"name">` এবং `toPreview()` বানাও।
-- Example I/O: `{id,name,email} -> {id,name}`
-- Edge cases: missing email ok
-- Concepts: Pick
+### Should Fail (TypeScript error expected)
 
-9) **Omit Sensitive Fields** — [Answer](typescript-interview-answers.md#q01-09)
-- Problem: `PublicUser = Omit<User,"email"> & { displayName: string }`
-- Example I/O: user -> public user
-- Edge cases: ensure email removed
-- Concepts: Omit, intersection
+```ts
+u1.id = "u999"; // ❌ readonly error
+```
 
-10) **Readonly Enforcement** — [Answer](typescript-interview-answers.md#q01-10)
-- Problem: `readonly id` change attempt লিখে compile error দেখাও; fix by creating new object.
-- Example I/O: `u.id = "x"` fails
-- Edge cases: none
-- Concepts: immutability mindset
+### Concepts Being Tested
 
-11) **Interface vs Type for Extensibility** — [Answer](typescript-interview-answers.md#q01-11)
-- Problem: `interface Shape { area(): number }` and `type Shape2 = { area(): number }` and explain pros/cons.
-- Example I/O: `class Circle implements Shape`
-- Edge cases: none
-- Concepts: implements, contracts
+* interface vs type
+* readonly
+* optional property
 
-12) **Index Signature Flags** — [Answer](typescript-interview-answers.md#q01-12)
-- Problem: Feature flags model: `Record<string, boolean>` and `isEnabled(flags, "newUI")`.
-- Example I/O: `{ newUI:true } -> true`
-- Edge cases: missing key -> false
-- Concepts: Record, index signature
+### Deliverables
 
-13) **Generic ApiResponse** — [Answer](typescript-interview-answers.md#q01-13)
-- Problem: `interface ApiResponse<T> { ok: boolean; data?: T; error?: string }`
-  `getOrThrow<T>(r)` implement.
-- Example I/O: ok -> data, else throw
-- Edge cases: ok true but data missing -> throw
-- Concepts: generics, runtime checks
+* `interface User`
+* `type UserType`
+* 2–3 usage examples (pass + fail)
 
-14) **Namespace-like Types** — [Answer](typescript-interview-answers.md#q01-14)
-- Problem: `type Models = { User: ..., Product: ... }` then use `Models["User"]`.
-- Example I/O: compile usage
-- Edge cases: none
-- Concepts: indexed access types
+---
 
-15) **Result<T,E> Union** — [Answer](typescript-interview-answers.md#q01-15)
-- Problem: `type Result<T,E> = {ok:true;data:T} | {ok:false;error:E}` + `unwrap()`.
-- Example I/O: `{ok:true,data:1} -> 1`
-- Edge cases: error -> throw with message
-- Concepts: discriminated union
+## 2) Admin Extends User — Interview Assignment
 
-16) **Exact Type Helper** — [Answer](typescript-interview-answers.md#q01-16)
-- Problem: helper type `Exact<T, Shape>` to forbid extra keys in function arg.
-- Example I/O: extra key should error
-- Edge cases: explain limitation
-- Concepts: advanced types
+### Objective
 
-17) **DeepReadonly Utility** — [Answer](typescript-interview-answers.md#q01-17)
-- Problem: `type DeepReadonly<T> = ...` nested object/array readonly.
-- Example I/O: mutation should fail
-- Edge cases: functions left unchanged
-- Concepts: mapped types, conditional types
+`AdminUser` বানাও যা `User` extend করে এবং `permissions: string[]` যোগ করবে।
 
-18) **Simplify Utility** — [Answer](typescript-interview-answers.md#q01-18)
-- Problem: `type Simplify<T> = { [K in keyof T]: T[K] } & {}` for readable intersections.
-- Example I/O: `Simplify<A & B>`
-- Edge cases: none
-- Concepts: mapped types
+### Requirements
 
-19) **Fluent Builder (typed)** — [Answer](typescript-interview-answers.md#q01-19)
-- Problem: builder chain that collects fields then build returns full type.
-- Example I/O:
-  - `b.set("name","A").set("age",1).build()`
-- Edge cases: build before required fields should fail (advanced)
-- Concepts: generics + conditional typing
+1. `AdminUser` অবশ্যই `User`-এর সব field পাবে।
+2. অতিরিক্ত `permissions: string[]` থাকবে।
 
-20) **Typed Routes Contract** — [Answer](typescript-interview-answers.md#q01-20)
-- Problem: `Routes` map from path to `{req,res}` types; `callApi("/login", req)` typed.
-- Example I/O: wrong req fields -> compile error
-- Edge cases: none
-- Concepts: indexed access, generics
+### Example (Expected Behavior)
+
+```ts
+const admin: AdminUser = {
+  id: "a1",
+  name: "Admin",
+  permissions: ["read", "write"],
+};
+```
+
+### Notes / Edge Cases
+
+* `permissions: []` allowed.
+
+### Concepts Being Tested
+
+* `extends`
+* structural typing
+
+### Deliverables
+
+* `AdminUser` type/interface
+* example usage
+
+---
+
+## 3) Declaration Merging Demo — Interview Assignment
+
+### Objective
+
+`interface AppConfig` দুইবার declare করো যাতে final shape merge হয়।
+
+### Requirements
+
+1. First declaration: `{ apiBaseUrl: string }`
+2. Second declaration: `{ timeoutMs: number }`
+3. Final type should have both properties.
+
+### Example (Expected Behavior)
+
+```ts
+const cfg: AppConfig = { apiBaseUrl: "https://api.x.com", timeoutMs: 5000 };
+```
+
+### Should Fail (TypeScript error expected)
+
+```ts
+// If same prop name but different type in second merge -> ❌ error
+```
+
+### Concepts Being Tested
+
+* interface declaration merging
+* conflict detection
+
+### Deliverables
+
+* Two `interface AppConfig` declarations
+* Working example + one conflict example
+
+---
+
+## 4) Type Alias Union Model — Interview Assignment
+
+### Objective
+
+`type Account = PersonalAccount | BusinessAccount` বানাও যেখানে `kind` discriminant থাকবে।
+
+### Requirements
+
+1. `PersonalAccount` has `kind: "personal"` and `pan: string`
+2. `BusinessAccount` has `kind: "business"` and `gst: string`
+3. Invalid `kind` should fail.
+
+### Example (Expected Behavior)
+
+```ts
+const a1: Account = { kind: "personal", pan: "ABCDE1234F" };
+const a2: Account = { kind: "business", gst: "19ABCDE1234F1Z5" };
+```
+
+### Should Fail
+
+```ts
+const bad: Account = { kind: "company", gst: "x" }; // ❌ invalid kind
+```
+
+### Concepts Being Tested
+
+* type alias
+* discriminated unions
+
+### Deliverables
+
+* Account union types
+* sample narrowing (optional)
+
+---
+
+## 5) Excess Property Check — Interview Assignment
+
+### Objective
+
+`createUser(u: User)` লিখে object literal pass করলে extra key error দেখাও।
+
+### Requirements
+
+1. Function signature: `createUser(u: User): void`
+2. Extra property in object literal should error.
+3. Variable assigned first may pass — explain why.
+
+### Example (Expected Behavior)
+
+```ts
+createUser({ id: "u1", name: "A" }); // ✅
+createUser({ id: "u1", name: "A", role: "x" }); // ❌ excess property
+```
+
+### Edge Case (Explain)
+
+```ts
+const temp = { id: "u1", name: "A", role: "x" };
+createUser(temp); // may ✅ depending on inference (explain excess check behavior)
+```
+
+### Concepts Being Tested
+
+* excess property checks
+* structural typing nuance
+
+### Deliverables
+
+* function + 2 examples + short explanation comment
+
+---
+
+## 6) Function Type via Interface — Interview Assignment
+
+### Objective
+
+Callable interface বানাও: `interface Validator { (value: string): boolean }` এবং `isEmail` implement করো।
+
+### Requirements
+
+1. `Validator` is callable
+2. `isEmail: Validator` returns boolean
+
+### Example (Expected Behavior)
+
+```ts
+const isEmail: Validator = (v) => v.includes("@");
+isEmail("a@b.com"); // true-ish
+```
+
+### Edge Cases
+
+* `""` returns false.
+
+### Concepts Being Tested
+
+* callable interface
+
+### Deliverables
+
+* `Validator` interface
+* `isEmail` implementation + basic tests
+
+---
+
+## 7) Hybrid Function + Property — Interview Assignment
+
+### Objective
+
+`logger` এমন বানাও যেটা function হিসেবে call হবে এবং `.level` property থাকবে।
+
+### Requirements
+
+1. `logger("msg")` callable
+2. `logger.level = "debug"` allowed
+3. `level` should be a union like `"debug" | "info" | "warn" | "error"`
+
+### Example (Expected Behavior)
+
+```ts
+logger("hello");
+logger.level = "debug";
+logger.level = "trace"; // ❌ should fail
+```
+
+### Concepts Being Tested
+
+* callable objects
+* intersection types
+* string literal unions
+
+### Deliverables
+
+* logger type + minimal runtime implementation
+* usage examples
+
+---
+
+## 8) Pick User Preview — Interview Assignment
+
+### Objective
+
+`type UserPreview = Pick<User, "id" | "name">` বানাও এবং `toPreview()` বানাও।
+
+### Requirements
+
+1. `UserPreview` has only `id` and `name`
+2. `toPreview(user: User): UserPreview` returns subset
+
+### Example (Expected Behavior)
+
+```ts
+toPreview({ id: "u1", name: "A", email: "a@x.com" }); // {id, name}
+```
+
+### Concepts Being Tested
+
+* `Pick<>`
+* function return typing
+
+### Deliverables
+
+* `UserPreview` + `toPreview()`
+
+---
+
+## 9) Omit Sensitive Fields — Interview Assignment
+
+### Objective
+
+`PublicUser = Omit<User, "email"> & { displayName: string }` বানাও।
+
+### Requirements
+
+1. `email` removed from public type
+2. `displayName` added
+
+### Example (Expected Behavior)
+
+```ts
+const p: PublicUser = { id: "u1", name: "A", displayName: "A (u1)" };
+p.email; // ❌ should not exist
+```
+
+### Concepts Being Tested
+
+* `Omit<>`
+* intersection types
+
+### Deliverables
+
+* `PublicUser` type + example
+
+---
+
+## 10) Readonly Enforcement — Interview Assignment
+
+### Objective
+
+`readonly id` change attempt লিখে compile error দেখাও; fix by creating new object.
+
+### Requirements
+
+1. Demonstrate mutation fails
+2. Show correct “immutable update” approach
+
+### Example
+
+```ts
+const u: User = { id: "u1", name: "A" };
+u.id = "x"; // ❌
+
+const u2: User = { ...u, id: "u2" }; // ✅ (new object)
+```
+
+### Concepts Being Tested
+
+* immutability mindset
+* readonly
+
+### Deliverables
+
+* fail + fix snippet
+
+---
+
+## 11) Interface vs Type for Extensibility — Interview Assignment
+
+### Objective
+
+`interface Shape { area(): number }` এবং `type Shape2 = { area(): number }` বানাও এবং pros/cons explain করো।
+
+### Requirements
+
+1. `class Circle implements Shape` example
+2. Short explanation: interface merging/extending vs type unions/intersections
+
+### Example (Expected Behavior)
+
+```ts
+class Circle implements Shape {
+  constructor(private r: number) {}
+  area() { return Math.PI * this.r * this.r; }
+}
+```
+
+### Concepts Being Tested
+
+* `implements`
+* contracts
+* interface vs type tradeoffs
+
+### Deliverables
+
+* Shape + Shape2 + Circle + brief notes
+
+---
+
+## 12) Index Signature Flags — Interview Assignment
+
+### Objective
+
+Feature flags model: `Record<string, boolean>` এবং `isEnabled(flags, "newUI")` implement করো।
+
+### Requirements
+
+1. `flags` is `Record<string, boolean>`
+2. Missing key returns `false`
+
+### Example (Expected Behavior)
+
+```ts
+const flags = { newUI: true };
+isEnabled(flags, "newUI"); // true
+isEnabled(flags, "x");     // false
+```
+
+### Concepts Being Tested
+
+* `Record<>`
+* index signature behavior
+
+### Deliverables
+
+* type + function + examples
+
+---
+
+## 13) Generic ApiResponse — Interview Assignment
+
+### Objective
+
+`interface ApiResponse<T> { ok: boolean; data?: T; error?: string }` বানাও এবং `getOrThrow<T>(r)` implement করো।
+
+### Requirements
+
+1. If `ok === true` and `data` exists → return data
+2. Otherwise throw (include message)
+3. Edge: ok true but data missing → throw
+
+### Example (Expected Behavior)
+
+```ts
+getOrThrow({ ok: true, data: 1 }); // 1
+getOrThrow({ ok: false, error: "bad" }); // throws
+getOrThrow({ ok: true }); // throws
+```
+
+### Concepts Being Tested
+
+* generics
+* runtime guards / narrowing
+
+### Deliverables
+
+* `ApiResponse<T>` + `getOrThrow<T>()` + examples
+
+---
+
+## 14) Namespace-like Types — Interview Assignment
+
+### Objective
+
+`type Models = { User: ..., Product: ... }` বানাও, তারপর `Models["User"]` ব্যবহার দেখাও।
+
+### Requirements
+
+1. `Models` contains at least 2 models
+2. Use indexed access to extract a model type
+
+### Example (Expected Behavior)
+
+```ts
+type Models = {
+  User: { id: string; name: string };
+  Product: { sku: string; price: number };
+};
+
+type U = Models["User"]; // {id,name}
+```
+
+### Concepts Being Tested
+
+* indexed access types
+
+### Deliverables
+
+* Models type + extraction examples
+
+---
+
+## 15) Result<T,E> Union — Interview Assignment
+
+### Objective
+
+`type Result<T,E> = {ok:true;data:T} | {ok:false;error:E}` এবং `unwrap()` implement করো।
+
+### Requirements
+
+1. `unwrap(r)` returns `data` when ok
+2. else throws with error message
+
+### Example (Expected Behavior)
+
+```ts
+unwrap({ ok: true, data: 1 }); // 1
+unwrap({ ok: false, error: "Nope" }); // throws
+```
+
+### Concepts Being Tested
+
+* discriminated union
+* narrowing
+* runtime error handling
+
+### Deliverables
+
+* `Result<T,E>` + `unwrap()` + examples
+
+---
+
+## 16) Exact Type Helper — Interview Assignment
+
+### Objective
+
+Helper type `Exact<T, Shape>` বানাও যাতে function arg এ extra keys forbid করা যায়।
+
+### Requirements
+
+1. `Exact<Actual, Shape>` should fail if `Actual` has keys not in `Shape`
+2. Use it in a function signature to enforce “no extra props”
+
+### Example (Expected Behavior)
+
+```ts
+type Shape = { id: string; name: string };
+
+declare function acceptExact<T>(x: Exact<T, Shape>): void;
+
+acceptExact({ id: "u1", name: "A" });           // ✅
+acceptExact({ id: "u1", name: "A", role: "x" }); // ❌
+```
+
+### Notes / Edge Cases
+
+* Mention limitations briefly (TypeScript structural typing, inference quirks).
+
+### Concepts Being Tested
+
+* advanced types
+* key exclusion / conditional typing
+
+### Deliverables
+
+* `Exact<>` type
+* function example + short limitation note
+
+## 17) DeepReadonly Utility — Interview Assignment
+
+### Objective  
+Implement a generic utility type `DeepReadonly<T>` that makes a type **recursively readonly**.
+
+### Requirements  
+1. **Nested objects become readonly** at every depth.  
+2. **Arrays become `ReadonlyArray`** and their element types are also deep-readonly.  
+3. **Functions remain unchanged** (do not transform callable types).  
+4. **Primitives remain unchanged**.
+
+### Example (Expected Behavior)
+
+```ts
+type Input = {
+  nested: { value: number; meta: { ok: boolean } };
+  items: { id: string }[];
+  fn: (x: number) => string;
+};
+
+type Output = DeepReadonly<Input>;
+
+/*
+Output should behave like:
+{
+  readonly nested: { readonly value: number; readonly meta: { readonly ok: boolean } };
+  readonly items: ReadonlyArray<{ readonly id: string }>;
+  readonly fn: (x: number) => string; // unchanged
+}
+*/
+```
+
+### Mutation Should Fail (TypeScript errors expected)
+
+```ts
+declare const x: DeepReadonly<{ nested: { value: number }; arr: { n: number }[] }>;
+
+x.nested.value = 2;   // ❌ error
+x.arr.push({ n: 1 }); // ❌ error
+x.arr[0].n = 10;      // ❌ error
+```
+
+### Concepts Being Tested  
+- Conditional types  
+- Mapped types  
+- Recursive type definitions  
+- Special-casing arrays and functions  
+
+### Deliverables  
+- `DeepReadonly<T>` implementation  
+- A few example/type tests showing it works  
+
+---
+
+## 18) Simplify Utility — Interview Assignment
+
+### Objective  
+Implement a utility type `Simplify<T>` that “flattens”/prettifies intersection types so they display as a readable object type in tooling.
+
+### Requirements  
+1. `Simplify<T>` should return a type that looks like a normal object instead of `A & B`.  
+2. It should preserve property names and types from `T`.
+
+### Example (Expected Behavior)
+
+```ts
+type A = { a: number };
+type B = { b: string };
+
+type X = A & B;
+type Y = Simplify<X>; // should display as { a: number; b: string }
+```
+
+### Notes / Edge Cases  
+- None required (basic version is enough).
+
+### Concepts Being Tested  
+- Mapped types  
+
+### Deliverables  
+- `Simplify<T>` implementation  
+- A couple of examples showing improved readability  
+
+---
+
+## 19) Fluent Builder (typed) — Interview Assignment
+
+### Objective  
+Create a **typed fluent builder** where each `.set(key, value)` call accumulates fields into the builder’s type, and `.build()` returns the fully built object type.
+
+### Requirements  
+1. `set("name", "A")` should add `name: string` to the builder’s accumulated type.  
+2. Chaining multiple `set()` calls should merge fields into the final type.  
+3. `build()` returns an object whose type contains all collected fields.
+
+### Example (Expected Behavior)
+
+```ts
+const b = createBuilder();
+
+const out = b
+  .set("name", "A")
+  .set("age", 1)
+  .build();
+
+// out should be typed as: { name: string; age: number }
+```
+
+### Advanced (Optional)  
+- **Required fields**: calling `build()` before required keys are set should be a compile-time error.
+
+### Concepts Being Tested  
+- Generics  
+- Type accumulation across chained calls  
+- (Optional) conditional types for required-field enforcement  
+
+### Deliverables  
+- Builder implementation (types + minimal runtime)  
+- Examples showing type inference works  
+- (Optional) required-field enforcement  
+
+---
+
+## 20) Typed Routes Contract — Interview Assignment
+
+### Objective  
+Define a `Routes` type mapping API paths to `{ req, res }` contracts, then implement a function `callApi(path, req)` that is **fully type-safe**.
+
+### Requirements  
+1. `Routes` maps each path (string literal) to `{ req: ..., res: ... }`.  
+2. `callApi("/login", req)` should:
+   - enforce the correct request type for that path
+   - return the correct response type for that path  
+3. Passing the wrong request shape must cause a **TypeScript compile error**.
+
+### Example (Expected Behavior)
+
+```ts
+type Routes = {
+  "/login": { req: { username: string; password: string }; res: { token: string } };
+  "/me": { req: { token: string }; res: { id: string; name: string } };
+};
+
+declare function callApi<P extends keyof Routes>(
+  path: P,
+  req: Routes[P]["req"]
+): Promise<Routes[P]["res"]>;
+
+callApi("/login", { username: "a", password: "b" }); // ✅ OK
+callApi("/login", { username: "a" });                // ❌ error (missing password)
+```
+
+### Notes / Edge Cases  
+- None required for the base version.
+
+### Concepts Being Tested  
+- Indexed access types (`Routes[P]["req"]`)  
+- Generics over keys (`P extends keyof Routes`)  
+- Type-safe API contracts  
+
+### Deliverables  
+- `Routes` contract type  
+- `callApi()` function signature (runtime can be stubbed)  
+- A few examples showing correct and incorrect usage
 
 ---
 
